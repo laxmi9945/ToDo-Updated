@@ -21,6 +21,9 @@ import java.util.List;
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskViewHolder> {
     Context context;
     List<NotesModel> model;
+
+    String s = "laxmi";
+
     public RecyclerAdapter(Context context, List<NotesModel> model)  {
         this.model = model;
         this.context = context;
