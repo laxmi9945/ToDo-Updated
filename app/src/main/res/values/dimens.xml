@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="list_item_padding_sides">20dp</dimen>
+    <dimen name="list_item_height">50dp</dimen>
+    <dimen name="title_edittext">25dp</dimen>
+    <dimen name="content_edittext">20dp</dimen>
+    <dimen name="top_margin">50dp</dimen>
+    <dimen name="nav_profile_pic_width">70dp</dimen>
+    <dimen name="nav_profile_pic_height">70dp</dimen>
+    <dimen name="splash_textView_size">25dp</dimen>
+    <dimen name="splash_imageView_width">100dp</dimen>
+    <dimen name="splash_img_marginleft">140dp</dimen>
+    <dimen name="splash_img_marginTop">183dp</dimen>
+</resources>

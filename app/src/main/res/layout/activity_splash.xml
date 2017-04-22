@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/dggd"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/splashimage"
+        android:layout_width="@dimen/splash_imageView_width"
+        android:layout_height="@dimen/splash_imageView_width"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="@dimen/splash_img_marginleft"
+        android:layout_marginTop="@dimen/splash_img_marginTop"
+        android:src="@drawable/bridgelabz" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/appCompatTextView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        android:textSize="@dimen/splash_textView_size"
+        android:gravity="bottom"
+        android:layout_marginBottom="30dp"
+        android:text="@string/splash_welcome_message"
+        android:textAlignment="center"
+        android:textColor="@color/colorPrimary"
+         />
+</LinearLayout>

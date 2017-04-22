@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:appcompat="http://schemas.android.com/tools">
+
+    <item
+        android:id="@+id/menu_search"
+        android:title="@string/menu_search"
+        android:icon="@drawable/musica_searcher"
+        appcompat:actionViewClass="android.support.v7.widget.SearchView"
+        appcompat:showAsAction="always"
+        android:orderInCategory="0"/>
+    <item
+        android:id="@+id/changeview"
+        android:icon="@drawable/listbutton"
+        android:title="ChangeView"
+        app:showAsAction="always"
+        android:orderInCategory="0"/>
+    <!-- <item
+         android:id="@+id/logout"
+         android:title="Logout"
+         android:icon="@android:drawable/ic_menu_view"/>
+ -->
+
+
+</menu>

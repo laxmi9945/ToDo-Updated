@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.app.todo" >
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+    <!-- GET_ACCOUNTS is necessary to display email address of logged in user. This permission is optional
+--><uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <application
+        android:allowBackup="true"
+        android:roundIcon="@drawable/todo"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:screenOrientation="portrait"
+        android:windowSoftInputMode="adjustPan">
+        <activity android:name=".ui.SplashActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.LoginActivity"/>
+
+        <activity android:name=".ui.TodoNotesActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:label="@string/notes"
+            android:windowSoftInputMode="adjustPan">
+
+        </activity>
+        <activity android:name=".ui.RegistrationActivity"/>
+        <activity android:name=".ui.ResetPasswordActivity"/>
+        <activity android:name=".ui.NotesItemDetailsActivity"/>
+        <activity android:name=".ui.NotesAddActivity"/>
+        <fragment android:name=".fragment.MyFragment"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+    </application>
+
+</manifest>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:orientation="vertical"
+    android:paddingLeft="50dp"
+    android:paddingRight="50dp">
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:scrollbars="none">
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+    <android.support.v7.widget.AppCompatImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginLeft="75dp"
+        android:layout_marginTop="40dp"
+        android:src="@drawable/registration" />
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/name_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:imeActionId="@+id/email_Edittext"
+        android:maxLines="1"
+        android:background="@drawable/registrationedittext"
+        android:drawableStart="@drawable/profile"
+        android:hint="@string/register_Name"
+        android:padding="5dp" />
+
+
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/email_Edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:imeActionId="@+id/password_edittext"
+        android:layout_marginTop="10dp"
+        android:drawableStart="@drawable/email"
+        android:background="@drawable/registrationedittext"
+        android:hint="@string/enter_email"
+        android:padding="5dp" />
+
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/password_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:imeActionId="@+id/mobilenumber_edittext"
+        android:layout_marginTop="10dp"
+        android:maxLines="1"
+        android:drawableStart="@drawable/password"
+        android:background="@drawable/registrationedittext"
+        android:hint="@string/enter_password"
+        android:padding="5dp" />
+
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/mobilenumber_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:imeActionId="@+id/save_button"
+        android:maxLines="1"
+        android:ems="10"
+        android:background="@drawable/registrationedittext"
+        android:hint="@string/mobilenumber"
+        android:drawableStart="@drawable/mobile"
+        android:inputType="number"
+        android:padding="5dp" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/save_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="100dp"
+        android:layout_marginRight="100dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/loginbtn"
+        android:text="@string/save" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/allreadyacc_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/already_acc"
+        android:textAlignment="center"
+        android:textColor="#ff00"
+        android:textSize="20dp" />
+
+</LinearLayout>
+</ScrollView>
+</LinearLayout>

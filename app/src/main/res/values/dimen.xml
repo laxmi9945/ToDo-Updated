@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="layout_marginTop">5dp</dimen>
+    <dimen name="padding">5dp</dimen>
+    <dimen name="imageview_width_140dp">140dp</dimen>
+    <dimen name="imageview_height_140dp">130dp</dimen>
+    <dimen name="recycler_margin_horizontal">4dp</dimen>
+    <dimen name="recycler_margin_vertical">4dp</dimen>
+    <dimen name="recycler_layout_spacing">4dp</dimen>
+    <dimen name="recycler_item_footer_height_min">48dp</dimen>
+    <dimen name="recycler_item_footer_padding">16dp</dimen>
+    <dimen name="imageview_mariginleft">70dp</dimen>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="nav_header_vertical_spacing">16dp</dimen>
+    <dimen name="nav_header_height">160dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="notesadd_textSize">20dp</dimen>
+    <dimen name="notesadd_mariginLeft">5dp</dimen>
+    <dimen name="nav_drawer_marigintop">20dp</dimen>
+    <dimen name="nav_header_marigintop">16dp</dimen>
+
+</resources>

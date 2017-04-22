@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="50dp"
+    android:paddingRight="50dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="1">
+
+        <android.support.v7.widget.AppCompatImageView
+            android:layout_marginTop="20dp"
+            android:layout_width="@dimen/imageview_width_140dp"
+            android:layout_height="@dimen/imageview_height_140dp"
+            android:layout_marginLeft="@dimen/imageview_mariginleft"
+            android:src="@drawable/bridgelabz" />
+    </LinearLayout>
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/email_Edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/roundedittext"
+        android:hint="@string/enter_Email"
+        android:imeActionId="@+id/PasswordEditText"
+        android:inputType="textEmailAddress"
+
+        android:maxLines="1"
+        android:padding="@dimen/padding" />
+
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/password_Edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/roundedittext"
+        android:hint="@string/enter_password"
+        android:inputType="textPassword"
+        android:maxLines="1"
+        android:padding="@dimen/padding" />
+
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/forgot_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="@dimen/layout_marginTop"
+        android:text="@string/password_forgot" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/login_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="70dp"
+        android:layout_marginRight="70dp"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/loginbtn"
+        android:text="@string/login_button"
+
+        android:textAllCaps="false" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/createAccount_Textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/register_textView"
+        android:textAlignment="center"
+        android:textSize="15dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical"
+        >
+        <com.facebook.login.widget.LoginButton
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:id="@+id/fb_login_button"
+            >
+
+        </com.facebook.login.widget.LoginButton>
+
+
+        <!--<com.android.volley.toolbox.NetworkImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/google_profile_pic">
+
+        </com.android.volley.toolbox.NetworkImageView>-->
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/google_button"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginLeft="3dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/google_button"
+            android:text="Login with G+"
+            android:textSize="15dp"
+            android:textColor="#fbfcfcfc"
+
+            android:textAllCaps="false"/>
+    </LinearLayout>
+
+
+
+</LinearLayout>
