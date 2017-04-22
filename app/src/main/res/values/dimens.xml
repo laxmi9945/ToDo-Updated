@@ -12,4 +12,5 @@
     <dimen name="splash_imageView_width">100dp</dimen>
     <dimen name="splash_img_marginleft">140dp</dimen>
     <dimen name="splash_img_marginTop">183dp</dimen>
+    <dimen name="imageview_width_100dp">100dp</dimen>
 </resources>

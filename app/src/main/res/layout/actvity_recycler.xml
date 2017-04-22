@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/todorecycler_layout"
+    android:id="@+id/relativeLayoutRoot"
     android:orientation="vertical">
     <android.support.design.widget.AppBarLayout
         android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
     </FrameLayout>-->
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/myrecyclerView"
+        android:id="@+id/recyclerViewNotes"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="69dp"
@@ -42,8 +42,7 @@
     </android.support.v7.widget.RecyclerView>
 
     <FrameLayout
-
-        android:id="@+id/myframe_layout"
+        android:id="@+id/frameLayout_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="69dp">
@@ -55,7 +54,7 @@
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/fab_button"
+        android:id="@+id/fabAddNotes"
         android:clickable="true"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"

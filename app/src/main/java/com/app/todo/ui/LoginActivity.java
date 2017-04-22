@@ -37,7 +37,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -58,34 +57,34 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
     SharedPreferences.Editor editor = null;
     AppCompatEditText editTextEmail, editTextPassword;
-    AppCompatButton login_Button,googleButton;
+    AppCompatButton login_Button, googleButton;
     AppCompatTextView createAccountTextview, forgotTextview;
     ProgressDialog progressDialog;
     FirebaseAuth firebaseAuth;
     CallbackManager callbackManager;
     LoginButton loginButton;
     SharedPreferences sharedPreferences;
-    SignInButton signInButton;
     GoogleSignInOptions googleSignInOptions;
     GoogleApiClient googleApiClient;
     int RC_SIGN_IN = 100; //to check the activity result
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i("test", "onCreate: test");
+        //Log.i("test", "onCreate: test");
 
         setContentView(R.layout.activity_login);
+        checkNetwork();
         progressDialog = new ProgressDialog(this);
         firebaseAuth = FirebaseAuth.getInstance();
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
-        callbackManager=CallbackManager.Factory.create();
+        callbackManager = CallbackManager.Factory.create();
 
-        facebookSDKInitialize();
         initView();
 
         //initializing google signin options
-        googleSignInOptions=new GoogleSignInOptions
+        googleSignInOptions = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -97,10 +96,19 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         googleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {                    }
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                    }
                 })
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
+
+
+        loginButton.setReadPermissions("public_profile email");
+
+    }
+
+    public void checkNetwork() {
+
         if (isNetworkConnected()) {
 
         } else {
@@ -112,12 +120,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         }
                     }).setIcon(android.R.drawable.ic_dialog_alert).show();
         }
-
-        loginButton.setReadPermissions("public_profile email");
-
-    }
-    private void facebookSDKInitialize() {
-
     }
 
     @Override
@@ -133,7 +135,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         createAccountTextview = (AppCompatTextView) findViewById(R.id.createAccount_Textview);
         forgotTextview = (AppCompatTextView) findViewById(R.id.forgot_textview);
         login_Button = (AppCompatButton) findViewById(R.id.login_button);
-        loginButton= (LoginButton) findViewById(R.id.fb_login_button);
+        loginButton = (LoginButton) findViewById(R.id.fb_login_button);
         //signInButton= (SignInButton) findViewById(R.id.google_signin_button);
         //fbButton = (AppCompatButton) findViewById(R.id.fb_button);
         googleButton = (AppCompatButton) findViewById(R.id.google_button);
@@ -152,7 +154,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         googleButton.setOnClickListener(this);
 
     }
-// [START on_start_check_user]
+
+    // [START on_start_check_user]
     @Override
     public void onStart() {
         super.onStart();
@@ -160,6 +163,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
 
     }
+
     // [END on_start_check_user]
     @Override
     public void onClick(View v) {
@@ -239,25 +243,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
                 bundle.putString("email", object.getString("email"));
 
-            if (object.has("gender"))
-
-                bundle.putString("gender", object.getString("gender"));
-
-            if (object.has("birthday"))
-
-                bundle.putString("birthday", object.getString("birthday"));
-
-            if (object.has("location"))
-
-                bundle.putString("location", object.getJSONObject("location").getString("name"));
-
             return bundle;
 
-        }
-
-        catch(JSONException e) {
-
-           // Log.d(TAG,"Error parsing JSON");
+        } catch (JSONException e) {
 
             return null;
 
@@ -267,7 +255,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
     //Facebook Social Login
 
-    public  void facebookLogin(){
+    public void facebookLogin() {
 
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
 
@@ -277,11 +265,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
                 handleFacebookAccessToken(loginResult.getAccessToken());
 
-                System.out.println("onSuccess");
+                //System.out.println("onSuccess");
 
                 String accessToken = loginResult.getAccessToken().getToken();
 
-                Log.i("accessToken", accessToken);
+                //Log.i("accessToken", accessToken);
 
                 GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
 
@@ -289,22 +277,22 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
                     public void onCompleted(JSONObject object, GraphResponse response) {
 
-                        Log.i("LoginActivity", response.toString());
+                        //Log.i("LoginActivity", response.toString());
 
                         // Get facebook data from login
 
                         Bundle bFacebookData = getFacebookData(object);
 
-                        String emailid=bFacebookData.getString("email");
-                        sharedPreferences=getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
-                        editor=sharedPreferences.edit();
-                        editor.putString("email",emailid);
+                        String emailid = bFacebookData.getString("email");
+                        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
+                        editor = sharedPreferences.edit();
+                        editor.putString("email", emailid);
                         editor.putString("profile", bFacebookData.getString("profile_pic"));
                         editor.putString("firstname", bFacebookData.getString("first_name"));
                         editor.putString("lastname", bFacebookData.getString("last_name"));
                         editor.commit();
-                       // Log.i(TAG, "onCompleted: "+emai);
-                        Toast.makeText(LoginActivity.this, "id :"+bFacebookData.getString("first_name"), Toast.LENGTH_SHORT).show();
+                        // Log.i(TAG, "onCompleted: "+emai);
+                        Toast.makeText(LoginActivity.this, "id :" + bFacebookData.getString("first_name"), Toast.LENGTH_SHORT).show();
 
                     }
 
@@ -324,7 +312,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
             public void onCancel() {
 
-                Toast.makeText(LoginActivity.this, "Login attempt canceled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this,getString(R.string.login_attempt_warn), Toast.LENGTH_SHORT).show();
 
             }
 
@@ -339,6 +327,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         });
 
     }
+
     private void handleFacebookAccessToken(AccessToken token) {
         //Log.d(TAG, "handleFacebookAccessToken:" + token);
 
@@ -348,13 +337,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            startActivity(new Intent(getApplicationContext(),TodoNotesActivity.class));
+                            startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
                             finish();
                             //updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
                             //Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                            Toast.makeText(LoginActivity.this, getString(R.string.auth_failed),
                                     Toast.LENGTH_SHORT).show();
                             //updateUI(null);
                         }
@@ -434,7 +423,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
 
-                            startActivity(new Intent(getApplicationContext(),TodoNotesActivity.class));
+                            startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
                             finish();
                             // Sign in success, update UI with the signed-in user's information
                             //Log.d(TAG, "signInWithCredential:success");
@@ -443,7 +432,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         } else {
                             // If sign in fails, display a message to the user.
                             //Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                            Toast.makeText(LoginActivity.this, getString(R.string.auth_failed),
                                     Toast.LENGTH_SHORT).show();
                             //updateUI(null);
                         }
@@ -453,7 +442,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 });
 
     }
-
 
 
 }

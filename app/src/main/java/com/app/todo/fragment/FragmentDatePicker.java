@@ -9,9 +9,6 @@ import android.view.ViewGroup;
 
 import com.app.todo.R;
 
-/**
- * Created by bridgeit on 8/4/17.
- */
 
 public class FragmentDatePicker extends DialogFragment {
     @Nullable

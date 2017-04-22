@@ -3,48 +3,66 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingLeft="50dp"
-    android:paddingRight="50dp">
+    android:padding="10dp"
+    android:gravity="center"
+    >
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:scrollbars="vertical"
+    >
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="1">
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        >
 
         <android.support.v7.widget.AppCompatImageView
-            android:layout_marginTop="20dp"
-            android:layout_width="@dimen/imageview_width_140dp"
-            android:layout_height="@dimen/imageview_height_140dp"
-            android:layout_marginLeft="@dimen/imageview_mariginleft"
-            android:src="@drawable/bridgelabz" />
-    </LinearLayout>
 
+            android:layout_width="@dimen/imageview_width_100dp"
+            android:layout_height="@dimen/imageview_width_100dp"
+
+            android:layout_gravity="center"
+            android:src="@drawable/bridgelabz" />
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/emailLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imageView"
+        android:layout_centerHorizontal="true"
+        >
     <android.support.v7.widget.AppCompatEditText
         android:id="@+id/email_Edittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:background="@drawable/roundedittext"
         android:hint="@string/enter_Email"
         android:imeActionId="@+id/PasswordEditText"
         android:inputType="textEmailAddress"
-
         android:maxLines="1"
         android:padding="@dimen/padding" />
-
-
+    </android.support.design.widget.TextInputLayout>
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/passwordLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imageView"
+        android:layout_centerHorizontal="true"
+        >
     <android.support.v7.widget.AppCompatEditText
         android:id="@+id/password_Edittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:background="@drawable/roundedittext"
+
         android:hint="@string/enter_password"
         android:inputType="textPassword"
         android:maxLines="1"
         android:padding="@dimen/padding" />
-
+    </android.support.design.widget.TextInputLayout>
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/forgot_textview"
@@ -57,7 +75,7 @@
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/login_button"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="35dp"
         android:layout_marginLeft="70dp"
         android:layout_marginRight="70dp"
         android:layout_marginTop="5dp"
@@ -109,7 +127,7 @@
 
             android:textAllCaps="false"/>
     </LinearLayout>
-
-
+    </LinearLayout>
+</ScrollView>
 
 </LinearLayout>

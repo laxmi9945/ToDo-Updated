@@ -18,6 +18,7 @@ public class Constants {
     public static int Splash_textView_animation_time=2000;
     public static String Mobile_Pattern = "[0-9]{10}";
     public static String EMAIL_PATTERN = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
-    public static String Password_Pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{5,12}$";
+    public static String Password_Pattern="^(?=.*[a-z])(?=.*[0-9]).{5,12}$";
+    //public static String Password_Pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{5,12}$";
 
 }

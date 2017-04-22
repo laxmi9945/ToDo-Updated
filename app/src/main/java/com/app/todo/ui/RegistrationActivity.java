@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatTextView;
-import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.view.View;
 
 import com.app.todo.R;
@@ -57,7 +56,6 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
         edittextpswrd = (AppCompatEditText) findViewById(R.id.password_edittext);
         edittextmobNo = (AppCompatEditText) findViewById(R.id.mobilenumber_edittext);
         textView = (AppCompatTextView) findViewById(R.id.allreadyacc_textview);
-        edittextmobNo.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
         setClicklistener();
     }
 
@@ -75,59 +73,13 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
                 break;
 
             case R.id.allreadyacc_textview:
-                startActivity(new Intent(RegistrationActivity.this, LoginActivity.class));
+                finish();
                 break;
         }
     }
 
     public void registerUser() {
 
-        /*pattern = Pattern.compile(Constants.Password_Pattern);
-        matcher = pattern.matcher(edittextpswrd.getText().toString());
-        pattern2 = Pattern.compile(Constants.Mobile_Pattern);
-        matcher2 = pattern2.matcher(edittextmobNo.getText().toString());
-        userInfoModel = new UserInfoModel();
-        final String userName = edittextName.getText().toString();
-        final String userEmail = edittextemail.getText().toString();
-        final String userPassword = edittextpswrd.getText().toString();
-        final String userMobileNo = edittextmobNo.getText().toString();
-       *//* Bundle bundle = new Bundle();
-        bundle.putString(Constants.Name, userInfoModel.getName());
-        bundle.putString(Constants.Email, userInfoModel.getEmail());
-        bundle.putString(Constants.Password, userInfoModel.getPassword());
-        bundle.putString(Constants.MobileNo, String.valueOf(userInfoModel.getMobile()));*//*
-
-        if (TextUtils.isEmpty(userName)) {
-            edittextName.setError(getString(R.string.field_msg));
-            return;
-        }
-        if (TextUtils.isEmpty(userEmail)) {
-            edittextemail.setError(getString(R.string.field_msg));
-            return;
-
-        } else if (!isValidEmail(userEmail)) {
-            edittextemail.setError(getString(R.string.format_invalid));
-
-        }
-        if (TextUtils.isEmpty(userPassword)) {
-            edittextpswrd.setError(getString(R.string.field_msg));
-            return;
-        } else if (matcher.matches()) {
-
-        } else {
-            edittextpswrd.setError(getString(R.string.wrong_format));
-            edittextpswrd.requestFocus();
-        }
-        if (TextUtils.isEmpty(userMobileNo)) {
-            edittextmobNo.setError(getString(R.string.field_msg));
-            edittextmobNo.requestFocus();
-            return;
-        } else if (matcher2.matches()) {
-
-        } else {
-            edittextmobNo.setError(getString(R.string.wrong_format));
-            edittextmobNo.requestFocus();
-        }*/
         pattern = Pattern.compile(Constants.Password_Pattern);
         matcher = pattern.matcher(edittextpswrd.getText().toString());
         pattern2 = Pattern.compile(Constants.Mobile_Pattern);
@@ -147,6 +99,7 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
         if (Name.isEmpty()) {
             edittextName.setError("First name not entered");
             edittextpswrd.requestFocus();
+            return;
         } else {
             checkName = true;
         }
@@ -154,9 +107,11 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
         if (Email.isEmpty()) {
             edittextemail.setError("Email should not empty");
             edittextpswrd.requestFocus();
+            return;
         } else if (!isValidEmail(Email)) {
             edittextemail.setError("Invalid Email");
             edittextpswrd.requestFocus();
+            return;
         } else {
             checkMail = true;
         }
@@ -164,28 +119,30 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
         if (Password.isEmpty()) {
             edittextpswrd.setError("Password should not empty");
             edittextpswrd.requestFocus();
+            return;
         } else if (matcher.matches()) {
             checkPassword = true;
         } else {
-            edittextpswrd.setError("invalid format");
+            edittextpswrd.setError("Password too simple! It must have atleast 1 numeric or special character");
             edittextpswrd.requestFocus();
-
+            return;
         }
 
 
         if (MobileNo.isEmpty()) {
             edittextmobNo.setError("Enter your mobile number");
             edittextpswrd.requestFocus();
+            return;
         } else {
             checkMobNo = true;
         }
 
 
-        if (checkName && checkMail && checkMobNo && checkPassword)
+        if (checkName && checkMail && checkMobNo && checkPassword) {
 
             progressDialog.setMessage(getString(R.string.registering));
-        progressDialog.show();
-        if (checkName && checkMail && checkMobNo && checkPassword) {
+            progressDialog.show();
+
             firebaseAuth.createUserWithEmailAndPassword(userEmail, userPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -222,6 +179,11 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
 
     public static boolean isValidEmail(String email) {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 }
 

@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -32,13 +33,11 @@ import com.app.todo.adapter.RecyclerAdapter;
 import com.app.todo.baseclass.BaseActivity;
 import com.app.todo.database.DataBaseUtility;
 import com.app.todo.fragment.AboutFragment;
-import com.app.todo.fragment.DummyFragment;
+import com.app.todo.fragment.NotesFragment;
 import com.app.todo.model.NotesModel;
 import com.app.todo.utils.Constants;
 import com.bumptech.glide.Glide;
 import com.facebook.login.LoginManager;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -46,8 +45,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,11 +74,8 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
     FirebaseAuth firebaseAuth;
     List<NotesModel> notesModels;
     public FloatingActionButton floatingActionButton;
-    GoogleSignInOptions googleSignInOptions;
     ProgressDialog progressDialog;
-    JSONObject response, profile_pic_data, profile_pic_url;
     String fb_first_name, fb_last_name, fb_email, imageUrl;
-    GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -110,6 +104,7 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         floatingActionButton.setVisibility(View.VISIBLE);
         notesModels = new ArrayList<NotesModel>();
         progressDialog = new ProgressDialog(this);
+
         //Getting data from SharedPreference
         fb_first_name = sharedPreferences.getString("firstname", "value");
         fb_last_name = sharedPreferences.getString("lastname", "value");
@@ -121,6 +116,7 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
 
         progressDialog.setMessage(getString(R.string.fetching_data));
         progressDialog.show();
+
         //retriving data from firebase
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -133,7 +129,7 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
                     notesModels.add(fsf);
                 }
 
-                recyclerAdapter = new RecyclerAdapter(getApplicationContext(), notesModels);
+                recyclerAdapter = new RecyclerAdapter(TodoNotesActivity.this, notesModels);
 
                 recyclerView.setAdapter(recyclerAdapter);
                 recyclerAdapter.notifyDataSetChanged();
@@ -172,50 +168,7 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
 
     }
 
-   /*public void setUserProfilePic(String jsondata)  {
-        try {
-            response=new JSONObject(jsondata);
-            nav_header_Email.setText(response.get().toString());
-            nav_header_Name.setText(response.get().toString());
-            profile_pic_data=new JSONObject(response.get().toString());
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-*/
-
-
-        /*@Override
-        protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-            super.onActivityResult(requestCode, resultCode, data);
-            callbackManager.onActivityResult(requestCode, resultCode, data);
-        }*/
-
-
-
-    /*private void getAllTask(DataSnapshot dataSnapshot){
-        for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
-            String taskTitle = singleSnapshot.getValue(String.class);
-            notesModels.add(new NotesModel(taskTitle));
-            recyclerAdapter = new RecyclerAdapter(getApplicationContext(), taskTitle);
-            recyclerView.setAdapter(recyclerAdapter);
-        }
-    }
-    private void taskDeletion(DataSnapshot dataSnapshot){
-        for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
-            String taskTitle = singleSnapshot.getValue(String.class);
-            for(int i = 0; i < notesModels.size(); i++){
-                if(notesModels.get(i).getTitle().equals(taskTitle)){
-                    notesModels.remove(i);
-                }
-            }
-
-            recyclerAdapter.notifyDataSetChanged();
-            recyclerAdapter = new RecyclerAdapter(getApplicationContext(), taskTitle);
-            recyclerView.setAdapter(recyclerAdapter);
-        }
-    }*/
 
 
     private void initSwipeView() {
@@ -231,23 +184,34 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
                 if (direction == ItemTouchHelper.LEFT) {
-                    /*DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
-                    Query applesQuery = ref.orderByChild("task").equalTo(taskTitle);
-                    applesQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                    /*databaseReference = FirebaseDatabase.getInstance().getReference();
+                    Query query = databaseReference.orderByChild("userdata").equalTo();
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            for (DataSnapshot appleSnapshot: dataSnapshot.getChildren()) {
-                                appleSnapshot.getRef().removeValue();
+                            for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
+                                snapshot.getRef().removeValue();
                             }
                         }
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
-                            Log.e(TAG, "onCancelled", databaseError.toException());
+                            //Log.e(TAG, "onCancelled", databaseError.toException());
                         }
                     });*/
+
                     dataBaseUtility.delete(notesModels.get(position));
                     recyclerAdapter.deleteItem(position);
+                    Snackbar snackbar = Snackbar
+                            .make(getCurrentFocus(), "Message is deleted", Snackbar.LENGTH_LONG)
+                            .setAction("UNDO", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Snackbar snackbar1 = Snackbar.make(getCurrentFocus(), "Message is restored!", Snackbar.LENGTH_SHORT);
+                                    snackbar1.show();
+                                }
+                            });
 
+                    snackbar.show();
 
                 } else {
 
@@ -267,8 +231,8 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
     public void initView() {
 
         View view = getLayoutInflater().inflate(R.layout.activity_todonotes, null, false);
-        floatingActionButton = (FloatingActionButton) findViewById(R.id.fab_button);
-        recyclerView = (RecyclerView) findViewById(R.id.myrecyclerView);
+        floatingActionButton = (FloatingActionButton) findViewById(R.id.fabAddNotes);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerViewNotes);
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -280,7 +244,6 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         nav_header_Name = (AppCompatTextView) header.findViewById(R.id.nav_header_appName);
         nav_header_Email = (AppCompatTextView) header.findViewById(R.id.nav_header_emailId);
         circleImageView = (CircleImageView) header.findViewById(R.id.profile_image);
-
 
         setClicklistener();
     }
@@ -357,7 +320,7 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.fab_button:
+            case R.id.fabAddNotes:
 
                 Intent intent = new Intent(this, NotesAddActivity.class);
                 startActivityForResult(intent, 2);
@@ -365,7 +328,7 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
 
                 break;
             case R.id.profile_image:
-                profilePictureSet();
+                //profilePictureSet();
 
 
                 break;
@@ -376,8 +339,6 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
     private void profilePictureSet() {
         //Toast.makeText(this, "clicked", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-// tells your intent to get the contents
-// opens the URI for your image directory on your sdcard
         intent.setType("image/*");
         startActivityForResult(intent, 1);
     }
@@ -387,12 +348,17 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         switch (item.getItemId()) {
             case R.id.notes:
 
-                getSupportFragmentManager().beginTransaction().replace(R.id.myframe_layout, new DummyFragment()).
-                        addToBackStack(null).commit();
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
+                        .replace(R.id.frameLayout_container, new NotesFragment(),NotesFragment.TAG).
+                        addToBackStack(null)
+                        .commit();
                 setTitle("Notes");
                 Toast.makeText(this, "Notes", LENGTH_SHORT).show();
                 drawer.closeDrawers();
                 break;
+
             case R.id.logout:
                 LoginManager.getInstance().logOut();//fb logout
                 firebaseAuth.signOut();
@@ -428,7 +394,7 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
 
                 getSupportFragmentManager().beginTransaction()
                         .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                        .replace(R.id.myframe_layout, new AboutFragment()).
+                        .replace(R.id.frameLayout_container, new AboutFragment()).
                         addToBackStack(null)
                         .commit();
                 setTitle("About");
@@ -442,24 +408,53 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         return true;
     }
 
-    /*public void updateNote(NotesModel notesModel) {
+    public void updateNote(NotesModel notesModel) {
         recyclerAdapter.addNotes(notesModel);
         recyclerView.setAdapter(recyclerAdapter);
-    }*/
+    }
 
     public void setData(NotesModel notesModel) {
         recyclerAdapter.addNotes(notesModel);
         recyclerView.setAdapter(recyclerAdapter);
     }
 
-    public void onBackPressed() {
 
+    @Override
+    public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+
+            if(getSupportFragmentManager().getBackStackEntryCount()>0){
+                Log.i("asdad ", "onBackPressed: "+getSupportFragmentManager().getBackStackEntryCount());
+                if(getSupportFragmentManager().findFragmentByTag(NotesFragment.TAG) instanceof NotesFragment ){
+                   finish();
+                }
+                else{
+
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
+                            .replace(R.id.frameLayout_container, new NotesFragment(),NotesFragment.TAG).
+                            addToBackStack(null)
+                            .commit();
+                    setTitle("Notes");
+                }
+            }
+        }
+    }
+    public void showOrHideFab(boolean show){
+        if(show){
+            floatingActionButton.setVisibility(View.VISIBLE);
+        }
+        else {
+            floatingActionButton.setVisibility(View.GONE);
         }
     }
 
+    public void setToolbarTitle(String title){
+        toolbar.setTitle(title);
+        setTitle(title);
+    }
 
 }

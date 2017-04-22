@@ -110,6 +110,8 @@ public class DataBaseUtility extends SQLiteOpenHelper {
         sqLiteDatabase.update(Todo_Notes,contentValues,null,null);
         sqLiteDatabase.close();
     }
+
+
     public Cursor selectNotes() {
 
         sqLiteDatabase = getReadableDatabase();

@@ -1,8 +1,8 @@
 package com.app.todo.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.app.todo.R;
-import com.app.todo.fragment.MyFragment;
+import com.app.todo.fragment.NoteseditFragment;
 import com.app.todo.model.NotesModel;
 
 import java.util.List;
@@ -21,8 +21,6 @@ import java.util.List;
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskViewHolder> {
     Context context;
     List<NotesModel> model;
-
-    String s = "laxmi";
 
     public RecyclerAdapter(Context context, List<NotesModel> model)  {
         this.model = model;
@@ -91,13 +89,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
             switch (v.getId()){
                 case R.id.myCardView:
 
-                    MyFragment fragment = new MyFragment();
+                    NoteseditFragment fragment = new NoteseditFragment();
                     Bundle args = new Bundle();
                     NotesModel note=model.get(getAdapterPosition());
                     args.putString("title", note.getTitle());
                     args.putString("content", note.getContent());
                     fragment.setArguments(args);
-                    ((Activity)context).getFragmentManager().beginTransaction().add(R.id.myframe_layout, fragment).commit();
+                    ((AppCompatActivity)context).getFragmentManager().beginTransaction().replace(R.id.frameLayout_container, fragment).commit();
                     break;
             }
         }

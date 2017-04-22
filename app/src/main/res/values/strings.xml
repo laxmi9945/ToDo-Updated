@@ -63,4 +63,6 @@
     <string name="fetching_error">Error while fetching data</string>
     <string name="close_app">Close app?</string>
     <string name="facebook_app_id">414255355608534</string>
+    <string name="login_attempt_warn">Login attempt canceled</string>
+    <string name="auth_failed">Authentication failed.</string>
 </resources>
