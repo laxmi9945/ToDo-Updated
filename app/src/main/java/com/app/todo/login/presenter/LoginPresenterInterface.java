@@ -5,4 +5,5 @@ package com.app.todo.login.presenter;
  */
 
 public interface LoginPresenterInterface {
+
 }

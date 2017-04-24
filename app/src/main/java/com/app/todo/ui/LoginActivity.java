@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.app.todo.R;
 import com.app.todo.baseclass.BaseActivity;
+import com.app.todo.model.UserInfoModel;
 import com.app.todo.utils.Constants;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -46,6 +47,11 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,6 +72,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     SharedPreferences sharedPreferences;
     GoogleSignInOptions googleSignInOptions;
     GoogleApiClient googleApiClient;
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
     int RC_SIGN_IN = 100; //to check the activity result
 
     @Override
@@ -104,6 +112,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
 
         loginButton.setReadPermissions("public_profile email");
+        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+
 
     }
 
@@ -284,15 +295,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         Bundle bFacebookData = getFacebookData(object);
 
                         String emailid = bFacebookData.getString("email");
-                        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
-                        editor = sharedPreferences.edit();
-                        editor.putString("email", emailid);
+                         editor.putString("email", emailid);
                         editor.putString("profile", bFacebookData.getString("profile_pic"));
                         editor.putString("firstname", bFacebookData.getString("first_name"));
                         editor.putString("lastname", bFacebookData.getString("last_name"));
                         editor.commit();
                         // Log.i(TAG, "onCompleted: "+emai);
-                        Toast.makeText(LoginActivity.this, "id :" + bFacebookData.getString("first_name"), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, "Welcome :" + bFacebookData.getString("first_name"), Toast.LENGTH_SHORT).show();
 
                     }
 
@@ -369,6 +378,29 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             public void onComplete(@NonNull Task<AuthResult> task) {
                 progressDialog.dismiss();
                 if (task.isSuccessful()) {
+                    firebaseDatabase=FirebaseDatabase.getInstance();
+                    databaseReference=firebaseDatabase.getReference("userInfo");
+                    databaseReference.child(firebaseAuth.getCurrentUser().getUid())
+                            .addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    UserInfoModel userInfoModel=dataSnapshot.getValue(UserInfoModel.class);
+                                    SharedPreferences.Editor editor=sharedPreferences.edit();
+                                    editor.putString(Constants.Name,userInfoModel.getName());
+                                    editor.putString(Constants.Email,userInfoModel.getEmail());
+                                    editor.putString(Constants.Password,userInfoModel.getPassword());
+                                    editor.putString(Constants.MobileNo,userInfoModel.getMobile());
+                                    editor.commit();
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
+
+
                     finish();
                     startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
                     /*Intent intent = new Intent(getApplicationContext(), TodoNotesActivity.class);

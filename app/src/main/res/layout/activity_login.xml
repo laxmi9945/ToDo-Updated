@@ -23,7 +23,6 @@
 
             android:layout_width="@dimen/imageview_width_100dp"
             android:layout_height="@dimen/imageview_width_100dp"
-
             android:layout_gravity="center"
             android:src="@drawable/bridgelabz" />
 

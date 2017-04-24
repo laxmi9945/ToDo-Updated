@@ -23,8 +23,11 @@ import com.app.todo.fragment.FragmentDatePicker;
 import com.app.todo.model.NotesModel;
 import com.app.todo.utils.Constants;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,7 +54,7 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
         Date date = new Date();
         CharSequence sequence = DateFormat.format(getString(R.string.date_time), date.getTime());
         timeTextView.setText(sequence);
-        sharedPreferences=this.getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
+        sharedPreferences = this.getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
     }
 
@@ -96,13 +99,13 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
             case R.id.action_save:
 
                 //database = new DataBaseUtility(this);
-                NotesModel model = new NotesModel();
+                final NotesModel model = new NotesModel();
 
-                String userId;
+                final String userId;
                 String titleData = titleEdittext.getText().toString();
                 String contentData = contentEdittext.getText().toString();
-                String recentTimeData = timeTextView.getText().toString();
-                userId=sharedPreferences.getString("uid","null");
+                final String recentTimeData = timeTextView.getText().toString();
+                userId = firebaseAuth.getCurrentUser().getUid();
                 model.setTitle(titleData);
                 model.setContent(contentData);
                 model.setDate(recentTimeData);
@@ -119,7 +122,27 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
                 //String id = mDatabaseReference.push().getKey();
                 //model.setId(id);
                 //mDatabaseReference.child(id).setValue(model);
-                mDatabaseReference.child("userData").child(userId).setValue(model);
+                mDatabaseReference.child("userData").child(userId).child(recentTimeData)
+                        .addValueEventListener(new ValueEventListener() {
+                            NotesModel notesModel = model;
+
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                int index = (int) dataSnapshot.getChildrenCount();
+                                if (notesModel != null) {
+                                    mDatabaseReference.child("userData").child(userId).child(recentTimeData)
+                                            .child(String.valueOf(index)).setValue(model);
+                                    notesModel = null;
+                                }
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
                 finish();
                 Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_SHORT).show();
                 return super.onOptionsItemSelected(item);

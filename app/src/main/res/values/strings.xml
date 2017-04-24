@@ -45,7 +45,7 @@
     <string name="search_hint">Search note..</string>
     <string name="saved">Saved...</string>
     <string name="pined">pined...</string>
-    <string name="date_time">E dd.MM.yyyy, hh:mm a</string>
+    <string name="date_time">E MMMM dd, yyyy</string>
     <string name="enter_registered_email">Enter your registered email id</string>
     <string name="sending_reset_instruction">Sending reset password instruction...</string>
     <string name="server_info">We have sent you instructions to reset your password!</string>
