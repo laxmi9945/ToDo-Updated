@@ -21,6 +21,8 @@ import android.widget.Toast;
 
 import com.app.todo.R;
 import com.app.todo.baseclass.BaseActivity;
+import com.app.todo.login.presenter.LoginPresenter;
+import com.app.todo.login.ui.LoginActivityInterface;
 import com.app.todo.model.UserInfoModel;
 import com.app.todo.utils.Constants;
 import com.facebook.AccessToken;
@@ -59,7 +61,7 @@ import org.json.JSONObject;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class LoginActivity extends BaseActivity implements View.OnClickListener {
+public class LoginActivity extends BaseActivity implements LoginActivityInterface {
 
     SharedPreferences.Editor editor = null;
     AppCompatEditText editTextEmail, editTextPassword;
@@ -75,7 +77,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
     int RC_SIGN_IN = 100; //to check the activity result
-
+    LoginPresenter loginPresenter;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -192,8 +194,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
             case R.id.login_button:
 
-                loginUser();
-
+                //loginUser();
+                loginPresenter.loginResponse(editTextEmail.getText().toString(),editTextPassword.getText().toString());
 
                 break;
             case R.id.fb_login_button:
@@ -384,13 +386,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             .addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
-                                    UserInfoModel userInfoModel=dataSnapshot.getValue(UserInfoModel.class);
+                                    /*UserInfoModel userInfoModel=dataSnapshot.getValue(UserInfoModel.class);
                                     SharedPreferences.Editor editor=sharedPreferences.edit();
                                     editor.putString(Constants.Name,userInfoModel.getName());
                                     editor.putString(Constants.Email,userInfoModel.getEmail());
                                     editor.putString(Constants.Password,userInfoModel.getPassword());
                                     editor.putString(Constants.MobileNo,userInfoModel.getMobile());
-                                    editor.commit();
+                                    editor.commit();*/
                                 }
 
                                 @Override
@@ -401,8 +403,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
 
 
-                    finish();
-                    startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
+                    /*finish();
+                    startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));*/
                     /*Intent intent = new Intent(getApplicationContext(), TodoNotesActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -476,5 +478,33 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
 
+    @Override
+    public void loginSuccess(UserInfoModel userInfoModel, String uid) {
+        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+        SharedPreferences.Editor editor=sharedPreferences.edit();
+        editor.putString(Constants.Name,userInfoModel.getName());
+        editor.putString(Constants.Email,userInfoModel.getEmail());
+        editor.putString(Constants.Password,userInfoModel.getPassword());
+        editor.putString(Constants.MobileNo,userInfoModel.getMobile());
+        editor.commit();
+        finish();
+        startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
+    }
+
+    @Override
+    public void loginFailure(String message) {
+
+    }
+
+    @Override
+    public void showProgressDialog() {
+
+    }
+
+    @Override
+    public void hideProgressDialog() {
+
+    }
 }
 
