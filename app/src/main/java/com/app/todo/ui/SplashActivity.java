@@ -12,6 +12,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 
 import com.app.todo.R;
+import com.app.todo.login.ui.LoginActivity;
 import com.app.todo.utils.Constants;
 import com.google.firebase.auth.FirebaseAuth;
 

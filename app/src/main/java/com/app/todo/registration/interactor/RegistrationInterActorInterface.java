@@ -5,4 +5,5 @@ package com.app.todo.registration.interactor;
  */
 
 public interface RegistrationInterActorInterface {
+    void loginResponse(String Name,String email,String password,String mobileNo);
 }

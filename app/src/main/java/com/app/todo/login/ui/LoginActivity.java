@@ -1,4 +1,4 @@
-package com.app.todo.ui;
+package com.app.todo.login.ui;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,8 +23,10 @@ import android.widget.Toast;
 import com.app.todo.R;
 import com.app.todo.baseclass.BaseActivity;
 import com.app.todo.login.presenter.LoginPresenter;
-import com.app.todo.login.ui.LoginActivityInterface;
 import com.app.todo.model.UserInfoModel;
+import com.app.todo.ui.RegistrationActivity;
+import com.app.todo.ui.ResetPasswordActivity;
+import com.app.todo.ui.TodoNotesActivity;
 import com.app.todo.utils.Constants;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -78,10 +81,10 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
     DatabaseReference databaseReference;
     int RC_SIGN_IN = 100; //to check the activity result
     LoginPresenter loginPresenter;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //Log.i("test", "onCreate: test");
 
         setContentView(R.layout.activity_login);
         checkNetwork();
@@ -93,26 +96,6 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
         initView();
 
-        //initializing google signin options
-        googleSignInOptions = new GoogleSignInOptions
-                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-        //initializing google api client
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                    }
-                })
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-
-
         loginButton.setReadPermissions("public_profile email");
         sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
@@ -120,7 +103,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
     }
 
-    public void checkNetwork() {
+    private void checkNetwork() {
 
         if (isNetworkConnected()) {
 
@@ -131,7 +114,8 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                         }
-                    }).setIcon(android.R.drawable.ic_dialog_alert).show();
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert).show();
         }
     }
 
@@ -152,6 +136,24 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         //signInButton= (SignInButton) findViewById(R.id.google_signin_button);
         //fbButton = (AppCompatButton) findViewById(R.id.fb_button);
         googleButton = (AppCompatButton) findViewById(R.id.google_button);
+        //initializing google signin options
+        googleSignInOptions = new GoogleSignInOptions
+                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        //initializing google api client
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                    }
+                })
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
         facebookLogin();
         setClicklistener();
     }
@@ -194,17 +196,15 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
             case R.id.login_button:
 
-                //loginUser();
+                loginUser();
                 loginPresenter.loginResponse(editTextEmail.getText().toString(),editTextPassword.getText().toString());
 
                 break;
+
             case R.id.fb_login_button:
 
                 break;
 
-           /* case R.id.google_signin_button:
-
-                break;*/
             case R.id.google_button:
                 signIn();
                 break;
@@ -217,58 +217,10 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-    private Bundle getFacebookData(JSONObject object) {
-
-        try {
-
-            Bundle bundle = new Bundle();
-
-            String id = object.getString("id");
-
-            try {
-
-                //URL profile_pic = new URL("https://graph.facebook.com/" + id + "/picture?width=200&height=150");
-                URL profile_pic = new URL("http://graph.facebook.com/" + id + "/picture?type=square");
-
-                Log.i("profile_pic", profile_pic + "");
-
-                bundle.putString("profile_pic", profile_pic.toString());
-
-            } catch (MalformedURLException e) {
-
-                e.printStackTrace();
-
-                return null;
-
-            }
-
-            bundle.putString("idFacebook", id);
-
-            if (object.has("first_name"))
-
-                bundle.putString("first_name", object.getString("first_name"));
-
-            if (object.has("last_name"))
-
-                bundle.putString("last_name", object.getString("last_name"));
-
-            if (object.has("email"))
-
-                bundle.putString("email", object.getString("email"));
-
-            return bundle;
-
-        } catch (JSONException e) {
-
-            return null;
-
-        }
-
-    }
 
     //Facebook Social Login
 
-    public void facebookLogin() {
+    private void facebookLogin() {
 
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
 
@@ -311,7 +263,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
                 Bundle parameters = new Bundle();
 
-                parameters.putString("fields", "id, first_name, last_name, email"); // Parámetros que pedimos a facebook
+                parameters.putString("fields", "id, first_name, last_name, email");
 
                 request.setParameters(parameters);
 
@@ -363,8 +315,56 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                     }
                 });
     }
+    private Bundle getFacebookData(JSONObject object) {
 
-    public void loginUser() {
+        try {
+
+            Bundle bundle = new Bundle();
+
+            String id = object.getString("id");
+
+            try {
+
+                //URL profile_pic = new URL("https://graph.facebook.com/" + id + "/picture?width=200&height=150");
+                URL profile_pic = new URL("http://graph.facebook.com/" + id + "/picture?type=square");
+
+                Log.i("profile_pic", profile_pic + "");
+
+                bundle.putString("profile_pic", profile_pic.toString());
+
+            } catch (MalformedURLException e) {
+
+                e.printStackTrace();
+
+                return null;
+
+            }
+
+            bundle.putString("idFacebook", id);
+
+            if (object.has("first_name"))
+
+                bundle.putString("first_name", object.getString("first_name"));
+
+            if (object.has("last_name"))
+
+                bundle.putString("last_name", object.getString("last_name"));
+
+            if (object.has("email"))
+
+                bundle.putString("email", object.getString("email"));
+
+            return bundle;
+
+        } catch (JSONException e) {
+
+            return null;
+
+        }
+
+    }
+
+    private void loginUser() {
         String Email = editTextEmail.getText().toString();
         String Password = editTextPassword.getText().toString();
         if (TextUtils.isEmpty(Email)) {
@@ -401,14 +401,6 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                                 }
                             });
 
-
-
-                    /*finish();
-                    startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));*/
-                    /*Intent intent = new Intent(getApplicationContext(), TodoNotesActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);*/
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                     builder.setMessage(task.getException().getMessage())
@@ -423,7 +415,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         progressDialog.show();
     }
 
-    public boolean isNetworkConnected() {
+    private boolean isNetworkConnected() {
         ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
@@ -438,42 +430,60 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if (result.isSuccess()) {
-                // Google Sign In was successful, authenticate with Firebase
-                GoogleSignInAccount account = result.getSignInAccount();
-                firebaseAuthWithGoogle(account);
-            } else {
-                // Google Sign In failed, update UI appropriately
+            handleSignInResult(result);
 
-            }
+        }
+    }
+
+    private void handleSignInResult(GoogleSignInResult result) {
+        if (result.isSuccess()) {
+            // Google Sign In was successful, authenticate with Firebase
+            GoogleSignInAccount account = result.getSignInAccount();
+            String person_name=account.getDisplayName();
+            String person_email=account.getEmail();
+            Uri profile_pic=account.getPhotoUrl();
+            String person_id=account.getId();
+            sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
+            editor = sharedPreferences.edit();
+            editor.putString("uName",person_name);
+            editor.putString("uEmail",person_email);
+            editor.putString("uId",person_id);
+            editor.putString("uPic",profile_pic.toString());
+            editor.commit();
+            //Toast.makeText(this, "info"+person_name+person_email+person_id+profile_pic, Toast.LENGTH_SHORT).show();
+            AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+            firebaseAuth.signInWithCredential(credential)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+
+                                startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
+                                finish();
+                                // Sign in success, update UI with the signed-in user's information
+                                //Log.d(TAG, "signInWithCredential:success");
+                                FirebaseUser user = firebaseAuth.getCurrentUser();
+                                //updateUI(user);
+                            } else {
+                                // If sign in fails, display a message to the user.
+                                //Log.w(TAG, "signInWithCredential:failure", task.getException());
+                                Toast.makeText(LoginActivity.this, getString(R.string.auth_failed),
+                                        Toast.LENGTH_SHORT).show();
+                                //updateUI(null);
+                            }
+
+
+                        }
+                    });
+            //firebaseAuthWithGoogle(account);
+        } else {
+            // Google Sign In failed, update UI appropriately
+
         }
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
-        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
-        firebaseAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
 
-                            startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
-                            finish();
-                            // Sign in success, update UI with the signed-in user's information
-                            //Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = firebaseAuth.getCurrentUser();
-                            //updateUI(user);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            //Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, getString(R.string.auth_failed),
-                                    Toast.LENGTH_SHORT).show();
-                            //updateUI(null);
-                        }
-
-
-                    }
-                });
 
     }
 
