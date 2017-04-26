@@ -17,4 +17,5 @@ public abstract class BaseActivity extends AppCompatActivity {
     public abstract void initView();
 
     public abstract void setClicklistener();
+
 }

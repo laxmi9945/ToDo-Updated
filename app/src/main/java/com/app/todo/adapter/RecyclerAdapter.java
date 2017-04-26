@@ -39,8 +39,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
     @Override
     public void onBindViewHolder(RecyclerAdapter.TaskViewHolder holder, final int position) {
         holder.titleTextView.setText(model.get(position).getTitle());
-        holder.dateTextview.setText(model.get(position).getDate());
-        holder.contentTextview.setText(model.get(position).getContent());
+        holder.dateTextView.setText(model.get(position).getDate());
+        holder.timeTextView.setText(model.get(position).getTime());
+        holder.contentTextView.setText(model.get(position).getContent());
 
     }
 
@@ -71,14 +72,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
 
     public class TaskViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        AppCompatTextView titleTextView, dateTextview, contentTextview;
+        AppCompatTextView titleTextView, dateTextView, contentTextView,timeTextView;
         CardView cardView;
         public TaskViewHolder(final View itemView)
         {
             super(itemView);
             titleTextView = (AppCompatTextView) itemView.findViewById(R.id.title_TextView);
-            dateTextview = (AppCompatTextView) itemView.findViewById(R.id.date_TextView);
-            contentTextview = (AppCompatTextView) itemView.findViewById(R.id.content_TextView);
+            dateTextView = (AppCompatTextView) itemView.findViewById(R.id.date_TextView);
+            timeTextView = (AppCompatTextView) itemView.findViewById(R.id.time_TextView);
+            contentTextView = (AppCompatTextView) itemView.findViewById(R.id.content_TextView);
             cardView = (CardView) itemView.findViewById(R.id.myCardView);
             cardView.setOnClickListener(this);
 

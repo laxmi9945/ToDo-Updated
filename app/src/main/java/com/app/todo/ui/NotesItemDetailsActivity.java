@@ -45,6 +45,8 @@ public class NotesItemDetailsActivity extends BaseActivity implements View.OnCli
 
     }
 
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.notes_item_details_action,menu);

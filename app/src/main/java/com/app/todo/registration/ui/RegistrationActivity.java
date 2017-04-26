@@ -2,6 +2,7 @@ package com.app.todo.ui;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -85,6 +86,11 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
         pattern2 = Pattern.compile(Constants.Mobile_Pattern);
         matcher2 = pattern.matcher(edittextmobNo.getText().toString());
         userInfoModel = new UserInfoModel();
+        SharedPreferences settings = getSharedPreferences(Constants.keys, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("UserEmail",edittextemail.getText().toString());
+        editor.putString("Password",edittextpswrd.getText().toString());
+        editor.apply();
         final String userName = edittextName.getText().toString();
         final String userEmail = edittextemail.getText().toString();
         final String userPassword = edittextpswrd.getText().toString();
@@ -153,6 +159,7 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
                         userInfoModel1.setEmail(userEmail);
                         userInfoModel1.setPassword(userPassword);
                         userInfoModel1.setMobile(userMobileNo);
+
                         //String id = mDatabaseReference.push().getKey();
                        // Log.i("abc", "onComplete: " + userEmail + userMobileNo + userName + userPassword);
                         mDatabaseReference.child("userInfo").child(task.getResult().getUser().getUid()).setValue(userInfoModel1);

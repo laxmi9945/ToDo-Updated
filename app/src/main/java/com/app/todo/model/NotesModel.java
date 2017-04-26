@@ -8,7 +8,17 @@ public class NotesModel {
     String title;
     String content;
     String date;
+
+    String time;
     String id;
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
 
 
 
@@ -16,10 +26,11 @@ public class NotesModel {
 
     }
 
-    public NotesModel(String date, String content, String id, String title) {
+    public NotesModel(String time,String date, String content, String id, String title) {
         this.title = title;
         this.content = content;
         this.date = date;
+        this.time = time;
         this.id = id;
     }
 

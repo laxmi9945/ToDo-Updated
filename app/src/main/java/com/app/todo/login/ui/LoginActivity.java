@@ -2,22 +2,23 @@ package com.app.todo.login.ui;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatTextView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.app.todo.R;
@@ -32,10 +33,8 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
-import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
@@ -81,21 +80,21 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
     DatabaseReference databaseReference;
     int RC_SIGN_IN = 100; //to check the activity result
     LoginPresenter loginPresenter;
-
+    Snackbar snackbar;
+    private LinearLayout linearLayout;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_login);
-        checkNetwork();
+
         progressDialog = new ProgressDialog(this);
         firebaseAuth = FirebaseAuth.getInstance();
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        AppEventsLogger.activateApp(this);
         callbackManager = CallbackManager.Factory.create();
 
         initView();
-
+        checkNetwork();
+        getOldUserData();
         loginButton.setReadPermissions("public_profile email");
         sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
@@ -103,19 +102,37 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
     }
 
+    private void getOldUserData() {
+        sharedPreferences = getSharedPreferences(Constants.keys, 0);
+        editTextEmail.setText(sharedPreferences.getString("UserEmail", "").toString());
+        editTextPassword.setText(sharedPreferences.getString("Password", "").toString());
+    }
+
     private void checkNetwork() {
 
         if (isNetworkConnected()) {
 
         } else {
-            new AlertDialog.Builder(this)
-                    .setTitle(getString(R.string.no_internet))
-                    .setMessage(getString(R.string.network_error_msg))
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
+             snackbar = Snackbar
+                    .make(linearLayout,getString(R.string.no_internet), Snackbar.LENGTH_LONG)
+                    .setAction(getString(R.string.retry), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            snackbar.dismiss();
+
                         }
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_alert).show();
+                    });
+
+            // Changing message text color
+            snackbar.setActionTextColor(Color.RED);
+
+            // Changing action button text color
+            View sbView = snackbar.getView();
+            AppCompatTextView textView = (AppCompatTextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
+            textView.setTextColor(Color.YELLOW);
+            snackbar.show();
+
         }
     }
 
@@ -133,19 +150,20 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         forgotTextview = (AppCompatTextView) findViewById(R.id.forgot_textview);
         login_Button = (AppCompatButton) findViewById(R.id.login_button);
         loginButton = (LoginButton) findViewById(R.id.fb_login_button);
-        //signInButton= (SignInButton) findViewById(R.id.google_signin_button);
-        //fbButton = (AppCompatButton) findViewById(R.id.fb_button);
         googleButton = (AppCompatButton) findViewById(R.id.google_button);
+        linearLayout= (LinearLayout) findViewById(R.id.Linear_rootLayout);
         //initializing google signin options
         googleSignInOptions = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
+
         //initializing google api client
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
+
         googleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
@@ -154,18 +172,17 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                 })
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
-        facebookLogin();
+
         setClicklistener();
     }
 
     @Override
     public void setClicklistener() {
+
         forgotTextview.setOnClickListener(this);
         createAccountTextview.setOnClickListener(this);
         loginButton.setOnClickListener(this);
         login_Button.setOnClickListener(this);
-        //signInButton.setOnClickListener(this);
-        //fbButton.setOnClickListener(this);
         googleButton.setOnClickListener(this);
 
     }
@@ -196,13 +213,13 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
             case R.id.login_button:
 
-                loginUser();
+                //loginUser();
                 loginPresenter.loginResponse(editTextEmail.getText().toString(),editTextPassword.getText().toString());
 
                 break;
 
             case R.id.fb_login_button:
-
+                facebookLogin();
                 break;
 
             case R.id.google_button:
@@ -229,12 +246,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
             public void onSuccess(LoginResult loginResult) {
 
                 handleFacebookAccessToken(loginResult.getAccessToken());
-
-                //System.out.println("onSuccess");
-
-                String accessToken = loginResult.getAccessToken().getToken();
-
-                //Log.i("accessToken", accessToken);
+                //String accessToken = loginResult.getAccessToken().getToken();
 
                 GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
 
@@ -242,20 +254,17 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
                     public void onCompleted(JSONObject object, GraphResponse response) {
 
-                        //Log.i("LoginActivity", response.toString());
-
                         // Get facebook data from login
 
                         Bundle bFacebookData = getFacebookData(object);
 
-                        String emailid = bFacebookData.getString("email");
+                        String emailid = bFacebookData.getString(Constants.fb_email);
                          editor.putString("email", emailid);
-                        editor.putString("profile", bFacebookData.getString("profile_pic"));
-                        editor.putString("firstname", bFacebookData.getString("first_name"));
-                        editor.putString("lastname", bFacebookData.getString("last_name"));
-                        editor.commit();
-                        // Log.i(TAG, "onCompleted: "+emai);
-                        Toast.makeText(LoginActivity.this, "Welcome :" + bFacebookData.getString("first_name"), Toast.LENGTH_SHORT).show();
+                        editor.putString("profile", bFacebookData.getString(Constants.fb_profile_pic));
+                        editor.putString("firstname", bFacebookData.getString(Constants.fb_first_name));
+                        editor.putString("lastname", bFacebookData.getString(Constants.fb_last_name));
+                        editor.apply();
+                        Toast.makeText(LoginActivity.this, "Welcome :" + bFacebookData.getString(Constants.fb_first_name), Toast.LENGTH_SHORT).show();
 
                     }
 
@@ -283,7 +292,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
             public void onError(FacebookException e) {
 
-                Toast.makeText(LoginActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, getString(R.string.error), Toast.LENGTH_SHORT).show();
 
             }
 
@@ -325,10 +334,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
             try {
 
-                //URL profile_pic = new URL("https://graph.facebook.com/" + id + "/picture?width=200&height=150");
                 URL profile_pic = new URL("http://graph.facebook.com/" + id + "/picture?type=square");
-
-                Log.i("profile_pic", profile_pic + "");
 
                 bundle.putString("profile_pic", profile_pic.toString());
 
@@ -342,17 +348,17 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
             bundle.putString("idFacebook", id);
 
-            if (object.has("first_name"))
+            if (object.has(Constants.fb_first_name))
 
-                bundle.putString("first_name", object.getString("first_name"));
+                bundle.putString(Constants.fb_first_name, object.getString(Constants.fb_first_name));
 
-            if (object.has("last_name"))
+            if (object.has(Constants.fb_last_name))
 
-                bundle.putString("last_name", object.getString("last_name"));
+                bundle.putString(Constants.fb_last_name, object.getString(Constants.fb_last_name));
 
-            if (object.has("email"))
+            if (object.has(Constants.fb_email))
 
-                bundle.putString("email", object.getString("email"));
+                bundle.putString(Constants.fb_email, object.getString(Constants.fb_email));
 
             return bundle;
 
@@ -386,13 +392,13 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                             .addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
-                                    /*UserInfoModel userInfoModel=dataSnapshot.getValue(UserInfoModel.class);
+                                    UserInfoModel userInfoModel=dataSnapshot.getValue(UserInfoModel.class);
                                     SharedPreferences.Editor editor=sharedPreferences.edit();
                                     editor.putString(Constants.Name,userInfoModel.getName());
                                     editor.putString(Constants.Email,userInfoModel.getEmail());
                                     editor.putString(Constants.Password,userInfoModel.getPassword());
                                     editor.putString(Constants.MobileNo,userInfoModel.getMobile());
-                                    editor.commit();*/
+                                    editor.commit();
                                 }
 
                                 @Override
@@ -406,6 +412,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                     builder.setMessage(task.getException().getMessage())
                             .setTitle(R.string.login_error_title)
                             .setPositiveButton(android.R.string.ok, null);
+
                     AlertDialog dialog = builder.create();
                     dialog.show();
                 }
@@ -419,9 +426,8 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnected();
+        return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
-
 
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
@@ -449,7 +455,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
             editor.putString("uEmail",person_email);
             editor.putString("uId",person_id);
             editor.putString("uPic",profile_pic.toString());
-            editor.commit();
+            editor.apply();
             //Toast.makeText(this, "info"+person_name+person_email+person_id+profile_pic, Toast.LENGTH_SHORT).show();
             AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
             firebaseAuth.signInWithCredential(credential)
@@ -516,5 +522,30 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
     public void hideProgressDialog() {
 
     }
+
+    @Override
+    public void showError(int errorType) {
+        switch (errorType){
+            case Constants.ErrorType.ERROR_EMPTY_EMAIL:
+                editTextEmail.setError(getString(R.string.email_field_condition));
+                editTextEmail.requestFocus();
+                break;
+            case Constants.ErrorType.ERROR_INVALID_EMAIL:
+                editTextEmail.setError(getString(R.string.email_field_condition));
+                editTextEmail.requestFocus();
+                break;
+            case Constants.ErrorType.ERROR_EMPTY_PASSWORD:
+                editTextPassword.setError(getString(R.string.password_field_condition));
+                editTextPassword.requestFocus();
+                break;
+            case Constants.ErrorType.ERROR_INVALID_PASSWORD:
+                editTextPassword.setError(getString(R.string.password_field_condition));
+                editTextPassword.requestFocus();
+                break;
+
+        }
+    }
+
+
 }
 

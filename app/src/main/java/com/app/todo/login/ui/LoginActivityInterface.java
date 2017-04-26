@@ -13,5 +13,5 @@ public interface LoginActivityInterface extends View.OnClickListener {
     void loginFailure(String message);
     void showProgressDialog();
     void hideProgressDialog();
-
+    void showError(int errorType);
 }

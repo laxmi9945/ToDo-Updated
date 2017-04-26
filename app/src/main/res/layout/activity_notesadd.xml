@@ -7,6 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:orientation="horizontal"
+        android:weightSum="1"
      >
         <android.support.v7.widget.AppCompatImageButton
             android:layout_width="30dp"
@@ -14,9 +15,10 @@
             android:layout_height="wrap_content"
             android:id="@+id/back_button"
             android:background="@drawable/back"
+
             />
         <android.support.v7.widget.AppCompatTextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginTop="8dp"
             android:textSize="20dp"
@@ -24,7 +26,19 @@
             android:layout_toRightOf="@+id/back_button"
             android:id="@+id/recenttime_textView"
             android:clickable="false"
+
           />
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:textSize="20dp"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/back_button"
+            android:id="@+id/time_textView"
+            android:clickable="false"
+
+            />
 
     </LinearLayout>
 

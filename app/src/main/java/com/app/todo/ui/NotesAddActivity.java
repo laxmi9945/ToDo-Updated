@@ -35,14 +35,15 @@ import java.util.List;
 
 public class NotesAddActivity extends BaseActivity implements View.OnClickListener {
     AppCompatImageButton imageButton;
-    AppCompatTextView timeTextView;
+    AppCompatTextView dateTextView,timeTextView;
     AppCompatEditText titleEdittext, contentEdittext;
     public List<NotesModel> data = new ArrayList<>();
     DataBaseUtility database;
     private DatabaseReference mDatabaseReference;
     FirebaseAuth firebaseAuth;
     SharedPreferences sharedPreferences;
-
+    Date date;
+    private static final String TAG = "NetworkStateReceiver";
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,9 +52,12 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
         // FirebaseDatabase.getInstance().
         //mDatabaseReference = FirebaseDatabase.getInstance().getReference();
         initView();
-        Date date = new Date();
+         date= new Date();
         CharSequence sequence = DateFormat.format(getString(R.string.date_time), date.getTime());
-        timeTextView.setText(sequence);
+        CharSequence sequence2 = DateFormat.format(getString(R.string.time), date.getTime());
+
+        dateTextView.setText(sequence);
+        timeTextView.setText(sequence2);
         sharedPreferences = this.getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
     }
@@ -62,7 +66,8 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
     public void initView() {
 
         imageButton = (AppCompatImageButton) findViewById(R.id.back_button);
-        timeTextView = (AppCompatTextView) findViewById(R.id.recenttime_textView);
+        dateTextView = (AppCompatTextView) findViewById(R.id.recenttime_textView);
+        timeTextView = (AppCompatTextView) findViewById(R.id.time_textView);
         titleEdittext = (AppCompatEditText) findViewById(R.id.title_edittext);
         contentEdittext = (AppCompatEditText) findViewById(R.id.content_edittext);
         setClicklistener();
@@ -71,10 +76,12 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void setClicklistener() {
         imageButton.setOnClickListener(this);
-        timeTextView.setOnClickListener(this);
+        dateTextView.setOnClickListener(this);
         titleEdittext.setOnClickListener(this);
         contentEdittext.setOnClickListener(this);
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -104,11 +111,13 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
                 final String userId;
                 String titleData = titleEdittext.getText().toString();
                 String contentData = contentEdittext.getText().toString();
-                final String recentTimeData = timeTextView.getText().toString();
+                final String recentTimeData = dateTextView.getText().toString();
+                final String recentTimeData2 = timeTextView.getText().toString();
                 userId = firebaseAuth.getCurrentUser().getUid();
                 model.setTitle(titleData);
                 model.setContent(contentData);
                 model.setDate(recentTimeData);
+                model.setTime(recentTimeData2);
                 model.setId(userId);
                 /*Intent intent = new Intent(NotesAddActivity.this, TodoNotesActivity.class);
                 Bundle bundle = new Bundle();

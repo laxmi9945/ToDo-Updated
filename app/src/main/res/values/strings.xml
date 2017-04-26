@@ -46,6 +46,7 @@
     <string name="saved">Saved...</string>
     <string name="pined">pined...</string>
     <string name="date_time">E MMMM dd, yyyy</string>
+    <string name="time">hh:mm a</string>
     <string name="enter_registered_email">Enter your registered email id</string>
     <string name="sending_reset_instruction">Sending reset password instruction...</string>
     <string name="server_info">We have sent you instructions to reset your password!</string>
@@ -54,7 +55,7 @@
     <string name="TextTakeCam">Take picture</string>
     <string name="TextTakeGal">Take picture from file</string>
     <string name="TextTitleDia">Set image</string>
-    <string name="no_internet">No Internet Connection</string>
+    <string name="no_internet">No internet connection!</string>
     <string name="network_error_msg">It looks like your internet connection is off. Please turn it on and try again</string>
     <string name="registering">Registering data plz wait...</string>
     <string name="wrong_format">wrong format</string>
@@ -65,4 +66,6 @@
     <string name="facebook_app_id">414255355608534</string>
     <string name="login_attempt_warn">Login attempt canceled</string>
     <string name="auth_failed">Authentication failed.</string>
+    <string name="retry">Retry</string>
+    <string name="error">Error</string>
 </resources>
