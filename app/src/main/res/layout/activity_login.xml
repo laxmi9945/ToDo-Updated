@@ -12,6 +12,11 @@
     android:focusableInTouchMode="true"
     android:background="#e3e3e3"
     >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:orientation="vertical">
 <ScrollView
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -59,7 +64,7 @@
         android:layout_below="@+id/imageView"
         android:layout_centerHorizontal="true"
         app:passwordToggleEnabled = "true"
-        app:passwordToggleTint="@color/colorHint"
+        app:passwordToggleTint="@color/colorRed"
         app:passwordToggleDrawable="@android:drawable/ic_menu_view"
         >
     <android.support.v7.widget.AppCompatEditText
@@ -67,7 +72,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-
         android:hint="@string/enter_password"
         android:inputType="textPassword"
         android:maxLines="1"
@@ -140,6 +144,7 @@
             android:textAllCaps="false"/>
     </LinearLayout>
     </LinearLayout>
-</ScrollView>
 
+</ScrollView>
+    </LinearLayout>
 </LinearLayout>

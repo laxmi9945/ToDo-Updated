@@ -197,6 +197,7 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
                 if (direction == ItemTouchHelper.LEFT) {
+                    //final String uId = firebaseAuth.getCurrentUser().getUid();
                     databaseReference = FirebaseDatabase.getInstance().getReference();
                     Query query = databaseReference.orderByChild("userdata").equalTo("userData");
                     query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -205,7 +206,7 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
                             /*for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                 snapshot.getRef().removeValue();
                             }*/
-                            dataSnapshot.child("userData").getRef().removeValue();
+                            dataSnapshot.child("").getRef().removeValue();
                         }
 
                         @Override

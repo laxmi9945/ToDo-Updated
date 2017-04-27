@@ -25,7 +25,7 @@ import com.app.todo.R;
 import com.app.todo.baseclass.BaseActivity;
 import com.app.todo.login.presenter.LoginPresenter;
 import com.app.todo.model.UserInfoModel;
-import com.app.todo.ui.RegistrationActivity;
+import com.app.todo.registration.ui.RegistrationActivity;
 import com.app.todo.ui.ResetPasswordActivity;
 import com.app.todo.ui.TodoNotesActivity;
 import com.app.todo.utils.Constants;
@@ -174,6 +174,8 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                 .build();
 
         setClicklistener();
+        loginPresenter=new LoginPresenter(this,this);
+
     }
 
     @Override
@@ -514,13 +516,14 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
     }
 
     @Override
-    public void showProgressDialog() {
-
+    public void showProgressDialog(String message) {
+        progressDialog.setMessage(message);
+        progressDialog.show();
     }
 
     @Override
     public void hideProgressDialog() {
-
+        progressDialog.dismiss();
     }
 
     @Override

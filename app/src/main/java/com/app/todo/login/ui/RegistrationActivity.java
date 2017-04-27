@@ -1,4 +1,4 @@
-package com.app.todo.ui;
+package com.app.todo.registration.ui;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -14,6 +14,8 @@ import android.view.View;
 
 import com.app.todo.R;
 import com.app.todo.model.UserInfoModel;
+import com.app.todo.registration.presenter.RegistrationPresenter;
+import com.app.todo.ui.TodoNotesActivity;
 import com.app.todo.utils.Constants;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -26,7 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class RegistrationActivity extends AppCompatActivity implements View.OnClickListener {
+public class RegistrationActivity extends AppCompatActivity implements RegistrationActivityInterface{
     AppCompatEditText edittextName, edittextemail, edittextpswrd, edittextmobNo;
     AppCompatButton buttonSave;
     AppCompatTextView textView;
@@ -37,6 +39,8 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
 
     private DatabaseReference mDatabaseReference;
     UserInfoModel userInfoModel;
+
+    RegistrationPresenter registrationPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,6 +62,8 @@ public class RegistrationActivity extends AppCompatActivity implements View.OnCl
         edittextmobNo = (AppCompatEditText) findViewById(R.id.mobilenumber_edittext);
         textView = (AppCompatTextView) findViewById(R.id.allreadyacc_textview);
         setClicklistener();
+
+       // registrationPresenter = new RegistrationPresenter(this, this);
     }
 
     public void setClicklistener() {
