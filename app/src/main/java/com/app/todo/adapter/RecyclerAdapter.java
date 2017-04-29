@@ -23,6 +23,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
     List<NotesModel> model;
 
     public RecyclerAdapter(Context context, List<NotesModel> model)  {
+      //  model=new ArrayList<>();
         this.model = model;
         this.context = context;
 
@@ -42,7 +43,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
         holder.dateTextView.setText(model.get(position).getDate());
         holder.timeTextView.setText(model.get(position).getTime());
         holder.contentTextView.setText(model.get(position).getContent());
-
     }
 
 
@@ -52,6 +52,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
         return model.size();
     }
 
+
     public void addNotes(NotesModel note) {
 
         model.add(note);
@@ -60,9 +61,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
 
     public void deleteItem(int position) {
         model.remove(position);
-
-        notifyItemRemoved(position);
-        notifyItemRangeChanged(position, model.size());
+        notifyDataSetChanged();
+       /* notifyItemRemoved(position);
+        notifyItemRangeChanged(position, model.size());*/
     }
     public void archiveItem(int position){
 

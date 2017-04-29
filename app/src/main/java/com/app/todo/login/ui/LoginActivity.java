@@ -12,11 +12,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatTextView;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -25,7 +23,6 @@ import com.app.todo.R;
 import com.app.todo.baseclass.BaseActivity;
 import com.app.todo.login.presenter.LoginPresenter;
 import com.app.todo.model.UserInfoModel;
-import com.app.todo.registration.ui.RegistrationActivity;
 import com.app.todo.ui.ResetPasswordActivity;
 import com.app.todo.ui.TodoNotesActivity;
 import com.app.todo.utils.Constants;
@@ -51,11 +48,8 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -152,6 +146,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         loginButton = (LoginButton) findViewById(R.id.fb_login_button);
         googleButton = (AppCompatButton) findViewById(R.id.google_button);
         linearLayout= (LinearLayout) findViewById(R.id.Linear_rootLayout);
+
         //initializing google signin options
         googleSignInOptions = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -372,58 +367,6 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
     }
 
-    private void loginUser() {
-        String Email = editTextEmail.getText().toString();
-        String Password = editTextPassword.getText().toString();
-        if (TextUtils.isEmpty(Email)) {
-            editTextEmail.setError(getString(R.string.field_msg));
-            return;
-        } else if (TextUtils.isEmpty(Password)) {
-            editTextPassword.setError(getString(R.string.field_msg));
-            return;
-        }
-
-        firebaseAuth.signInWithEmailAndPassword(Email, Password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                progressDialog.dismiss();
-                if (task.isSuccessful()) {
-                    firebaseDatabase=FirebaseDatabase.getInstance();
-                    databaseReference=firebaseDatabase.getReference("userInfo");
-                    databaseReference.child(firebaseAuth.getCurrentUser().getUid())
-                            .addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    UserInfoModel userInfoModel=dataSnapshot.getValue(UserInfoModel.class);
-                                    SharedPreferences.Editor editor=sharedPreferences.edit();
-                                    editor.putString(Constants.Name,userInfoModel.getName());
-                                    editor.putString(Constants.Email,userInfoModel.getEmail());
-                                    editor.putString(Constants.Password,userInfoModel.getPassword());
-                                    editor.putString(Constants.MobileNo,userInfoModel.getMobile());
-                                    editor.commit();
-                                }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
-                            });
-
-                } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                    builder.setMessage(task.getException().getMessage())
-                            .setTitle(R.string.login_error_title)
-                            .setPositiveButton(android.R.string.ok, null);
-
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                }
-            }
-        });
-        progressDialog.setMessage(getString(R.string.login_msg));
-        progressDialog.show();
-    }
-
     private boolean isNetworkConnected() {
         ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -501,13 +444,14 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         SharedPreferences.Editor editor=sharedPreferences.edit();
-        editor.putString(Constants.Name,userInfoModel.getName());
-        editor.putString(Constants.Email,userInfoModel.getEmail());
-        editor.putString(Constants.Password,userInfoModel.getPassword());
-        editor.putString(Constants.MobileNo,userInfoModel.getMobile());
+        String login_email=editTextEmail.getText().toString();
+        String login_password=editTextPassword.getText().toString();
+        editor.putString(Constants.Email,login_email);
+        editor.putString(Constants.Password,login_password);
+        editor.putString("uid",uid);
         editor.commit();
-        finish();
         startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
+        finish();
     }
 
     @Override
@@ -534,7 +478,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                 editTextEmail.requestFocus();
                 break;
             case Constants.ErrorType.ERROR_INVALID_EMAIL:
-                editTextEmail.setError(getString(R.string.email_field_condition));
+                editTextEmail.setError(getString(R.string.invalid_email));
                 editTextEmail.requestFocus();
                 break;
             case Constants.ErrorType.ERROR_EMPTY_PASSWORD:
@@ -542,13 +486,23 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                 editTextPassword.requestFocus();
                 break;
             case Constants.ErrorType.ERROR_INVALID_PASSWORD:
-                editTextPassword.setError(getString(R.string.password_field_condition));
+                editTextPassword.setError(getString(R.string.invalid_password));
                 editTextPassword.requestFocus();
                 break;
-
+            case Constants.ErrorType.ERROR_NO_INTERNET_CONNECTION:
+                Toast.makeText(this, getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
+                break;
         }
     }
+    public void isFbLogin(){
+        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
+        editor=sharedPreferences.edit();
 
+    }
+    public void isGoogleLogin(){
+        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
+        editor=sharedPreferences.edit();
+    }
 
 }
 

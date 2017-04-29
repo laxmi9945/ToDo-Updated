@@ -12,21 +12,24 @@
     android:focusableInTouchMode="true"
     android:background="#e3e3e3"
     >
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        >
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
-        android:orientation="vertical">
-<ScrollView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:scrollbars="vertical"
-    >
+        android:orientation="vertical"
+        >
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:background="#FFFFFF"
         android:layout_gravity="center"
         >
 
@@ -145,6 +148,7 @@
     </LinearLayout>
     </LinearLayout>
 
-</ScrollView>
+
     </LinearLayout>
+    </ScrollView>
 </LinearLayout>

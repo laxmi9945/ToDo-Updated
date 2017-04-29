@@ -32,7 +32,7 @@
             android:windowSoftInputMode="adjustPan">
 
         </activity>
-        <activity android:name=".registration.ui.RegistrationActivity"  />
+        <activity android:name=".login.ui.RegistrationActivity"  />
         <activity android:name=".ui.ResetPasswordActivity"/>
         <activity android:name=".ui.NotesItemDetailsActivity"/>
         <activity android:name=".ui.NotesAddActivity"/>

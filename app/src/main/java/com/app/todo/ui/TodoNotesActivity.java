@@ -5,7 +5,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -44,7 +47,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -79,6 +81,9 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
     String fb_first_name, fb_last_name, fb_email, imageUrl;
     String google_first_name, google_email, google_imageUrl;
     private static final String TAG = "NetworkStateReceiver";
+    String uId;
+    private static int RESULT_LOAD_IMG = 1;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,11 +91,10 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         setContentView(R.layout.activity_drawerlayout);
 
 
-
         //Getting reference to Firebase Database
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        databaseReference = firebaseDatabase.getReference().child("userData");
+        databaseReference = FirebaseDatabase.getInstance().getReference().child("userData");
         firebaseAuth = FirebaseAuth.getInstance();
+        uId = firebaseAuth.getCurrentUser().getUid();
         initView();
         initSwipeView();
         setSupportActionBar(toolbar);
@@ -110,46 +114,29 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         notesModels = new ArrayList<NotesModel>();
         progressDialog = new ProgressDialog(this);
 
-        //Getting data from SharedPreference
-        google_first_name = sharedPreferences.getString("uName", "value");
-        google_email = sharedPreferences.getString("uEmail", "value");
-        google_imageUrl = sharedPreferences.getString("uPic", "value");
-        //Toast.makeText(this, "ggl"+google_first_name+google_email+google_imageUrl, Toast.LENGTH_SHORT).show();
-        Log.i("test", "onCreate: " + google_first_name + google_email + google_imageUrl);
-        nav_header_Name.setText(google_first_name);
-        nav_header_Email.setText(google_email);
-        Glide.with(getApplicationContext()).load(google_imageUrl).into(circleImageView);
 
-        //Getting data from SharedPreference
-        fb_first_name = sharedPreferences.getString("firstname", "value");
-        fb_last_name = sharedPreferences.getString("lastname", "value");
-        fb_email = sharedPreferences.getString("email", "value");
-        imageUrl = sharedPreferences.getString("profile", "value");
-        nav_header_Name.setText(fb_first_name + " " + fb_last_name);
-        nav_header_Email.setText(fb_email);
-        Glide.with(getApplicationContext()).load(imageUrl).into(circleImageView);
+
+
 
         progressDialog.setMessage(getString(R.string.fetching_data));
         progressDialog.show();
         //retriving data from firebase
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            String uId = firebaseAuth.getCurrentUser().getUid();
+        databaseReference.child(uId).addValueEventListener(new ValueEventListener() {
+            //String uId = firebaseAuth.getCurrentUser().getUid();
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 GenericTypeIndicator<ArrayList<NotesModel>> arrayListGenericTypeIndicator = new GenericTypeIndicator<ArrayList<NotesModel>>() {
                 };
-                ArrayList<NotesModel> notesModelArrayList;
-                for (DataSnapshot post : dataSnapshot.child(uId).getChildren()) {
-                    notesModelArrayList = post.getValue(arrayListGenericTypeIndicator);
-                    notesModels.addAll(notesModelArrayList);
+                ArrayList<NotesModel> notesModel=new ArrayList<>();
+
+                for (DataSnapshot post : dataSnapshot.getChildren()) {
+
+                    ArrayList<NotesModel> notesModel_ArrayList=null;
+                    notesModel_ArrayList = post.getValue(arrayListGenericTypeIndicator);
+                    notesModel.addAll(notesModel_ArrayList);
                 }
-
-                recyclerAdapter = new RecyclerAdapter(TodoNotesActivity.this, notesModels);
-
-                recyclerView.setAdapter(recyclerAdapter);
-                recyclerAdapter.notifyDataSetChanged();
-                progressDialog.dismiss();
+               setDatatoRecycler(notesModel);
 
             }
 
@@ -183,6 +170,43 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         });
 
     }
+    public boolean isFbLogin(){
+        //Getting data from SharedPreference
+        fb_first_name = sharedPreferences.getString("firstname", "");
+        fb_last_name = sharedPreferences.getString("lastname", "");
+        fb_email = sharedPreferences.getString("email", "");
+        imageUrl = sharedPreferences.getString("profile", "");
+        nav_header_Name.setText(fb_first_name + " " + fb_last_name);
+        nav_header_Email.setText(fb_email);
+        Glide.with(getApplicationContext()).load(imageUrl).into(circleImageView);
+        return false;
+    }
+
+    public boolean isGoogleLogin(){
+
+        //Getting data from SharedPreference
+        google_first_name = sharedPreferences.getString("uName", "");
+        google_email = sharedPreferences.getString("uEmail", "");
+        google_imageUrl = sharedPreferences.getString("uPic", "");
+        nav_header_Name.setText(google_first_name);
+        nav_header_Email.setText(google_email);
+        Glide.with(getApplicationContext()).load(google_imageUrl).into(circleImageView);
+        return false;
+    }
+    private void setDatatoRecycler(List<NotesModel> notesModel) {
+        if(notesModel==null){
+            notesModels=new ArrayList<>();
+        }else {
+            notesModels=notesModel;
+        }
+        recyclerAdapter = new RecyclerAdapter(TodoNotesActivity.this, notesModels);
+
+        recyclerView.setAdapter(recyclerAdapter);
+        recyclerAdapter.notifyDataSetChanged();
+        progressDialog.dismiss();
+
+    }
+
 
     private void initSwipeView() {
 
@@ -195,28 +219,15 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAdapterPosition();
+                final int position = viewHolder.getAdapterPosition();
                 if (direction == ItemTouchHelper.LEFT) {
-                    //final String uId = firebaseAuth.getCurrentUser().getUid();
-                    databaseReference = FirebaseDatabase.getInstance().getReference();
-                    Query query = databaseReference.orderByChild("userdata").equalTo("userData");
-                    query.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            /*for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                snapshot.getRef().removeValue();
-                            }*/
-                            dataSnapshot.child("").getRef().removeValue();
-                        }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                            Toast.makeText(TodoNotesActivity.this, "Cancelled..", Toast.LENGTH_SHORT).show();
-                            //Log.e(TAG, "onCancelled", databaseError.toException());
-                        }
-                    });
-                    dataBaseUtility.delete(notesModels.get(position));
-                    recyclerAdapter.deleteItem(position);
+                    databaseReference = FirebaseDatabase.getInstance().getReference();
+                    NotesModel model = notesModels.get(position);
+                    //recyclerAdapter.deleteItem(position);
+                    databaseReference.child("userData").child(uId).child(model.getDate()).child(String.valueOf(model.getId())).removeValue();
+                    dataBaseUtility.delete(model);
+                   // recyclerAdapter.deleteItem(position);
 
 
                 } else {
@@ -261,10 +272,8 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         nav_header_Name = (AppCompatTextView) header.findViewById(R.id.nav_header_appName);
         nav_header_Email = (AppCompatTextView) header.findViewById(R.id.nav_header_emailId);
         circleImageView = (CircleImageView) header.findViewById(R.id.profile_image);
-        /*nav_header_Name2 = (AppCompatTextView) header.findViewById(R.id.nav_header_appName);
-        nav_header_Email2 = (AppCompatTextView) header.findViewById(R.id.nav_header_emailId);
-        circleImageView2 = (CircleImageView) header.findViewById(R.id.profile_image);*/
         setClicklistener();
+
     }
 
     @Override
@@ -330,10 +339,36 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
             recyclerView.setAdapter(recyclerAdapter);
 
         }
+        if (resultCode == RESULT_OK) {
+            if (requestCode == RESULT_LOAD_IMG) {
+                // Get the url from data
+                Uri selectedImageUri = data.getData();
+                if (null != selectedImageUri) {
+                    // Get the path from the Uri
+                    String path = getPathFromURI(selectedImageUri);
+                    Log.i(TAG, "Image Path : " + path);
+                    // Set the image in ImageView
+                    //imgView.setImageURI(selectedImageUri);
+                    circleImageView.setImageURI(selectedImageUri);
+                }
+            }
+        }
 
 
         super.onActivityResult(requestCode, resultCode, data);
 
+    }
+    /* Get the real path from the URI */
+    public String getPathFromURI(Uri contentUri) {
+        String res = null;
+        String[] proj = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
+        if (cursor.moveToFirst()) {
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            res = cursor.getString(column_index);
+        }
+        cursor.close();
+        return res;
     }
 
     @Override
@@ -348,12 +383,20 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
 
                 break;
             case R.id.profile_image:
-                //profilePictureSet();
+                profilePictureSet();
 
 
                 break;
 
         }
+    }
+
+    private void profilePictureSet() {
+        // Create intent to Open Image applications like Gallery, Google Photos
+        Intent galleryIntent = new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        // Start the Intent
+        startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
     }
 
     @Override
@@ -373,27 +416,13 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
                 break;
 
             case R.id.logout:
-                //LoginManager.getInstance().logOut();//fb logout
-                /*firebaseAuth.signOut();
-                FirebaseAuth.getInstance().signOut();*///Gmail signout
+                LoginManager.getInstance().logOut();    //fb logout
+
+                FirebaseAuth.getInstance().signOut();
+
                 deleteAccessToken();
-                /*finish();
-                startActivity(new Intent(getApplicationContext(), LoginActivity.class));*/
-
-                /*SharedPreferences.Editor shEditor = sharedPreferences.edit();
-                if (sharedPreferences.contains("login")) {
-
-                    Log.i("check", "onOptionsItemSelected: ");
-                    shEditor.putString("login", "false");
-                    shEditor.commit();
-                    Intent intent = new Intent(TodoNotesActivity.this, LoginActivity.class);
-                    Toast.makeText(TodoNotesActivity.this, getString(R.string.logout), LENGTH_SHORT).show();
-                    startActivity(intent);
-                    finish();
-
-                }*/
-                //Toast.makeText(TodoNotesActivity.this, getString(R.string.logout_success), LENGTH_SHORT).show();
                 break;
+
             case R.id.reminder:
 
                 //Toast.makeText(this, getString(R.string.logic), LENGTH_SHORT).show();
@@ -444,7 +473,15 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         //if(firebaseAuth.getCurrentUser()!=null) {
         LoginManager.getInstance().logOut();//fb logout
         firebaseAuth.signOut();
-        FirebaseAuth.getInstance().signOut();//google signout
+        /*firebaseAuth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        // [START_EXCLUDE]
+                        updateUI(false);
+                        // [END_EXCLUDE]
+                    }
+                });*/
         sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
@@ -501,5 +538,6 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         toolbar.setTitle(title);
         setTitle(title);
     }
+
 
 }

@@ -111,14 +111,14 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
                 final String userId;
                 String titleData = titleEdittext.getText().toString();
                 String contentData = contentEdittext.getText().toString();
-                final String recentTimeData = dateTextView.getText().toString();
+                final String recentDateData = dateTextView.getText().toString();
                 final String recentTimeData2 = timeTextView.getText().toString();
                 userId = firebaseAuth.getCurrentUser().getUid();
                 model.setTitle(titleData);
                 model.setContent(contentData);
-                model.setDate(recentTimeData);
+                model.setDate(recentDateData);
                 model.setTime(recentTimeData2);
-                model.setId(userId);
+                model.setId(0);
                 /*Intent intent = new Intent(NotesAddActivity.this, TodoNotesActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString(Constants.title_data, titleData);
@@ -131,7 +131,7 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
                 //String id = mDatabaseReference.push().getKey();
                 //model.setId(id);
                 //mDatabaseReference.child(id).setValue(model);
-                mDatabaseReference.child("userData").child(userId).child(recentTimeData)
+                mDatabaseReference.child("userData").child(userId).child(recentDateData)
                         .addValueEventListener(new ValueEventListener() {
                             NotesModel notesModel = model;
 
@@ -140,7 +140,8 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
 
                                 int index = (int) dataSnapshot.getChildrenCount();
                                 if (notesModel != null) {
-                                    mDatabaseReference.child("userData").child(userId).child(recentTimeData)
+                                    model.setId(index);
+                                    mDatabaseReference.child("userData").child(userId).child(recentDateData)
                                             .child(String.valueOf(index)).setValue(model);
                                     notesModel = null;
                                 }

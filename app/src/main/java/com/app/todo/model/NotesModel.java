@@ -8,9 +8,9 @@ public class NotesModel {
     String title;
     String content;
     String date;
-
     String time;
-    String id;
+    int id;
+
     public String getTime() {
         return time;
     }
@@ -19,21 +19,19 @@ public class NotesModel {
         this.time = time;
     }
 
-
-
-
     public NotesModel() {
 
     }
+    /*
 
-    public NotesModel(String time,String date, String content, String id, String title) {
+    public NotesModel(String time,String date, String content, int id, String title) {
         this.title = title;
         this.content = content;
         this.date = date;
         this.time = time;
         this.id = id;
     }
-
+*/
     public String getTitle() {
         return title;
     }
@@ -57,11 +55,11 @@ public class NotesModel {
     public void setDate(String date) {
         this.date = date;
     }
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

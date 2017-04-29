@@ -26,7 +26,7 @@ public class Constants {
     public static String fb_profile_pic="profile_pic";
 
     public interface ErrorType{
-        public static final int NO_INTERNET_CONNECTION=0;
+        public static final int ERROR_NO_INTERNET_CONNECTION=0;
         public static final int ERROR_INVALID_EMAIL=1;
         public static final int ERROR_INVALID_PASSWORD=2;
         public static final int ERROR_EMPTY_EMAIL=3;

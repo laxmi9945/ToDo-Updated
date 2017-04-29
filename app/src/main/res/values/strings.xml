@@ -23,7 +23,7 @@
     <string name="enter_correct_details">Enter Correct Details Or Register</string>
     <string name="invalid_password">invalid Password</string>
     <string name="password_field_condition">Password should not empty</string>
-    <string name="invalid_mail">invalid Mail</string>
+    <string name="invalid_email">invalid Mail</string>
     <string name="email_field_condition">Email should not empty</string>
     <string name="first_name">First name not entered</string>
     <string name="format_invalid">invalid format</string>

@@ -12,10 +12,13 @@ import android.view.ViewGroup;
 
 import com.app.todo.R;
 import com.app.todo.ui.TodoNotesActivity;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class NoteseditFragment extends Fragment implements View.OnClickListener {
     AppCompatEditText titleEditText, contentEdtitext;
-
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
     TodoNotesActivity todoNotesActivity;
 
     public NoteseditFragment() {
@@ -31,6 +34,8 @@ public class NoteseditFragment extends Fragment implements View.OnClickListener 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_todoitemsdetails, container, false);
+        databaseReference = firebaseDatabase.getReference().child("userData");
+
         titleEditText = (AppCompatEditText) view.findViewById(R.id.edit_title);
         contentEdtitext = (AppCompatEditText) view.findViewById(R.id.edit_content);
         AppCompatButton button = (AppCompatButton) view.findViewById(R.id.save_btn);
