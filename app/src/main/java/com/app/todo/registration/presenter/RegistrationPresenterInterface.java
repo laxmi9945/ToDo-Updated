@@ -1,10 +1,7 @@
-package com.app.todo.login.presenter;
+package com.app.todo.registration.presenter;
 
 import com.app.todo.model.UserInfoModel;
 
-/**
- * Created by bridgeit on 24/4/17.
- */
 
 public interface RegistrationPresenterInterface {
     void registrationSuccess(UserInfoModel userInfoModel, String uid);

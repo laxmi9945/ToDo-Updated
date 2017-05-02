@@ -9,7 +9,12 @@ public class NotesModel {
     String content;
     String date;
     String time;
+
+
+
+    String reminderDate;
     int id;
+
 
     public String getTime() {
         return time;
@@ -61,6 +66,13 @@ public class NotesModel {
 
     public void setId(int id) {
         this.id = id;
+    }
+    public String getReminderDate() {
+        return reminderDate;
+    }
+
+    public void setReminderDate(String reminderDate) {
+        this.reminderDate = reminderDate;
     }
 
 }

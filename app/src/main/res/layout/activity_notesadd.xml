@@ -86,7 +86,13 @@
         android:textCursorDrawable="@color/colorAccent"
         />
     </android.support.design.widget.TextInputLayout>
-
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/reminderDate"
+        android:textSize="15dp"
+        android:layout_marginLeft="@dimen/notesadd_mariginLeft"
+        android:textColor="#ff00"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

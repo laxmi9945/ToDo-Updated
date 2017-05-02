@@ -1,4 +1,4 @@
-package com.app.todo.login.ui;
+package com.app.todo.registration.ui;
 
 import android.view.View;
 

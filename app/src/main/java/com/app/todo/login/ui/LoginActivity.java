@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -23,8 +21,10 @@ import com.app.todo.R;
 import com.app.todo.baseclass.BaseActivity;
 import com.app.todo.login.presenter.LoginPresenter;
 import com.app.todo.model.UserInfoModel;
+import com.app.todo.registration.ui.RegistrationActivity;
 import com.app.todo.ui.ResetPasswordActivity;
 import com.app.todo.ui.TodoNotesActivity;
+import com.app.todo.utils.CommonChecker;
 import com.app.todo.utils.Constants;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -68,7 +68,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
     CallbackManager callbackManager;
     LoginButton loginButton;
     SharedPreferences sharedPreferences;
-    GoogleSignInOptions googleSignInOptions;
+    GoogleSignInOptions  googleSignInOptions;
     GoogleApiClient googleApiClient;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
@@ -104,7 +104,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
     private void checkNetwork() {
 
-        if (isNetworkConnected()) {
+        if (CommonChecker.isNetworkConnected(LoginActivity.this)) {
 
         } else {
              snackbar = Snackbar
@@ -150,11 +150,6 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         //initializing google signin options
         googleSignInOptions = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-
-        //initializing google api client
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
@@ -165,7 +160,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
                     }
                 })
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
                 .build();
 
         setClicklistener();
@@ -307,6 +302,9 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
+
+                            sharedPreferences.edit().putBoolean(Constants.key_fb_login,true).apply();
+                           // Log.i("ghg", "onComplete: ............."+sharedPreferences.edit().putBoolean(Constants.key_fb_login,true));
                             finish();
                             //updateUI(user);
                         } else {
@@ -367,12 +365,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
     }
 
-    private boolean isNetworkConnected() {
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        return networkInfo != null && networkInfo.isConnectedOrConnecting();
-    }
+
 
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
@@ -388,13 +381,14 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
+
             // Google Sign In was successful, authenticate with Firebase
             GoogleSignInAccount account = result.getSignInAccount();
             String person_name=account.getDisplayName();
             String person_email=account.getEmail();
             Uri profile_pic=account.getPhotoUrl();
             String person_id=account.getId();
-            sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
+            sharedPreferences = getApplicationContext().getSharedPreferences(Constants.key_google_login, Context.MODE_PRIVATE);
             editor = sharedPreferences.edit();
             editor.putString("uName",person_name);
             editor.putString("uEmail",person_email);
@@ -411,16 +405,14 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
                                 startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
                                 finish();
+                                sharedPreferences.edit().putBoolean(Constants.key_google_login,true).apply();
                                 // Sign in success, update UI with the signed-in user's information
-                                //Log.d(TAG, "signInWithCredential:success");
-                                FirebaseUser user = firebaseAuth.getCurrentUser();
-                                //updateUI(user);
+
                             } else {
                                 // If sign in fails, display a message to the user.
                                 //Log.w(TAG, "signInWithCredential:failure", task.getException());
                                 Toast.makeText(LoginActivity.this, getString(R.string.auth_failed),
                                         Toast.LENGTH_SHORT).show();
-                                //updateUI(null);
                             }
 
 
@@ -433,23 +425,16 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         }
     }
 
-    private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
-
-
-    }
-
 
     @Override
     public void loginSuccess(UserInfoModel userInfoModel, String uid) {
         sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
-        editor = sharedPreferences.edit();
-        SharedPreferences.Editor editor=sharedPreferences.edit();
         String login_email=editTextEmail.getText().toString();
         String login_password=editTextPassword.getText().toString();
         editor.putString(Constants.Email,login_email);
         editor.putString(Constants.Password,login_password);
         editor.putString("uid",uid);
-        editor.commit();
+        sharedPreferences.edit().putBoolean(Constants.key_firebase_login,true).apply();
         startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
         finish();
     }
@@ -493,15 +478,6 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                 Toast.makeText(this, getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
                 break;
         }
-    }
-    public void isFbLogin(){
-        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
-        editor=sharedPreferences.edit();
-
-    }
-    public void isGoogleLogin(){
-        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
-        editor=sharedPreferences.edit();
     }
 
 }

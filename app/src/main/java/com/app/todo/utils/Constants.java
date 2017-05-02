@@ -6,6 +6,9 @@ package com.app.todo.utils;
 
 public class Constants {
     public static String keys="laxmi";
+    public static String key_fb_login="isFblogin";
+    public static String key_google_login="isGooglelogin";
+    public static String key_firebase_login="isFireBaselogin";
     public static String values="value";
     public static String Name="name";
     public static String Email="email";

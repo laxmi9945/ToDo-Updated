@@ -40,6 +40,7 @@
     <string name="notesadd_content_hint">Add contents</string>
     <string name="field_msg">field should not be empty</string>
     <string name="login_msg">logging into app plz wait..</string>
+    <string name="registration_msg">Registering data...</string>
     <string name="login_error_title">Error!</string>
     <string name="menu_search">search</string>
     <string name="search_hint">Search note..</string>
@@ -68,4 +69,5 @@
     <string name="auth_failed">Authentication failed.</string>
     <string name="retry">Retry</string>
     <string name="error">Error</string>
+    <string name="after_reg_login_fail_message">Login failed....</string>
 </resources>

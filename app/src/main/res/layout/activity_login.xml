@@ -10,7 +10,7 @@
     android:id="@+id/Linear_rootLayout"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:background="#e3e3e3"
+    android:background="@drawable/login_bg"
     >
     <ScrollView
         android:layout_width="match_parent"
@@ -20,10 +20,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
+        android:background="@android:drawable/screen_background_light_transparent"
         android:orientation="vertical"
+        android:alpha="0.8"
         >
-
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -95,8 +95,8 @@
         android:id="@+id/login_button"
         android:layout_width="match_parent"
         android:layout_height="35dp"
-        android:layout_marginLeft="70dp"
-        android:layout_marginRight="70dp"
+        android:layout_marginLeft="@dimen/login_btn_marigin"
+        android:layout_marginRight="@dimen/login_btn_marigin"
         android:layout_marginTop="5dp"
         android:background="@drawable/loginbtn"
         android:text="@string/login_button"
@@ -126,19 +126,11 @@
 
         </com.facebook.login.widget.LoginButton>
 
-
-        <!--<com.android.volley.toolbox.NetworkImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:id="@+id/google_profile_pic">
-
-        </com.android.volley.toolbox.NetworkImageView>-->
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/google_button"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:layout_marginLeft="3dp"
-            android:layout_marginTop="15dp"
+            android:layout_height="@dimen/google_btn_height"
+            android:layout_marginTop="@dimen/google_btn_marigin_top"
             android:background="@drawable/google_button"
             android:text="Login with G+"
             android:textSize="15dp"
@@ -147,8 +139,6 @@
             android:textAllCaps="false"/>
     </LinearLayout>
     </LinearLayout>
-
-
     </LinearLayout>
     </ScrollView>
 </LinearLayout>

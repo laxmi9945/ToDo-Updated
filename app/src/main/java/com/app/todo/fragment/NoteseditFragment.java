@@ -2,6 +2,7 @@ package com.app.todo.fragment;
 
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatButton;
@@ -29,13 +30,14 @@ public class NoteseditFragment extends Fragment implements View.OnClickListener 
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         ((TodoNotesActivity) getActivity()).showOrHideFab(false);
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_todoitemsdetails, container, false);
+        firebaseDatabase=FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference().child("userData");
-
         titleEditText = (AppCompatEditText) view.findViewById(R.id.edit_title);
         contentEdtitext = (AppCompatEditText) view.findViewById(R.id.edit_content);
         AppCompatButton button = (AppCompatButton) view.findViewById(R.id.save_btn);
@@ -57,6 +59,7 @@ public class NoteseditFragment extends Fragment implements View.OnClickListener 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.save_btn:
+                startActivity(new Intent(getActivity(),TodoNotesActivity.class));
 
               /*  DataBaseUtility dataBaseUtility = new DataBaseUtility(getActivity());
                 NotesModel notesModel = new NotesModel(titleEditText.getText().toString(), contentEdtitext.getText().toString(),);

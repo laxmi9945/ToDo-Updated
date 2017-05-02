@@ -1,4 +1,4 @@
-package com.app.todo.login.interactor;
+package com.app.todo.registration.interactor;
 
 
 import com.app.todo.model.UserInfoModel;

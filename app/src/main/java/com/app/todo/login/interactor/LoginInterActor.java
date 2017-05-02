@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
-import android.widget.Toast;
 
 import com.app.todo.R;
 import com.app.todo.login.presenter.LoginPresenterInterface;
@@ -36,13 +35,13 @@ public class LoginInterActor implements LoginInterActorInterface  {
 
     @Override
     public void loginResponse(String email, String password) {
-        loginPresenterInterface.showProgressDialog(String.valueOf(R.string.login_msg));
+        loginPresenterInterface.showProgressDialog(context.getString(R.string.login_msg));
+
         firebaseAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
 
                 if (task.isSuccessful()) {
-                    Toast.makeText(context, "Login Success", Toast.LENGTH_SHORT).show();
                     String uid=task.getResult().getUser().getUid();
                     userData(uid);
 

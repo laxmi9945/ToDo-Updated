@@ -1,4 +1,4 @@
-package com.app.todo.login.ui;
+package com.app.todo.registration.ui;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.app.todo.R;
-import com.app.todo.login.presenter.RegistrationPresenter;
+import com.app.todo.registration.presenter.RegistrationPresenter;
 import com.app.todo.model.UserInfoModel;
 import com.app.todo.ui.TodoNotesActivity;
 import com.app.todo.utils.Constants;

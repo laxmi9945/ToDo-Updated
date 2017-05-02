@@ -16,6 +16,10 @@
             android:icon="@drawable/archive"
             android:title="Archive" />
         <item
+            android:id="@+id/trash"
+            android:icon="@drawable/trashh"
+            android:title="Trash" />
+        <item
             android:id="@+id/logout"
             android:icon="@drawable/logout"
             android:title="Logout" />
