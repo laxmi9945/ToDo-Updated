@@ -141,11 +141,16 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
                                     int index = 0;
                                     ArrayList<NotesModel> notesModel_ArrayList = new ArrayList<NotesModel>();
                                     //notesModel_ArrayList = dataSnapshot.getValue(typeIndicator);
-                                    if(dataSnapshot.hasChild(userId)){
-                                        notesModel_ArrayList.addAll(dataSnapshot.child(userId)
-                                                .child(recentDateData)
-                                                .getValue(typeIndicator));
+                                    try{
+                                        if(dataSnapshot.hasChild(userId)){
+                                            notesModel_ArrayList.addAll(dataSnapshot.child(userId)
+                                                    .child(recentDateData)
+                                                    .getValue(typeIndicator));
+                                        }
+                                    }catch (Exception e){
+                                        Log.i(TAG, "onDataChange: "+e);
                                     }
+
 
                                     index = notesModel_ArrayList.size();
                                     if (notesModel != null) {

@@ -8,7 +8,8 @@
         android:id="@+id/menu_search"
         android:title="@string/menu_search"
         android:icon="@drawable/musica_searcher"
-        app:showAsAction="always"
+        app:showAsAction="collapseActionView|ifRoom"
+        app:actionViewClass="android.support.v7.widget.SearchView"
         />
     <item
         android:id="@+id/changeview"

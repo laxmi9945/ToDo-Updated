@@ -101,6 +101,7 @@ public class DataBaseUtility extends SQLiteOpenHelper {
         sqLiteDatabase = this.getWritableDatabase();
         sqLiteDatabase.delete(Todo_Notes, Title_table + " =? ", new String[]{notesModel.getTitle()});
         sqLiteDatabase.close();
+
     }
     public void updateNote(NotesModel notesModel){
         sqLiteDatabase=this.getWritableDatabase();

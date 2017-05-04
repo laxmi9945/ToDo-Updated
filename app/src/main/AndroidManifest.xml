@@ -30,8 +30,15 @@
         <activity android:name=".ui.TodoNotesActivity"
             android:theme="@style/homeTheme"
             android:label="@string/notes"
-            android:windowSoftInputMode="adjustPan">
-
+            android:windowSoftInputMode="adjustPan"
+            android:launchMode="singleTop" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable">
+            </meta-data>
         </activity>
         <activity android:name=".registration.ui.RegistrationActivity"  />
         <activity android:name=".ui.ResetPasswordActivity"/>

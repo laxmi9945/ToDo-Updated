@@ -97,8 +97,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
                     NotesModel note=model.get(getAdapterPosition());
                     args.putString("title", note.getTitle());
                     args.putString("content", note.getContent());
+                    args.putString("date", note.getDate());
+                    args.putString("time", note.getTime());
+                    args.putString("id", String.valueOf(note.getId()));
                     fragment.setArguments(args);
-                    ((AppCompatActivity)context).getFragmentManager().beginTransaction().replace(R.id.frameLayout_container, fragment).commit();
+                    ((AppCompatActivity)context).getFragmentManager().beginTransaction().replace(R.id.frameLayout_container, fragment).addToBackStack(null).commit();
                     break;
             }
         }

@@ -2,6 +2,7 @@ package com.app.todo.ui;
 
 
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,6 +21,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -27,6 +29,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.app.todo.R;
@@ -34,6 +37,7 @@ import com.app.todo.adapter.RecyclerAdapter;
 import com.app.todo.baseclass.BaseActivity;
 import com.app.todo.database.DataBaseUtility;
 import com.app.todo.fragment.AboutFragment;
+import com.app.todo.fragment.ArchiveFragment;
 import com.app.todo.fragment.NotesFragment;
 import com.app.todo.fragment.TrashFragment;
 import com.app.todo.login.ui.LoginActivity;
@@ -94,6 +98,9 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
     boolean isFblogin = true, isGooglelogin = true, isFireBaselogin = true;
     GoogleSignInOptions  googleSignInOptions;
     GoogleApiClient googleApiClient;
+    ArrayAdapter<String> myAdapter;
+    ArrayList<NotesModel> notesModel=new ArrayList<>();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -259,11 +266,8 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
 
                     databaseReference = FirebaseDatabase.getInstance().getReference();
                     NotesModel model = notesModels.get(position);
-                    //recyclerAdapter.deleteItem(position);
-                    //databaseReference.child("userData").child(uId).child(model.getDate()).child(String.valueOf(model.getId())).removeValue();
                     databaseReference.child("userData").child(uId).child(model.getDate()).child(String.valueOf(model.getId())).removeValue();
                     dataBaseUtility.delete(model);
-                    // recyclerAdapter.deleteItem(position);
 
 
                 } else {
@@ -271,11 +275,11 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
                     recyclerAdapter.archiveItem(position);
                     recyclerView.setAdapter(recyclerAdapter);
                     Snackbar snackbar = Snackbar
-                            .make(getCurrentFocus(), "Message is deleted", Snackbar.LENGTH_LONG)
+                            .make(getCurrentFocus(), "Item is archived", Snackbar.LENGTH_LONG)
                             .setAction("UNDO", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    Snackbar snackbar1 = Snackbar.make(getCurrentFocus(), "Message is restored!", Snackbar.LENGTH_SHORT);
+                                    Snackbar snackbar1 = Snackbar.make(getCurrentFocus(), "Item is restored!", Snackbar.LENGTH_SHORT);
                                     snackbar1.show();
                                 }
                             });
@@ -309,6 +313,8 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         nav_header_Email = (AppCompatTextView) header.findViewById(R.id.nav_header_emailId);
         circleImageView = (CircleImageView) header.findViewById(R.id.profile_image);
 
+      // myAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, notesModel);
+
         //initializing google signin options
         googleSignInOptions = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -337,6 +343,26 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.todo_notes_action, menu);
+        SearchManager searchManager = (SearchManager)
+                getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(false);
+        SearchView.OnQueryTextListener onQueryTextListener=new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                return false;
+            }
+        };
+        searchView.setOnQueryTextListener(onQueryTextListener);
         this.menu = menu;
         return true;
     }
@@ -355,11 +381,11 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         MenuItem item = menu.findItem(R.id.changeview);
         if (!isView) {
             recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
-            item.setIcon(R.drawable.gridbutton);
+            item.setIcon(R.mipmap.straggered_view);
             isView = true;
         } else {
             recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-            item.setIcon(R.drawable.listbutton);
+            item.setIcon(R.mipmap.list_view);
             isView = false;
         }
 
@@ -502,11 +528,11 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
                 break;
 
             case R.id.archive:
-                //Toast.makeText(this, getString(R.string.logic), LENGTH_SHORT).show();
+
                 getSupportFragmentManager().beginTransaction()
                         .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                        .replace(R.id.frameLayout_container, new ArchiveFragment()).
-                        addToBackStack(null)
+                        .replace(R.id.frameLayout_container, new ArchiveFragment())
+                        .addToBackStack(null)
                         .commit();
                 setTitle("Archive");
 
@@ -575,7 +601,7 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         } else {
 
             if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-                Log.i("asdad ", "onBackPressed: " + getSupportFragmentManager().getBackStackEntryCount());
+                Log.i("test ", "onBackPressed: " + getSupportFragmentManager().getBackStackEntryCount());
                 if (getSupportFragmentManager().findFragmentByTag(NotesFragment.TAG) instanceof NotesFragment) {
                     finish();
                 } else {
@@ -584,7 +610,7 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
                             .beginTransaction()
                             .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
                             .replace(R.id.frameLayout_container, new NotesFragment(), NotesFragment.TAG).
-                            addToBackStack(null)
+                             addToBackStack(null)
                             .commit();
                     setTitle("Notes");
                 }
@@ -605,6 +631,28 @@ public class TodoNotesActivity extends BaseActivity implements View.OnClickListe
         setTitle(title);
     }
 
+   /* private String getCalendarUriBase(Activity act) {
 
-
+        String calendarUriBase = null;
+        Uri calendars = Uri.parse("content://calendar/calendars");
+        Cursor managedCursor = null;
+        try {
+            managedCursor = act.managedQuery(calendars, null, null, null, null);
+        } catch (Exception e) {
+        }
+        if (managedCursor != null) {
+            calendarUriBase = "content://calendar/";
+        } else {
+            calendars = Uri.parse("content://com.android.calendar/calendars");
+            try {
+                managedCursor = act.managedQuery(calendars, null, null, null, null);
+            } catch (Exception e) {
+            }
+            if (managedCursor != null) {
+                calendarUriBase = "content://com.android.calendar/";
+            }
+        }
+        return calendarUriBase;
+    }
+*/
 }
