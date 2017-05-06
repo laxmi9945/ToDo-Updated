@@ -22,8 +22,8 @@ import com.app.todo.baseclass.BaseActivity;
 import com.app.todo.login.presenter.LoginPresenter;
 import com.app.todo.model.UserInfoModel;
 import com.app.todo.registration.ui.RegistrationActivity;
-import com.app.todo.ui.ResetPasswordActivity;
-import com.app.todo.ui.TodoNotesActivity;
+import com.app.todo.todoMain.ui.ResetPasswordActivity;
+import com.app.todo.todoMain.ui.TodoNotesActivity;
 import com.app.todo.utils.CommonChecker;
 import com.app.todo.utils.Constants;
 import com.facebook.AccessToken;
@@ -251,7 +251,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                         Bundle bFacebookData = getFacebookData(object);
 
                         String emailid = bFacebookData.getString(Constants.fb_email);
-                         editor.putString("email", emailid);
+                        editor.putString("email", emailid);
                         editor.putString("profile", bFacebookData.getString(Constants.fb_profile_pic));
                         editor.putString("firstname", bFacebookData.getString(Constants.fb_first_name));
                         editor.putString("lastname", bFacebookData.getString(Constants.fb_last_name));
@@ -388,12 +388,12 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
             String person_email=account.getEmail();
             Uri profile_pic=account.getPhotoUrl();
             String person_id=account.getId();
-            sharedPreferences = getApplicationContext().getSharedPreferences(Constants.key_google_login, Context.MODE_PRIVATE);
+            sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
             editor = sharedPreferences.edit();
-            editor.putString("uName",person_name);
-            editor.putString("uEmail",person_email);
-            editor.putString("uId",person_id);
-            editor.putString("uPic",profile_pic.toString());
+            editor.putString(Constants.Name,person_name);
+            editor.putString(Constants.Email,person_email);
+            editor.putString(Constants.id,person_id);
+            editor.putString(Constants.profile_pic,profile_pic.toString());
             editor.apply();
             //Toast.makeText(this, "info"+person_name+person_email+person_id+profile_pic, Toast.LENGTH_SHORT).show();
             AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);

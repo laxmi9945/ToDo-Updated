@@ -1,4 +1,4 @@
-package com.app.todo.fragment;
+package com.app.todo.todoMain.ui.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,22 +8,17 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.app.todo.R;
-import com.app.todo.ui.TodoNotesActivity;
 
-/**
- * Created by bridgeit on 24/4/17.
- */
-
-public class ArchiveFragment extends Fragment {
+class ReminderFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view= inflater.inflate(R.layout.activity_archive_fragment,container,false);
+       View view= inflater.inflate(R.layout.activity_reminder_fragment,container,false);
         return view;
     }
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        ((TodoNotesActivity) getActivity()).showOrHideFab(false);
+        ((TodoMainActivity) getActivity()).showOrHideFab(false);
     }
 }

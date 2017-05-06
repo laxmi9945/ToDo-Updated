@@ -1,4 +1,4 @@
-package com.app.todo.ui;
+package com.app.todo.todoMain.ui;
 
 import android.content.Intent;
 import android.os.Bundle;

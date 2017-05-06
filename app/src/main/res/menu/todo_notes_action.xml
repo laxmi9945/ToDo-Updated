@@ -1,28 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:appcompat="http://schemas.android.com/tools"
+
     >
 
     <item
         android:id="@+id/menu_search"
         android:title="@string/menu_search"
-        android:icon="@drawable/musica_searcher"
+        android:icon="@drawable/ic_actionsearch"
         app:showAsAction="collapseActionView|ifRoom"
         app:actionViewClass="android.support.v7.widget.SearchView"
         />
     <item
         android:id="@+id/changeview"
-        android:icon="@drawable/listbutton"
+        android:icon="@drawable/ic_action_list"
         android:title="ChangeView"
-
         app:showAsAction="always"
         />
-    <!-- <item
-         android:id="@+id/logout"
-         android:title="Logout"
-         android:icon="@android:drawable/ic_menu_view"/>
- -->
+
 
 
 </menu>

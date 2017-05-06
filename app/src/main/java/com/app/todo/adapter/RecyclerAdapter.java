@@ -9,18 +9,22 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 
 import com.app.todo.R;
 import com.app.todo.fragment.NoteseditFragment;
 import com.app.todo.model.NotesModel;
 
+import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Random;
 
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskViewHolder> {
     Context context;
     List<NotesModel> model;
+    private int lastPosition = -1;
 
     public RecyclerAdapter(Context context, List<NotesModel> model)  {
       //  model=new ArrayList<>();
@@ -43,6 +47,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
         holder.dateTextView.setText(model.get(position).getDate());
         holder.timeTextView.setText(model.get(position).getTime());
         holder.contentTextView.setText(model.get(position).getContent());
+        // Here you apply the animation when the view is bound
+        setAnimation(holder.itemView, position);
     }
 
 
@@ -99,11 +105,33 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
                     args.putString("content", note.getContent());
                     args.putString("date", note.getDate());
                     args.putString("time", note.getTime());
-                    args.putString("id", String.valueOf(note.getId()));
+                    args.putInt("id", note.getId());
                     fragment.setArguments(args);
+                    /*ActivityOptionsCompat option = ActivityOptionsCompat
+                            .makeSceneTransitionAnimation(ListActivity.this, cardView, "card");*/
                     ((AppCompatActivity)context).getFragmentManager().beginTransaction().replace(R.id.frameLayout_container, fragment).addToBackStack(null).commit();
                     break;
             }
+        }
+
+    }
+
+    public void setFilter(ArrayList<NotesModel> newList){
+
+        model=new ArrayList<>();
+        model.addAll(newList );
+        notifyDataSetChanged();
+
+    }
+
+    private void setAnimation(View viewToAnimate, int position) {
+
+        // If the bound view wasn't previously displayed on screen, it's animated
+        if (position > lastPosition) {
+            ScaleAnimation anim = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+            anim.setDuration(new Random().nextInt(501));//to make duration random number between [0,501)
+            viewToAnimate.startAnimation(anim);
+            lastPosition = position;
         }
     }
 

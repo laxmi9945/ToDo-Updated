@@ -42,7 +42,7 @@
     <string name="login_msg">logging into app plz wait..</string>
     <string name="registration_msg">Registering data...</string>
     <string name="login_error_title">Error!</string>
-    <string name="menu_search">search</string>
+    <string name="menu_search">Search note..</string>
     <string name="search_hint">Search note..</string>
     <string name="saved">Saved...</string>
     <string name="pined">pined...</string>
@@ -70,4 +70,5 @@
     <string name="retry">Retry</string>
     <string name="error">Error</string>
     <string name="after_reg_login_fail_message">Login failed....</string>
+    <integer name="swing_anim_time">750</integer>
 </resources>

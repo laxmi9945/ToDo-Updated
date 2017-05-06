@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme"
         android:screenOrientation="portrait"
         android:windowSoftInputMode="adjustPan">
-        <activity android:name=".ui.SplashActivity"
+        <activity android:name=".todoMain.ui.SplashActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,7 +27,7 @@
         <activity android:name=".login.ui.LoginActivity"
         />
 
-        <activity android:name=".ui.TodoNotesActivity"
+        <activity android:name=".todoMain.ui.TodoNotesActivity"
             android:theme="@style/homeTheme"
             android:label="@string/notes"
             android:windowSoftInputMode="adjustPan"
@@ -41,12 +41,13 @@
             </meta-data>
         </activity>
         <activity android:name=".registration.ui.RegistrationActivity"  />
-        <activity android:name=".ui.ResetPasswordActivity"/>
-        <activity android:name=".ui.NotesItemDetailsActivity"/>
-        <activity android:name=".ui.NotesAddActivity"/>
+        <activity android:name=".todoMain.ui.ResetPasswordActivity"/>
+        <activity android:name=".todoMain.ui.NotesItemDetailsActivity"/>
+        <activity android:name=".todoMain.ui.NotesAddActivity"/>
         <fragment android:name=".fragment.MyFragment"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+        <receiver android:name=".todoMain.ui.NotesAddActivity" />
     </application>
 
 </manifest>

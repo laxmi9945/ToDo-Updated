@@ -1,4 +1,4 @@
-package com.app.todo.ui;
+package com.app.todo.todoMain.ui;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -46,6 +46,8 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
     FirebaseAuth firebaseAuth;
     SharedPreferences sharedPreferences;
     Date date;
+    Calendar myCalendar;
+    DatePickerDialog.OnDateSetListener datePicker;
     private static final String TAG = "NetworkStateReceiver";
 
     @Override
@@ -63,11 +65,25 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
         timeTextView.setText(sequence2);
         sharedPreferences = this.getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+
+
+        datePicker = new DatePickerDialog.OnDateSetListener() {
+
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                  int dayOfMonth) {
+                myCalendar.set(Calendar.YEAR, year);
+                myCalendar.set(Calendar.MONTH, monthOfYear);
+                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                updateLabel();
+            }
+
+        };
     }
 
     @Override
     public void initView() {
-
+        myCalendar = Calendar.getInstance();
         imageButton = (AppCompatImageButton) findViewById(R.id.back_button);
         dateTextView = (AppCompatTextView) findViewById(R.id.recenttime_textView);
         timeTextView = (AppCompatTextView) findViewById(R.id.time_textView);
@@ -103,18 +119,18 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
                 return super.onOptionsItemSelected(item);
 
             case R.id.action_reminder:
-                /*DialogFragment newFragment = new FragmentDatePicker();
-                newFragment.show(getFragmentManager(), "DatePicker");*/
+
                 new DatePickerDialog(this, datePicker, myCalendar
                         .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
                         myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+
                 return super.onOptionsItemSelected(item);
 
             case R.id.action_save:
 
                 //database = new DataBaseUtility(this);
-                final NotesModel model = new NotesModel();
 
+                final NotesModel model = new NotesModel();
                 final String userId;
                 String titleData = titleEdittext.getText().toString();
                 String contentData = contentEdittext.getText().toString();
@@ -127,7 +143,7 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
                 model.setDate(recentDateData);
                 model.setTime(recentTimeData2);
                 model.setReminderDate(reminder_Date);
-                //
+
                 try {
                     mDatabaseReference.child("userData")
                             .addValueEventListener(new ValueEventListener() {
@@ -141,14 +157,14 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
                                     int index = 0;
                                     ArrayList<NotesModel> notesModel_ArrayList = new ArrayList<NotesModel>();
                                     //notesModel_ArrayList = dataSnapshot.getValue(typeIndicator);
-                                    try{
-                                        if(dataSnapshot.hasChild(userId)){
+                                    try {
+                                        if (dataSnapshot.hasChild(userId)) {
                                             notesModel_ArrayList.addAll(dataSnapshot.child(userId)
                                                     .child(recentDateData)
                                                     .getValue(typeIndicator));
                                         }
-                                    }catch (Exception e){
-                                        Log.i(TAG, "onDataChange: "+e);
+                                    } catch (Exception e) {
+                                        Log.i(TAG, "onDataChange: " + e);
                                     }
 
 
@@ -177,7 +193,7 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
 
                                 }
                             });
-                }catch (Exception e){
+                } catch (Exception e) {
 
                 }
                 finish();
@@ -190,29 +206,36 @@ public class NotesAddActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
+    private void setAlarm(Calendar myCalendar) {
+       /* info.setText("\n\n***\n"
+                + "Alarm is set@ " + targetCal.getTime() + "\n"
+                + "***\n");
 
-    Calendar myCalendar = Calendar.getInstance();
-
-    DatePickerDialog.OnDateSetListener datePicker = new DatePickerDialog.OnDateSetListener() {
-
-        @Override
-        public void onDateSet(DatePicker view, int year, int monthOfYear,
-                              int dayOfMonth) {
-            myCalendar.set(Calendar.YEAR, year);
-            myCalendar.set(Calendar.MONTH, monthOfYear);
-            myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            updateLabel();
-        }
-
-    };
+        Intent intent = new Intent(getBaseContext(), AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), RQS_1, intent, 0);
+        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);*/
+    }
 
     private void updateLabel() {
 
         String myFormat = "MMMM dd, yyyy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat);
-
         reminderTextView.setText(sdf.format(myCalendar.getTime()));
-        Toast.makeText(this, "Reminder set:" + reminderTextView.getText().toString(), Toast.LENGTH_SHORT).show();
+        Calendar current = Calendar.getInstance();
+        if ((myCalendar.compareTo(current) <= 0)) {
+            //The set Date/Time already passed
+            new DatePickerDialog(this, datePicker, myCalendar
+                    .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                    myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            Toast.makeText(getApplicationContext(),
+                    "Invalid/Passed Date",
+                    Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "Reminder set:" + reminderTextView.getText().toString(), Toast.LENGTH_SHORT).show();
+            setAlarm(myCalendar);
+        }
+
     }
 
     @Override

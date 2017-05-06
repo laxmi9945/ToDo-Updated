@@ -1,4 +1,4 @@
-package com.app.todo.ui;
+package com.app.todo.todoMain.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,7 +17,7 @@ import com.app.todo.utils.Constants;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class SplashActivity extends AppCompatActivity {
-    //SharedPreferences sharedPreferences;
+
     AppCompatTextView textView;
     Animation animation;
     FirebaseAuth firebaseAuth;

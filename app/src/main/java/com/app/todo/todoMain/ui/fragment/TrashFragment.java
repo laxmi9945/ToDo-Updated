@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.app.todo.R;
-import com.app.todo.ui.TodoNotesActivity;
+import com.app.todo.todoMain.ui.TodoNotesActivity;
 
 /**
  * Created by bridgeit on 29/4/17.

@@ -13,7 +13,7 @@ import android.widget.Toast;
 import com.app.todo.R;
 import com.app.todo.registration.presenter.RegistrationPresenter;
 import com.app.todo.model.UserInfoModel;
-import com.app.todo.ui.TodoNotesActivity;
+import com.app.todo.todoMain.ui.TodoNotesActivity;
 import com.app.todo.utils.Constants;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;

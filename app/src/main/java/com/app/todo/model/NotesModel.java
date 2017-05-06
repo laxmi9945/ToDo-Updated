@@ -9,11 +9,9 @@ public class NotesModel {
     String content;
     String date;
     String time;
-
-
-
     String reminderDate;
     int id;
+    public boolean isArchieved;
 
 
     public String getTime() {
@@ -27,6 +25,7 @@ public class NotesModel {
     public NotesModel() {
 
     }
+
     /*
 
     public NotesModel(String time,String date, String content, int id, String title) {
@@ -60,6 +59,7 @@ public class NotesModel {
     public void setDate(String date) {
         this.date = date;
     }
+
     public int getId() {
         return id;
     }
@@ -67,12 +67,21 @@ public class NotesModel {
     public void setId(int id) {
         this.id = id;
     }
+
     public String getReminderDate() {
         return reminderDate;
     }
 
     public void setReminderDate(String reminderDate) {
         this.reminderDate = reminderDate;
+    }
+
+    public boolean isArchieved() {
+        return isArchieved;
+    }
+
+    public void setArchieved(boolean archieved) {
+        isArchieved = archieved;
     }
 
 }

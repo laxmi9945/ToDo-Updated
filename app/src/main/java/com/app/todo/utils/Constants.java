@@ -14,6 +14,7 @@ public class Constants {
     public static String Email="email";
     public static String Password="password";
     public static String MobileNo="mobileNo";
+    public static final String id = "id";
     public static String title_data="Title_data";
     public static String content_data="Content_data";
     public static String date_data="date_data";
@@ -27,6 +28,7 @@ public class Constants {
     public static String fb_last_name="last_name";
     public static String fb_email="email";
     public static String fb_profile_pic="profile_pic";
+    public static String profile_pic = "pref_profile_pic";
 
     public interface ErrorType{
         public static final int ERROR_NO_INTERNET_CONNECTION=0;
