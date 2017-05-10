@@ -19,8 +19,32 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:id="@+id/tv"
-        android:text="Dev by: Monty"
+        android:text="@string/developer_name"
         android:layout_marginTop="20dp"
         android:textStyle="italic"/>
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:id="@+id/mobNo"
+        android:text="@string/developer_mob"
+        android:layout_marginTop="2dp"
+        android:textStyle="italic"/>
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:id="@+id/emailId"
+        android:text="@string/developer_email"
+        android:layout_marginTop="2dp"
+        android:textStyle="italic"/>
 
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="copyrights &#169; Bridgelabz Solutions LLP"
+        android:layout_marginTop="110dp"
+        android:textStyle="italic"
+       />
 </LinearLayout>

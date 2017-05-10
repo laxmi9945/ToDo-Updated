@@ -1,8 +1,14 @@
 package com.app.todo.todoMain.ui.activity;
 
-/**
- * Created by bridgeit on 6/5/17.
- */
+import android.view.View;
 
-public interface NotesAddActivityInterface {
+
+public interface NotesAddActivityInterface extends View.OnClickListener {
+
+    void showDialog(String message);
+    void hideDialog();
+
+    void noteAddSuccess(String message);
+    void noteAddFailure(String message);
+
 }

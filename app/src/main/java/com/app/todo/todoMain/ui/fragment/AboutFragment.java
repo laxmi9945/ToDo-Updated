@@ -1,4 +1,4 @@
-package com.app.todo.fragment;
+package com.app.todo.todoMain.ui.fragment;
 
 
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.app.todo.R;
-import com.app.todo.todoMain.ui.TodoNotesActivity;
+import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 
 
 public class AboutFragment extends Fragment {
@@ -28,7 +28,7 @@ public class AboutFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        ((TodoNotesActivity) getActivity()).showOrHideFab(false);
+        ((TodoMainActivity) getActivity()).showOrHideFab(false);
     }
 
 }

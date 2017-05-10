@@ -4,13 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-/**
- * Created by bridgeit on 25/4/17.
- */
-
 public class CommonChecker {
-
-    
 
     public static boolean isValidEmail(String email) {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
@@ -21,4 +15,5 @@ public class CommonChecker {
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
+
 }

@@ -1,15 +1,12 @@
 package com.app.todo.utils;
 
-/**
- * Created by bridgeit on 28/3/17.
- */
-
 public class Constants {
     public static String keys="laxmi";
     public static String key_fb_login="isFblogin";
     public static String key_google_login="isGooglelogin";
     public static String key_firebase_login="isFireBaselogin";
     public static String values="value";
+    public static String userdata="userData";
     public static String Name="name";
     public static String Email="email";
     public static String Password="password";
@@ -29,6 +26,12 @@ public class Constants {
     public static String fb_email="email";
     public static String fb_profile_pic="profile_pic";
     public static String profile_pic = "pref_profile_pic";
+    public static String firebase_userInfo = "userInfo";
+    public static String currentDateKey = "currentDate";
+    public static String titleKey = "noteTitle";
+    public static String descriptionKey = "noteDescription";
+    public static String currentTimeKey = "currentTime";
+    public static String reminderKey = "reminderDate";
 
     public interface ErrorType{
         public static final int ERROR_NO_INTERNET_CONNECTION=0;

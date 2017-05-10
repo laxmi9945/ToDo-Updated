@@ -41,6 +41,7 @@ import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.ui.fragment.AboutFragment;
 import com.app.todo.todoMain.ui.fragment.ArchiveFragment;
 import com.app.todo.todoMain.ui.fragment.NotesFragment;
+import com.app.todo.todoMain.ui.fragment.ReminderFragment;
 import com.app.todo.todoMain.ui.fragment.TrashFragment;
 import com.app.todo.utils.Constants;
 import com.bumptech.glide.Glide;
@@ -70,7 +71,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import static android.widget.Toast.LENGTH_SHORT;
 
 
-public class TodoNotesActivity extends BaseActivity implements SearchView.OnQueryTextListener, View.OnClickListener,
+public class TodoMainActivity extends BaseActivity implements SearchView.OnQueryTextListener, View.OnClickListener,
         NavigationView.OnNavigationItemSelectedListener {
     RecyclerView recyclerView;
     boolean isView = false;
@@ -91,7 +92,7 @@ public class TodoNotesActivity extends BaseActivity implements SearchView.OnQuer
     CircleImageView circleImageView;
     DatabaseReference databaseReference;
     FirebaseAuth firebaseAuth;
-    List<NotesModel> notesModels,allNotes;
+    List<NotesModel> notesModels,allNotes,archiveNotes,reminderNotes;
     FloatingActionButton floatingActionButton;
     ProgressDialog progressDialog;
     String fb_first_name;
@@ -101,13 +102,13 @@ public class TodoNotesActivity extends BaseActivity implements SearchView.OnQuer
     String google_first_name;
     String google_email;
     String google_imageUrl;
-    NotesModel notesModel;
+    NotesModel notesModel=new NotesModel();
     static final String TAG = "NetworkStateReceiver";
     String uId;
     static final int RESULT_LOAD_IMG = 1;
     GoogleSignInOptions googleSignInOptions;
     GoogleApiClient googleApiClient;
-
+    List<NotesModel>  notesModelList=new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -170,6 +171,7 @@ public class TodoNotesActivity extends BaseActivity implements SearchView.OnQuer
                     notesModel_ArrayList = post.getValue(arrayListGenericTypeIndicator);
                     notesModel.addAll(notesModel_ArrayList);
                 }
+
                 notesModel.removeAll(Collections.singleton(null));
                 setDatatoRecycler(notesModel);
 
@@ -238,8 +240,9 @@ public class TodoNotesActivity extends BaseActivity implements SearchView.OnQuer
         } else {
             notesModels = notesModel;
         }
-        recyclerAdapter = new RecyclerAdapter(TodoNotesActivity.this, notesModels);
-
+        recyclerAdapter = new RecyclerAdapter(TodoMainActivity.this, notesModels);
+        allNotes=getWithoutArchive();
+        checkLayout();
         recyclerView.setAdapter(recyclerAdapter);
         recyclerAdapter.notifyDataSetChanged();
         progressDialog.dismiss();
@@ -262,20 +265,17 @@ public class TodoNotesActivity extends BaseActivity implements SearchView.OnQuer
                 if (direction == ItemTouchHelper.LEFT) {
 
                     databaseReference = FirebaseDatabase.getInstance().getReference();
-                    NotesModel model = notesModels.get(position);
-                    databaseReference.child(Constants.userdata).child(uId).child(model.getDate()).child(String.valueOf(model.getId())).removeValue();
-                    dataBaseUtility.delete(model);
+                    notesModel = notesModels.get(position);
+                    databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).removeValue();
+                    dataBaseUtility.delete(notesModel);
                     recyclerAdapter.deleteItem(position);
                     recyclerView.setAdapter(recyclerAdapter);
 
                 }
                 if (direction==ItemTouchHelper.RIGHT){
-                    notesModel= allNotes.get(position);
+                    notesModel= notesModels.get(position);
                     notesModel.setArchieved(true);
                     databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
-                    /*recyclerAdapter.archiveItem(position);
-                    recyclerView.setAdapter(recyclerAdapter);*/
-
                     Snackbar snackbar = Snackbar
                             .make(getCurrentFocus(), getString(R.string.item_archieved), Snackbar.LENGTH_LONG)
                             .setAction(getString(R.string.undo), new View.OnClickListener() {
@@ -287,7 +287,6 @@ public class TodoNotesActivity extends BaseActivity implements SearchView.OnQuer
                                     snackbar1.show();
                                 }
                             });
-
                     snackbar.show();
                 }
 
@@ -409,6 +408,7 @@ public class TodoNotesActivity extends BaseActivity implements SearchView.OnQuer
             recyclerView.setAdapter(recyclerAdapter);
 
         }
+
         if (resultCode == RESULT_OK) {
             if (requestCode == RESULT_LOAD_IMG) {
                 // Get the url from data
@@ -497,8 +497,12 @@ public class TodoNotesActivity extends BaseActivity implements SearchView.OnQuer
                         .replace(R.id.frameLayout_container, new ReminderFragment()).addToBackStack(null)
                         .commit();
                 setTitle(getString(R.string.reminder));
-
-                Toast.makeText(this, getString(R.string.reminder), Toast.LENGTH_SHORT).show();
+                /*reminderNotes=getReminderItems();
+                checkLayout();
+                recyclerAdapter=new RecyclerAdapter(this,reminderNotes);
+                recyclerView.setAdapter(recyclerAdapter);
+                recyclerAdapter.notifyDataSetChanged();
+                Toast.makeText(this, getString(R.string.reminder), Toast.LENGTH_SHORT).show();*/
                 drawer.closeDrawers();
 
                 break;
@@ -523,6 +527,11 @@ public class TodoNotesActivity extends BaseActivity implements SearchView.OnQuer
                         .addToBackStack(null)
                         .commit();
                 setTitle(getString(R.string.archive));
+                /*checkLayout();
+                archiveNotes=getArchive();
+                recyclerAdapter=new RecyclerAdapter(this,archiveNotes);
+                recyclerView.setAdapter(recyclerAdapter);
+                recyclerAdapter.notifyDataSetChanged();*/
 
                 Toast.makeText(this, getString(R.string.archive), Toast.LENGTH_SHORT).show();
                 drawer.closeDrawers();
@@ -546,6 +555,17 @@ public class TodoNotesActivity extends BaseActivity implements SearchView.OnQuer
         return true;
     }
 
+    private void checkLayout() {
+            if (isView) {
+                recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
+
+            } else {
+                recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+
+            }
+        }
+
+
     void deleteAccessToken() {
 
         LoginManager.getInstance().logOut();//fb logout
@@ -557,7 +577,7 @@ public class TodoNotesActivity extends BaseActivity implements SearchView.OnQuer
             @Override
             public void onResult(@NonNull Status status) {
                 finish();
-                Toast.makeText(TodoNotesActivity.this, getString(R.string.logout_success), Toast.LENGTH_SHORT).show();
+                Toast.makeText(TodoMainActivity.this, getString(R.string.logout_success), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -652,9 +672,30 @@ public class TodoNotesActivity extends BaseActivity implements SearchView.OnQuer
         }
         return notesModelArrayList;
     }
-   /* private List<NotesModel> getArchievedItems(){
-     return true;
+    private List<NotesModel> getWithoutArchive() {
+        ArrayList<NotesModel> todoHomeDataModel = new ArrayList<>();
+        for (NotesModel note : notesModelList) {
+            if (!note.isArchieved()) {
+                todoHomeDataModel.add(note);
+            }
+        }
+        return todoHomeDataModel;
     }
-*/
 
+    private List<NotesModel> getArchive() {
+        ArrayList<NotesModel> todoHomeDataModel = new ArrayList<>();
+        for (NotesModel note : notesModelList) {
+            if (note.isArchieved()) {
+                todoHomeDataModel.add(note);
+            }
+
+        }
+        return todoHomeDataModel;
+    }
+
+    public void showOrhideIcon(boolean isShow){
+        if(isShow){
+
+        }
+    }
 }

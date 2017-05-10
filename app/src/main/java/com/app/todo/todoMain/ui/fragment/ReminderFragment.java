@@ -1,4 +1,4 @@
-package com.app.todo.todoMain.ui.activity;
+package com.app.todo.todoMain.ui.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.app.todo.R;
+import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 
 class ReminderFragment extends Fragment {
     @Nullable

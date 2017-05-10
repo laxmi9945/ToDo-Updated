@@ -1,14 +1,10 @@
 package com.app.todo.model;
 
-/**
- * Created by bridgeit on 15/4/17.
- */
-
 public class UserInfoModel {
-    String name;
-    String email;
-    String password;
-    String mobile;
+    private String name;
+    private String email;
+    private String password;
+    private String mobile;
 
     public UserInfoModel() {
     }

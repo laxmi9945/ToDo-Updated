@@ -1,6 +1,7 @@
 package com.app.todo.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
@@ -13,8 +14,8 @@ import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 
 import com.app.todo.R;
-import com.app.todo.fragment.NoteseditFragment;
 import com.app.todo.model.NotesModel;
+import com.app.todo.todoMain.ui.fragment.NoteseditFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,8 +69,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
     public void deleteItem(int position) {
         model.remove(position);
         notifyDataSetChanged();
-       /* notifyItemRemoved(position);
-        notifyItemRangeChanged(position, model.size());*/
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, model.size());
     }
     public void archiveItem(int position){
 
@@ -90,6 +91,22 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
             contentTextView = (AppCompatTextView) itemView.findViewById(R.id.content_TextView);
             cardView = (CardView) itemView.findViewById(R.id.myCardView);
             cardView.setOnClickListener(this);
+            cardView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    NotesModel note=model.get(getAdapterPosition());
+                    //Toast.makeText(context, "Yes...", Toast.LENGTH_SHORT).show();
+                    Intent shareIntent=new Intent(android.content.Intent.ACTION_SEND);
+                    shareIntent.setType("text/plain");
+                    String title=note.getTitle();
+                    String content=note.getContent();
+                    shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, note.getTitle());
+                    shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Title: "+title+ "\n" +"Content: "+content);
+                    context.startActivity(Intent.createChooser(shareIntent, context.getResources().getString(R.string.share_using)));
+
+                    return true;
+                }
+            });
 
         }
 
@@ -97,7 +114,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
         public void onClick(View v) {
             switch (v.getId()){
                 case R.id.myCardView:
-
                     NoteseditFragment fragment = new NoteseditFragment();
                     Bundle args = new Bundle();
                     NotesModel note=model.get(getAdapterPosition());
@@ -107,8 +123,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
                     args.putString("time", note.getTime());
                     args.putInt("id", note.getId());
                     fragment.setArguments(args);
-                    /*ActivityOptionsCompat option = ActivityOptionsCompat
-                            .makeSceneTransitionAnimation(ListActivity.this, cardView, "card");*/
                     ((AppCompatActivity)context).getFragmentManager().beginTransaction().replace(R.id.frameLayout_container, fragment).addToBackStack(null).commit();
                     break;
             }

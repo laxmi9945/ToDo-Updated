@@ -11,45 +11,48 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.app.todo.R;
-import com.app.todo.registration.presenter.RegistrationPresenter;
 import com.app.todo.model.UserInfoModel;
-import com.app.todo.todoMain.ui.TodoNotesActivity;
+import com.app.todo.registration.presenter.RegistrationPresenter;
+import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 import com.app.todo.utils.Constants;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public class RegistrationActivity extends AppCompatActivity implements RegistrationActivityInterface{
-    AppCompatEditText edittextName, edittextemail, edittextpswrd, edittextmobNo;
-    AppCompatButton buttonSave;
-    AppCompatTextView textView;
-    Pattern pattern, pattern2;
-    Matcher matcher, matcher2;
-    ProgressDialog progressDialog;
-    FirebaseAuth firebaseAuth;
+    private AppCompatEditText edittextName;
+    private AppCompatEditText edittextemail;
+    private AppCompatEditText edittextpswrd;
+    private AppCompatEditText edittextmobNo;
+    private AppCompatButton buttonSave;
+    private AppCompatTextView textView;
+    private Pattern pattern;
+    private Pattern pattern2;
+    private Matcher matcher;
+    private Matcher matcher2;
+    private ProgressDialog progressDialog;
+    private FirebaseAuth firebaseAuth;
+    private UserInfoModel userInfoModel;
 
-    private DatabaseReference mDatabaseReference;
-    UserInfoModel userInfoModel;
-
-    RegistrationPresenter registrationPresenter;
-    String Name,Email, Password, MobileNo;
+    private RegistrationPresenter registrationPresenter;
+    private String Name;
+    private String Email;
+    private String Password;
+    private String MobileNo;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
         firebaseAuth = FirebaseAuth.getInstance();
         registrationPresenter=new RegistrationPresenter(this,this);
-        //FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-        //databaseReference = FirebaseDatabase.getInstance().getReference();
         progressDialog = new ProgressDialog(this);
         initView();
 
     }
 
-    public void initView() {
+    private void initView() {
         buttonSave = (AppCompatButton) findViewById(R.id.save_button);
         edittextName = (AppCompatEditText) findViewById(R.id.name_edittext);
         edittextemail = (AppCompatEditText) findViewById(R.id.email_Edittext);
@@ -58,10 +61,9 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
         textView = (AppCompatTextView) findViewById(R.id.allreadyacc_textview);
         setClicklistener();
 
-       // registrationPresenter = new RegistrationPresenter(this, this);
     }
 
-    public void setClicklistener() {
+    private void setClicklistener() {
         buttonSave.setOnClickListener(this);
         textView.setOnClickListener(this);
     }
@@ -87,7 +89,7 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
         }
     }
 
-    public boolean registerUser() {
+    private boolean registerUser() {
         boolean checkName = false, checkMail = false, checkPassword = false, checkMobNo = false;
         pattern = Pattern.compile(Constants.Password_Pattern);
         matcher = pattern.matcher(edittextpswrd.getText().toString());
@@ -101,7 +103,7 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
 
 
         if (Name.isEmpty()) {
-            edittextName.setError("First name not entered");
+            edittextName.setError(getString(R.string.first_name_field));
             edittextpswrd.requestFocus();
 
         } else {
@@ -109,11 +111,11 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
         }
 
         if (Email.isEmpty()) {
-            edittextemail.setError("Email should not empty");
+            edittextemail.setError(getString(R.string.email_field_condition));
             edittextpswrd.requestFocus();
 
         } else if (!isValidEmail(Email)) {
-            edittextemail.setError("Invalid Email");
+            edittextemail.setError(getString(R.string.invalid_email));
             edittextpswrd.requestFocus();
 
         } else {
@@ -121,20 +123,20 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
         }
 
         if (Password.isEmpty()) {
-            edittextpswrd.setError("Password should not empty");
+            edittextpswrd.setError(getString(R.string.password_field_condition));
             edittextpswrd.requestFocus();
 
         } else if (matcher.matches()) {
             checkPassword = true;
         } else {
-            edittextpswrd.setError("Password too simple! It must have atleast 1 numeric or special character");
+            edittextpswrd.setError(getString(R.string.password_hint));
             edittextpswrd.requestFocus();
 
         }
 
 
         if (MobileNo.isEmpty()) {
-            edittextmobNo.setError("Enter your mobile number");
+            edittextmobNo.setError(getString(R.string.enter_mobile));
             edittextpswrd.requestFocus();
 
         } else {
@@ -143,48 +145,7 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
         return checkName && checkMail && checkMobNo && checkPassword;
     }
 
-
-        /*if (checkName && checkMail && checkMobNo && checkPassword) {
-
-            progressDialog.setMessage(getString(R.string.registering));
-            progressDialog.show();
-
-            firebaseAuth.createUserWithEmailAndPassword(userEmail, userPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
-                        mDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                        UserInfoModel userInfoModel1 = new UserInfoModel();
-                        userInfoModel1.setName(userName);
-                        userInfoModel1.setEmail(userEmail);
-                        userInfoModel1.setPassword(userPassword);
-                        userInfoModel1.setMobile(userMobileNo);
-
-                        //String id = mDatabaseReference.push().getKey();
-                       // Log.i("abc", "onComplete: " + userEmail + userMobileNo + userName + userPassword);
-                        mDatabaseReference.child("userInfo").child(task.getResult().getUser().getUid()).setValue(userInfoModel1);
-                        // databaseReference= FirebaseDatabase.getInstance().getReference("");
-                        //databaseReference.child("userinfo").child(task.getResult().getUser().getUid()).setValue(userInfoModel);
-                        Intent intent = new Intent(RegistrationActivity.this, TodoNotesActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                    } else {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationActivity.this);
-                        builder.setMessage(task.getException().getMessage())
-                                .setTitle(R.string.login_error_title)
-                                .setPositiveButton(android.R.string.ok, null);
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
-                    }
-                    progressDialog.dismiss();
-                }
-            });
-
-        }
-    }*/
-
-    public static boolean isValidEmail(String email) {
+    private static boolean isValidEmail(String email) {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
@@ -195,8 +156,8 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
 
     @Override
     public void registrationSuccess(UserInfoModel userInfoModel, String uid) {
-        Toast.makeText(this, uid, Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(RegistrationActivity.this, TodoNotesActivity.class);
+
+        Intent intent = new Intent(RegistrationActivity.this, TodoMainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

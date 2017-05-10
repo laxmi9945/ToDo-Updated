@@ -9,9 +9,9 @@ import com.app.todo.model.UserInfoModel;
 
 
 public class RegistrationPresenter implements RegistrationPresenterInterface {
-    Context context;
-    RegistrationActivityInterface viewInterface;
-    RegistrationInterActorInterface registrationInterActorInterface;
+    private final Context context;
+    private final RegistrationActivityInterface viewInterface;
+    private final RegistrationInterActorInterface registrationInterActorInterface;
     public RegistrationPresenter(Context context, RegistrationActivityInterface viewInterface) {
         this.context=context;
         this.viewInterface=viewInterface;

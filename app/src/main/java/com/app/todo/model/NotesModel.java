@@ -1,17 +1,13 @@
 package com.app.todo.model;
 
-/**
- * Created by bridgeit on 6/4/17.
- */
-
 public class NotesModel {
-    String title;
-    String content;
-    String date;
-    String time;
-    String reminderDate;
-    int id;
-    public boolean isArchieved;
+    private String title;
+    private String content;
+    private String date;
+    private String time;
+    private String reminderDate;
+    private int id;
+    private boolean isArchieved;
 
 
     public String getTime() {

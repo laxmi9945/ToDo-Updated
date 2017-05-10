@@ -1,4 +1,4 @@
-package com.app.todo.fragment;
+package com.app.todo.todoMain.ui.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,11 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.app.todo.R;
-import com.app.todo.todoMain.ui.TodoNotesActivity;
+import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 
-/**
- * Created by bridgeit on 24/4/17.
- */
 
 public class ArchiveFragment extends Fragment {
     @Nullable
@@ -24,6 +21,6 @@ public class ArchiveFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        ((TodoNotesActivity) getActivity()).showOrHideFab(false);
+        ((TodoMainActivity) getActivity()).showOrHideFab(false);
     }
 }

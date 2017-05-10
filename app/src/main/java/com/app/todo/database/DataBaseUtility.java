@@ -11,9 +11,7 @@ import com.app.todo.model.NotesModel;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by bridgeit on 11/4/17.
- */
+
 
 public class DataBaseUtility extends SQLiteOpenHelper {
 

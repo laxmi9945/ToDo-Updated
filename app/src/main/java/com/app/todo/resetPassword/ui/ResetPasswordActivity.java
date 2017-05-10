@@ -1,4 +1,4 @@
-package com.app.todo.todoMain.ui.activity;
+package com.app.todo.resetPassword.ui;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
@@ -13,21 +13,24 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.app.todo.R;
+import com.app.todo.resetPassword.presenter.ResetPasswordPresenter;
+import com.app.todo.resetPassword.presenter.ResetPasswordPresenterInterface;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
 
-public class ResetPasswordActivity extends AppCompatActivity implements View.OnClickListener {
+public class ResetPasswordActivity extends AppCompatActivity implements ResetPasswordActivityInterface {
     private FirebaseAuth firebaseAuth;
     AppCompatEditText reset_editText;
     AppCompatButton resetButton, backButton;
     ProgressDialog progressDialog;
-
+    ResetPasswordPresenterInterface presenter;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_resetpassword);
+        presenter=new ResetPasswordPresenter(this,this);
         firebaseAuth = FirebaseAuth.getInstance();
         reset_editText = (AppCompatEditText) findViewById(R.id.resetpassword_editText);
         resetButton = (AppCompatButton) findViewById(R.id.reset_button);
@@ -73,5 +76,25 @@ public class ResetPasswordActivity extends AppCompatActivity implements View.OnC
                         progressDialog.dismiss();
                     }
                 });
+    }
+
+    @Override
+    public void showDialog(String message) {
+
+    }
+
+    @Override
+    public void hideDialog() {
+
+    }
+
+    @Override
+    public void resetPasswordSuccess(String message) {
+
+    }
+
+    @Override
+    public void resetPasswordFailure(String message) {
+
     }
 }

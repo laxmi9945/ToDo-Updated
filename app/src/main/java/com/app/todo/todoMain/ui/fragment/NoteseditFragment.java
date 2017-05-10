@@ -1,4 +1,4 @@
-package com.app.todo.fragment;
+package com.app.todo.todoMain.ui.fragment;
 
 
 import android.app.Fragment;
@@ -16,7 +16,7 @@ import android.view.ViewGroup;
 import com.app.todo.R;
 import com.app.todo.database.DataBaseUtility;
 import com.app.todo.model.NotesModel;
-import com.app.todo.todoMain.ui.TodoNotesActivity;
+import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -43,7 +43,7 @@ public class NoteseditFragment extends Fragment implements View.OnClickListener 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        ((TodoNotesActivity) getActivity()).showOrHideFab(false);
+        ((TodoMainActivity) getActivity()).showOrHideFab(false);
 
     }
 
@@ -84,7 +84,7 @@ public class NoteseditFragment extends Fragment implements View.OnClickListener 
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.save_btn:
-                //startActivity(new Intent(getActivity(),TodoNotesActivity.class));
+                //startActivity(new Intent(getActivity(),TodoMainActivity.class));
                 DataBaseUtility dataBaseUtility=new DataBaseUtility(getActivity());
                 notesModel=new NotesModel();
                 notesModel.setTitle(titleEditText.getText().toString());

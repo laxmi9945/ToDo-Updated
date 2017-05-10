@@ -4,9 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
-/**
- * Created by bridgeit on 26/3/17.
- */
+
 
 public abstract class BaseActivity extends AppCompatActivity {
     @Override

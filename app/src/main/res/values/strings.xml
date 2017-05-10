@@ -23,9 +23,10 @@
     <string name="enter_correct_details">Enter Correct Details Or Register</string>
     <string name="invalid_password">invalid Password</string>
     <string name="password_field_condition">Password should not empty</string>
-    <string name="invalid_email">invalid Mail</string>
+    <string name="invalid_email">invalid eMail</string>
     <string name="email_field_condition">Email should not empty</string>
     <string name="first_name">First name not entered</string>
+    <string name="first_name_field">First name should not empty</string>
     <string name="format_invalid">invalid format</string>
     <string name="enter_mobile">Enter your mobile number</string>
     <string name="registration_success">Registration Successful</string>
@@ -70,5 +71,22 @@
     <string name="retry">Retry</string>
     <string name="error">Error</string>
     <string name="after_reg_login_fail_message">Login failed....</string>
+    <string name="password_hint">Password too simple! It must have atleast 1 numeric and length should be 5-12</string>
+    <string name="item_archieved">Item is archived</string>
+    <string name="item_restored">Item is restored!</string>
+    <string name="userData">userData</string>
+    <string name="about">About</string>
+    <string name="archive">Archive</string>
+    <string name="trash">Trash</string>
+    <string name="welcome">Welcome :</string>
+    <string name="invalid_date">Invalid/Passed Date</string>
+    <string name="reminder_set">Reminder set:</string>
+    <string name="developer_name">Dev by:Laxmi Mishra</string>
+    <string name="developer_mob">Mob No:7978787272</string>
+    <string name="developer_email">Email:laxmi9945@gmail.com</string>
+    <string name="note_add_loading_message">note is adding...</string>
+    <string name="share_using">Share using</string>
+
+
     <integer name="swing_anim_time">750</integer>
 </resources>

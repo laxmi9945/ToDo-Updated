@@ -22,8 +22,8 @@ import com.app.todo.baseclass.BaseActivity;
 import com.app.todo.login.presenter.LoginPresenter;
 import com.app.todo.model.UserInfoModel;
 import com.app.todo.registration.ui.RegistrationActivity;
-import com.app.todo.todoMain.ui.ResetPasswordActivity;
-import com.app.todo.todoMain.ui.TodoNotesActivity;
+import com.app.todo.resetPassword.ui.ResetPasswordActivity;
+import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 import com.app.todo.utils.CommonChecker;
 import com.app.todo.utils.Constants;
 import com.facebook.AccessToken;
@@ -48,8 +48,6 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,8 +68,6 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
     SharedPreferences sharedPreferences;
     GoogleSignInOptions  googleSignInOptions;
     GoogleApiClient googleApiClient;
-    FirebaseDatabase firebaseDatabase;
-    DatabaseReference databaseReference;
     int RC_SIGN_IN = 100; //to check the activity result
     LoginPresenter loginPresenter;
     Snackbar snackbar;
@@ -88,7 +84,6 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
         initView();
         checkNetwork();
-        getOldUserData();
         loginButton.setReadPermissions("public_profile email");
         sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
@@ -96,11 +91,6 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
     }
 
-    private void getOldUserData() {
-        sharedPreferences = getSharedPreferences(Constants.keys, 0);
-        editTextEmail.setText(sharedPreferences.getString("UserEmail", "").toString());
-        editTextPassword.setText(sharedPreferences.getString("Password", "").toString());
-    }
 
     private void checkNetwork() {
 
@@ -256,7 +246,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                         editor.putString("firstname", bFacebookData.getString(Constants.fb_first_name));
                         editor.putString("lastname", bFacebookData.getString(Constants.fb_last_name));
                         editor.apply();
-                        Toast.makeText(LoginActivity.this, "Welcome :" + bFacebookData.getString(Constants.fb_first_name), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, getString(R.string.welcome) + bFacebookData.getString(Constants.fb_first_name), Toast.LENGTH_SHORT).show();
 
                     }
 
@@ -301,7 +291,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
+                            startActivity(new Intent(getApplicationContext(), TodoMainActivity.class));
 
                             sharedPreferences.edit().putBoolean(Constants.key_fb_login,true).apply();
                            // Log.i("ghg", "onComplete: ............."+sharedPreferences.edit().putBoolean(Constants.key_fb_login,true));
@@ -403,7 +393,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
 
-                                startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
+                                startActivity(new Intent(getApplicationContext(), TodoMainActivity.class));
                                 finish();
                                 sharedPreferences.edit().putBoolean(Constants.key_google_login,true).apply();
                                 // Sign in success, update UI with the signed-in user's information
@@ -418,9 +408,8 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
                         }
                     });
-            //firebaseAuthWithGoogle(account);
+
         } else {
-            // Google Sign In failed, update UI appropriately
 
         }
     }
@@ -435,7 +424,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         editor.putString(Constants.Password,login_password);
         editor.putString("uid",uid);
         sharedPreferences.edit().putBoolean(Constants.key_firebase_login,true).apply();
-        startActivity(new Intent(getApplicationContext(), TodoNotesActivity.class));
+        startActivity(new Intent(getApplicationContext(), TodoMainActivity.class));
         finish();
     }
 

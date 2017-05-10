@@ -1,5 +1,6 @@
-package com.app.todo.todoMain.ineractor;
+package com.app.todo.resetPassword.interactor;
 
 
 public interface ResetPasswordInterActorInterface {
+    void resetPassword();
 }

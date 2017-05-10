@@ -1,8 +1,17 @@
 package com.app.todo.todoMain.presenter;
 
-/**
- * Created by bridgeit on 6/5/17.
- */
+import android.os.Bundle;
 
-public class NotesAddPresenterInterface {
+
+
+public interface NotesAddPresenterInterface {
+
+    void addNoteToFirebase(Bundle bundle);
+
+    void showDialog(String message);
+    void hideDialog();
+
+    void noteAddSuccess(String message);
+    void noteAddFailure(String message);
+
 }

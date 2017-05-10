@@ -1,4 +1,4 @@
-package com.app.todo.todoMain.ui;
+package com.app.todo.todoMain.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,7 +29,7 @@ public class SplashActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         if (firebaseAuth.getCurrentUser() != null) {
             finish();
-            startActivity(new Intent(this, TodoNotesActivity.class));
+            startActivity(new Intent(this, TodoMainActivity.class));
         }
         textView = (AppCompatTextView) findViewById(R.id.appCompatTextView);
         animation = new TranslateAnimation(450, 0, 450, 0);
@@ -63,16 +63,6 @@ public class SplashActivity extends AppCompatActivity {
 
             }
         });
-
-        /*sharedPreferences = getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
-        if (sharedPreferences.contains("login")) {
-            if (sharedPreferences.getString("login", "false").equals("true")) {
-                //Log.i("bb", "onCreate: "+sharedPreferences.getString("login","false"));
-                Intent intent1 = new Intent(this, TodoNotesActivity.class);
-                startActivity(intent1);
-                finish();
-            }
-        }*/
 
     }
 
