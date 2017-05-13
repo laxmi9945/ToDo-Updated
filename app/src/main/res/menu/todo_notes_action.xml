@@ -14,7 +14,7 @@
     <item
         android:id="@+id/changeview"
         android:icon="@drawable/ic_action_list"
-        android:title="ChangeView"
+        android:title="@string/change_View"
         app:showAsAction="always"
         />
 

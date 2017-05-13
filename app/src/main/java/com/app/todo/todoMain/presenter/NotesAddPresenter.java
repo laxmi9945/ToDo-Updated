@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.app.todo.model.NotesModel;
-import com.app.todo.todoMain.ineractor.NotesAddInteractor;
-import com.app.todo.todoMain.ineractor.NotesAddInteractorInterface;
+import com.app.todo.todoMain.interactor.NotesAddInteractor;
+import com.app.todo.todoMain.interactor.NotesAddInteractorInterface;
 import com.app.todo.todoMain.ui.activity.NotesAddActivityInterface;
 import com.app.todo.utils.Constants;
 

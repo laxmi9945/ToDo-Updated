@@ -14,13 +14,14 @@ import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 
 public class AboutFragment extends Fragment {
 
+    public static final String TAG = "NotesFragment";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view=inflater.inflate(R.layout.activity_aboutfragment, container, false);
-
+        setHasOptionsMenu(true);
         return view;
 
     }

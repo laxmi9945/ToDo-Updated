@@ -1,15 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ffffff"
-    android:clickable="true">
-<android.support.v7.widget.AppCompatTextView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:text="Reminder Fragment"
-    android:textSize="30dp"
-    android:layout_gravity="center"
-    android:gravity="center"/>
+    android:orientation="vertical"
+    android:id="@+id/reminder_rootLayout"
+    >
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/reminder_recyclerView">
+
+    </android.support.v7.widget.RecyclerView>
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/reminder_event_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:alpha="0.2"
+        android:background="@drawable/calendar_reminder"
+        />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:alpha="0.5"
+        android:text="@string/no_reminder"
+        android:textSize="20dp"
+        android:id="@+id/reminder_textView"
+       />
 </LinearLayout>

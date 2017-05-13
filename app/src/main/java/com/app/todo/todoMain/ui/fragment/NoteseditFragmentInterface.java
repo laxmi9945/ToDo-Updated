@@ -1,8 +1,9 @@
 package com.app.todo.todoMain.ui.fragment;
 
-/**
- * Created by bridgeit on 9/5/17.
- */
+import android.view.View;
 
-public interface NoteseditFragmentInterface {
+
+public interface NoteseditFragmentInterface extends View.OnClickListener {
+    void showDialog(String message);
+    void hideDialog();
 }

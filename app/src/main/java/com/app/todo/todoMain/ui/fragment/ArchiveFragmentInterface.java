@@ -1,8 +1,13 @@
 package com.app.todo.todoMain.ui.fragment;
 
-/**
- * Created by bridgeit on 8/5/17.
- */
+import com.app.todo.model.NotesModel;
 
-public class ArchiveFragmentInterface {
+import java.util.List;
+
+public interface ArchiveFragmentInterface{
+    void showDialog(String message);
+    void hideDialog();
+
+    void archiveSuccess(List<NotesModel> modelList);
+    void archiveFailure(String message);
 }

@@ -1,17 +1,13 @@
-package com.app.todo.todoMain.ui.fragment;
+package com.app.todo.todoMain.presenter;
 
 import com.app.todo.model.NotesModel;
 
 import java.util.List;
 
-/**
- * Created by bridgeit on 10/5/17.
- */
-
-public interface ReminderFragmentInterface  {
+public interface ReminderFragmentPresenterInterface {
     void showDialog(String message);
     void hideDialog();
+    void getReminderNotes(String uId);
     void gettingReminderSuccess(List<NotesModel> notesModelList);
-
     void gettingReminderFailure(String message);
 }

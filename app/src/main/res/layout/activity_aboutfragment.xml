@@ -9,9 +9,9 @@
 
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="150dp"
-        android:layout_marginTop="150dp"
-        android:layout_height="150dp"
+        android:layout_width="@dimen/about_img_width"
+        android:layout_marginTop="@dimen/about_img_width"
+        android:layout_height="@dimen/about_img_width"
         android:layout_gravity="center"
         android:src="@drawable/mann" />
     <android.support.v7.widget.AppCompatTextView
@@ -44,7 +44,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="copyrights &#169; Bridgelabz Solutions LLP"
-        android:layout_marginTop="110dp"
+        android:layout_marginTop="115dp"
         android:textStyle="italic"
        />
 </LinearLayout>

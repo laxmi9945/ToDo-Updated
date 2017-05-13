@@ -1,6 +1,7 @@
 package com.app.todo.adapter;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,7 @@ import android.view.animation.ScaleAnimation;
 
 import com.app.todo.R;
 import com.app.todo.model.NotesModel;
+import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 import com.app.todo.todoMain.ui.fragment.NoteseditFragment;
 
 import java.util.ArrayList;
@@ -31,6 +33,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
       //  model=new ArrayList<>();
         this.model = model;
         this.context = context;
+    }
+
+    public RecyclerAdapter(Context baseContext, TodoMainActivity todoMainActivity) {
 
     }
 
@@ -78,10 +83,17 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
         notifyItemRangeChanged(position,model.size());
     }
 
+    public void reminderItem(){
+
+        notifyDataSetChanged();
+    }
+
+
     public class TaskViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         AppCompatTextView titleTextView, dateTextView, contentTextView,timeTextView;
         CardView cardView;
+
         public TaskViewHolder(final View itemView)
         {
             super(itemView);
@@ -90,24 +102,41 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
             timeTextView = (AppCompatTextView) itemView.findViewById(R.id.time_TextView);
             contentTextView = (AppCompatTextView) itemView.findViewById(R.id.content_TextView);
             cardView = (CardView) itemView.findViewById(R.id.myCardView);
+
             cardView.setOnClickListener(this);
+
             cardView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    NotesModel note=model.get(getAdapterPosition());
-                    //Toast.makeText(context, "Yes...", Toast.LENGTH_SHORT).show();
-                    Intent shareIntent=new Intent(android.content.Intent.ACTION_SEND);
-                    shareIntent.setType("text/plain");
-                    String title=note.getTitle();
-                    String content=note.getContent();
-                    shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, note.getTitle());
-                    shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Title: "+title+ "\n" +"Content: "+content);
-                    context.startActivity(Intent.createChooser(shareIntent, context.getResources().getString(R.string.share_using)));
+
+                    final CharSequence[] options = {"Share note","Cancel"};
+                    android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
+                    builder.setTitle("Select Option");
+                    builder.setItems(options, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int item) {
+
+                            if (options[item].equals("Share note")) {
+                                NotesModel note=model.get(getAdapterPosition());
+                                //Toast.makeText(context, "Yes...", Toast.LENGTH_SHORT).show();
+                                Intent shareIntent=new Intent(android.content.Intent.ACTION_SEND);
+                                shareIntent.setType("text/plain");
+                                String title=note.getTitle();
+                                String content=note.getContent();
+                                shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, note.getTitle());
+                                shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Title: "+title+ "\n" +"Content: "+content);
+                                context.startActivity(Intent.createChooser(shareIntent, context.getResources().getString(R.string.share_using)));
+                                dialog.dismiss();
+                            } else if (options[item].equals("Cancel")) {
+                                dialog.dismiss();
+                            }
+                        }
+                    });
+                    builder.show();
 
                     return true;
                 }
             });
-
         }
 
         @Override
@@ -147,6 +176,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
             viewToAnimate.startAnimation(anim);
             lastPosition = position;
         }
+    }
+    public void setNoteList(ArrayList<NotesModel> notesmodel){
+        this.model.clear();
+        notifyDataSetChanged();
+        this.model.addAll(notesmodel);
+        notifyDataSetChanged();
     }
 
 }

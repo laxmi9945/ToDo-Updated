@@ -13,6 +13,7 @@ import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 
 
 public class TrashFragment extends Fragment {
+    public static final String TAG = "NotesFragment";
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

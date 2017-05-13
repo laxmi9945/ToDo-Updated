@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.app.todo.R;
 import com.app.todo.model.NotesModel;
-import com.app.todo.todoMain.presenter.ReminderFragmentPresenterInterface;
+import com.app.todo.todoMain.presenter.ArchiveFragmentPresenterInterface;
 import com.app.todo.utils.CommonChecker;
 import com.app.todo.utils.Constants;
 import com.google.firebase.auth.FirebaseAuth;
@@ -17,26 +17,24 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-
-public class ReminderFragmentInteractor implements ReminderFragmentInteractorInterface {
+public class ArchiveFragmentInteractor implements ArchiveFragmentInteractorInterface {
     Context context;
-    ReminderFragmentPresenterInterface presenter;
-
+    ArchiveFragmentPresenterInterface presenter;
     FirebaseAuth firebaseAuth;
-    DatabaseReference mDatabaseReference;
+    DatabaseReference databaseReference;
 
-    public ReminderFragmentInteractor(Context context, ReminderFragmentPresenterInterface presenter) {
-        this.context = context;
-        this.presenter = presenter;
-        firebaseAuth = FirebaseAuth.getInstance();
-        mDatabaseReference = FirebaseDatabase.getInstance().getReference(Constants.userdata);
+    public ArchiveFragmentInteractor(Context context,ArchiveFragmentPresenterInterface presenter){
+        this.context=context;
+        this.presenter=presenter;
+        firebaseAuth=FirebaseAuth.getInstance();
+        databaseReference= FirebaseDatabase.getInstance().getReference(Constants.userdata);
     }
 
     @Override
-    public void getReminderNotes(String uId) {
-        presenter.showDialog(context.getString(R.string.loading));
-        if(CommonChecker.isNetworkConnected(context)){
-            mDatabaseReference.child(uId).addValueEventListener(new ValueEventListener() {
+    public void getArchiveNote(String uId) {
+        presenter.showDialog(context.getString(R.string.getting_archive_notes));
+        if (CommonChecker.isNetworkConnected(context)){
+            databaseReference.child(uId).addValueEventListener(new ValueEventListener() {
                 //String uId = firebaseAuth.getCurrentUser().getUid();
 
                 @Override
@@ -52,20 +50,23 @@ public class ReminderFragmentInteractor implements ReminderFragmentInteractorInt
                         notesModel.addAll(notesModel_ArrayList);
 
                     }
-                    presenter.gettingReminderSuccess(notesModel);
+                    presenter.noteArchiveSuccess(notesModel);
                     presenter.hideDialog();
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
-                    presenter.gettingReminderFailure(context.getString(R.string.archive_failure));
+                    //Toast.makeText(context, getString(R.string.fetching_error) , Toast.LENGTH_SHORT).show();
+                    presenter.noteAddFailure(context.getString(R.string.archive_failure));
                     presenter.hideDialog();
                 }
             });
+
         }else {
-            presenter.gettingReminderFailure(context.getString(R.string.fail));
+            presenter.noteAddFailure(context.getString(R.string.fail));
+            presenter.hideDialog();
         }
-        presenter.hideDialog();
+
+
     }
 }

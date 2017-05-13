@@ -1,11 +1,15 @@
 package com.app.todo.registration.ui;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.view.View;
 import android.widget.Toast;
@@ -28,6 +32,7 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
     private AppCompatEditText edittextmobNo;
     private AppCompatButton buttonSave;
     private AppCompatTextView textView;
+    AppCompatImageView profile_imageView;
     private Pattern pattern;
     private Pattern pattern2;
     private Matcher matcher;
@@ -41,6 +46,8 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
     private String Email;
     private String Password;
     private String MobileNo;
+    private final int PICK_IMAGE_CAMERA = 1, PICK_IMAGE_GALLERY = 2;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +60,7 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
     }
 
     private void initView() {
+        profile_imageView= (AppCompatImageView) findViewById(R.id.user_pic);
         buttonSave = (AppCompatButton) findViewById(R.id.save_button);
         edittextName = (AppCompatEditText) findViewById(R.id.name_edittext);
         edittextemail = (AppCompatEditText) findViewById(R.id.email_Edittext);
@@ -66,26 +74,65 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
     private void setClicklistener() {
         buttonSave.setOnClickListener(this);
         textView.setOnClickListener(this);
+        profile_imageView.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.save_button:
+
                 if(registerUser()) {
+
                     userInfoModel = new UserInfoModel();
                     userInfoModel.setName(Name);
                     userInfoModel.setEmail(Email);
                     userInfoModel.setPassword(Password);
                     userInfoModel.setMobile(MobileNo);
                     registrationPresenter.registrationResponse(userInfoModel);
-
                 }
+
                 break;
 
             case R.id.allreadyacc_textview:
                 finish();
                 break;
+            case R.id.user_pic:
+                addProfilePic();
+                break;
+        }
+    }
+
+    private void addProfilePic() {
+        try {
+            PackageManager pm = getPackageManager();
+            int hasPerm = pm.checkPermission(android.Manifest.permission.CAMERA, getPackageName());
+            if (hasPerm == PackageManager.PERMISSION_GRANTED) {
+                final CharSequence[] options = {"Take Photo", "Choose From Gallery", "Cancel"};
+                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+                builder.setTitle("Select Option");
+                builder.setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int item) {
+                        if (options[item].equals("Take Photo")) {
+                            dialog.dismiss();
+                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                            startActivityForResult(intent, PICK_IMAGE_CAMERA);
+                        } else if (options[item].equals("Choose From Gallery")) {
+                            dialog.dismiss();
+                            Intent pickPhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                            startActivityForResult(pickPhoto, PICK_IMAGE_GALLERY);
+                        } else if (options[item].equals("Cancel")) {
+                            dialog.dismiss();
+                        }
+                    }
+                });
+                builder.show();
+            } else
+                Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
         }
     }
 

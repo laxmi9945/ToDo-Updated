@@ -1,8 +1,14 @@
 package com.app.todo.todoMain.presenter;
 
-/**
- * Created by bridgeit on 8/5/17.
- */
+import com.app.todo.model.NotesModel;
 
-public class ArchiveFragmentPresenterInterface {
+import java.util.List;
+
+
+public interface ArchiveFragmentPresenterInterface {
+    void showDialog(String message);
+    void hideDialog();
+    void getArchiveNote(String uId);
+    void noteArchiveSuccess(List<NotesModel> notesModelList);
+    void noteAddFailure(String message);
 }

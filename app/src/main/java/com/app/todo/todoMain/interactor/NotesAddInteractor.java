@@ -1,4 +1,4 @@
-package com.app.todo.todoMain.ineractor;
+package com.app.todo.todoMain.interactor;
 
 import android.content.Context;
 import android.util.Log;

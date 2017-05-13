@@ -15,7 +15,7 @@ import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 public class NotesFragment extends Fragment   {
 
     public static final String TAG = "NotesFragment";
-
+    TodoMainActivity todoMainActivity;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

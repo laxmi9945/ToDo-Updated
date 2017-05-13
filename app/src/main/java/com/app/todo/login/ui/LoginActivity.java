@@ -72,6 +72,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
     LoginPresenter loginPresenter;
     Snackbar snackbar;
     private LinearLayout linearLayout;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -136,7 +137,6 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         loginButton = (LoginButton) findViewById(R.id.fb_login_button);
         googleButton = (AppCompatButton) findViewById(R.id.google_button);
         linearLayout= (LinearLayout) findViewById(R.id.Linear_rootLayout);
-
         //initializing google signin options
         googleSignInOptions = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -241,10 +241,10 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                         Bundle bFacebookData = getFacebookData(object);
 
                         String emailid = bFacebookData.getString(Constants.fb_email);
-                        editor.putString("email", emailid);
-                        editor.putString("profile", bFacebookData.getString(Constants.fb_profile_pic));
-                        editor.putString("firstname", bFacebookData.getString(Constants.fb_first_name));
-                        editor.putString("lastname", bFacebookData.getString(Constants.fb_last_name));
+                        editor.putString(Constants.fb_email_key, emailid);
+                        editor.putString(Constants.fb_profile_key, bFacebookData.getString(Constants.fb_profile_pic));
+                        editor.putString(Constants.fb_name_key, bFacebookData.getString(Constants.fb_first_name));
+                        editor.putString(Constants.fb_lastname_key, bFacebookData.getString(Constants.fb_last_name));
                         editor.apply();
                         Toast.makeText(LoginActivity.this, getString(R.string.welcome) + bFacebookData.getString(Constants.fb_first_name), Toast.LENGTH_SHORT).show();
 
@@ -468,6 +468,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                 break;
         }
     }
+
 
 }
 

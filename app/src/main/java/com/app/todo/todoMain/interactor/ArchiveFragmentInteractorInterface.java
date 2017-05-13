@@ -1,8 +1,6 @@
-package com.app.todo.todoMain.ineractor;
+package com.app.todo.todoMain.interactor;
 
-/**
- * Created by bridgeit on 8/5/17.
- */
 
 public interface ArchiveFragmentInteractorInterface  {
+    void getArchiveNote(String uId);
 }

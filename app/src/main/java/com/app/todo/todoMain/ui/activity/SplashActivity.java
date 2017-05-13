@@ -16,7 +16,7 @@ import com.app.todo.login.ui.LoginActivity;
 import com.app.todo.utils.Constants;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends AppCompatActivity  {
 
     AppCompatTextView textView;
     Animation animation;
@@ -31,6 +31,8 @@ public class SplashActivity extends AppCompatActivity {
             finish();
             startActivity(new Intent(this, TodoMainActivity.class));
         }
+
+
         textView = (AppCompatTextView) findViewById(R.id.appCompatTextView);
         animation = new TranslateAnimation(450, 0, 450, 0);
         animation.setDuration(Constants.Splash_textView_animation_time);

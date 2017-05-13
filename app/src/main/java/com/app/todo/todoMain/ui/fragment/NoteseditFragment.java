@@ -17,13 +17,14 @@ import com.app.todo.R;
 import com.app.todo.database.DataBaseUtility;
 import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.ui.activity.TodoMainActivity;
+import com.app.todo.utils.Constants;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Date;
 
-public class NoteseditFragment extends Fragment implements View.OnClickListener {
+public class NoteseditFragment extends Fragment implements NoteseditFragmentInterface {
     private static final String TAG = "NoteseditFragment";
     AppCompatEditText titleEditText, contentEdtitext;
     FirebaseDatabase firebaseDatabase;
@@ -52,7 +53,7 @@ public class NoteseditFragment extends Fragment implements View.OnClickListener 
         View view = inflater.inflate(R.layout.activity_todoitemsdetails, container, false);
         firebaseDatabase=FirebaseDatabase.getInstance();
         firebaseAuth=FirebaseAuth.getInstance();
-        databaseReference = firebaseDatabase.getReference().child("userData");
+        databaseReference = firebaseDatabase.getReference().child(Constants.userdata);
         titleEditText = (AppCompatEditText) view.findViewById(R.id.edit_title);
         contentEdtitext = (AppCompatEditText) view.findViewById(R.id.edit_content);
         AppCompatButton button = (AppCompatButton) view.findViewById(R.id.save_btn);
@@ -108,4 +109,13 @@ public class NoteseditFragment extends Fragment implements View.OnClickListener 
     }
 
 
+    @Override
+    public void showDialog(String message) {
+
+    }
+
+    @Override
+    public void hideDialog() {
+
+    }
 }

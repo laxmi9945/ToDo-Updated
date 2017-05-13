@@ -3,6 +3,9 @@ package com.app.todo.resetPassword.presenter;
 
 
 public interface ResetPasswordPresenterInterface {
+
+    void resetPassword(String email);
+
     void showDialog(String message);
     void hideDialog();
 

@@ -56,7 +56,7 @@ public class LoginInterActor implements LoginInterActorInterface  {
                 }
             }
         });
-        loginPresenterInterface.hideProgressDialog();
+
     }
 
     private void userData(final String uid) {
@@ -65,6 +65,7 @@ public class LoginInterActor implements LoginInterActorInterface  {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 UserInfoModel userInfoModel=dataSnapshot.getValue(UserInfoModel.class);
                 loginPresenterInterface.loginSuccess(userInfoModel,uid);
+                loginPresenterInterface.hideProgressDialog();
             }
 
             @Override

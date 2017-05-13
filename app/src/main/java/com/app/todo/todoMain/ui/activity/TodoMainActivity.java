@@ -2,14 +2,18 @@ package com.app.todo.todoMain.ui.activity;
 
 
 import android.animation.LayoutTransition;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.net.Uri;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -38,6 +42,7 @@ import com.app.todo.baseclass.BaseActivity;
 import com.app.todo.database.DataBaseUtility;
 import com.app.todo.login.ui.LoginActivity;
 import com.app.todo.model.NotesModel;
+import com.app.todo.todoMain.presenter.TodoMainActivityPresenter;
 import com.app.todo.todoMain.ui.fragment.AboutFragment;
 import com.app.todo.todoMain.ui.fragment.ArchiveFragment;
 import com.app.todo.todoMain.ui.fragment.NotesFragment;
@@ -53,27 +58,27 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
-
-public class TodoMainActivity extends BaseActivity implements SearchView.OnQueryTextListener, View.OnClickListener,
-        NavigationView.OnNavigationItemSelectedListener {
+public class TodoMainActivity extends BaseActivity implements TodoMainActivityInterface {
     RecyclerView recyclerView;
+    TextToSpeech textToSpeech;
     boolean isView = false;
     RecyclerAdapter recyclerAdapter;
     SharedPreferences sharedPreferences;
@@ -92,7 +97,7 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
     CircleImageView circleImageView;
     DatabaseReference databaseReference;
     FirebaseAuth firebaseAuth;
-    List<NotesModel> notesModels,allNotes,archiveNotes,reminderNotes;
+    List<NotesModel> allNotes, noteList, archiveNotes, reminderNotes;
     FloatingActionButton floatingActionButton;
     ProgressDialog progressDialog;
     String fb_first_name;
@@ -102,13 +107,15 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
     String google_first_name;
     String google_email;
     String google_imageUrl;
-    NotesModel notesModel=new NotesModel();
+    NotesModel notesModel = new NotesModel();
     static final String TAG = "NetworkStateReceiver";
     String uId;
-    static final int RESULT_LOAD_IMG = 1;
     GoogleSignInOptions googleSignInOptions;
     GoogleApiClient googleApiClient;
-    List<NotesModel>  notesModelList=new ArrayList<>();
+    List<NotesModel> notesModelList = new ArrayList<>();
+    private final int PICK_IMAGE_CAMERA = 1, PICK_IMAGE_GALLERY = 2;
+    Snackbar snackbar;
+    TodoMainActivityPresenter presenter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -123,7 +130,7 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
         firebaseAuth = FirebaseAuth.getInstance();
         uId = firebaseAuth.getCurrentUser().getUid();
         initView();
-
+        presenter.getNoteList(uId);
         if (sharedPreferences.getBoolean(Constants.key_fb_login, false)) {
             isFbLogin();
 
@@ -149,14 +156,13 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
 
         floatingActionButton.setVisibility(View.VISIBLE);
-        notesModels = new ArrayList<>();
-        progressDialog = new ProgressDialog(this);
-
+       /* progressDialog = new ProgressDialog(this);
         progressDialog.setMessage(getString(R.string.fetching_data));
         progressDialog.show();
 
         //retriving data from firebase
         databaseReference.child(uId).addValueEventListener(new ValueEventListener() {
+
             //String uId = firebaseAuth.getCurrentUser().getUid();
 
             @Override
@@ -167,9 +173,10 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
 
                 for (DataSnapshot post : dataSnapshot.getChildren()) {
 
-                    ArrayList<NotesModel> notesModel_ArrayList = null;
+                    ArrayList<NotesModel> notesModel_ArrayList;
                     notesModel_ArrayList = post.getValue(arrayListGenericTypeIndicator);
                     notesModel.addAll(notesModel_ArrayList);
+
                 }
 
                 notesModel.removeAll(Collections.singleton(null));
@@ -182,6 +189,7 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
                 //Toast.makeText(context, getString(R.string.fetching_error) , Toast.LENGTH_SHORT).show();
             }
         });
+*/
 
         //Animating Fab button while Scrolling
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -211,14 +219,15 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
     boolean isFbLogin() {
 
         //Getting data from SharedPreference
-        fb_first_name = sharedPreferences.getString("firstname", "");
-        fb_last_name = sharedPreferences.getString("lastname", "");
-        fb_email = sharedPreferences.getString("email", "");
-        imageUrl = sharedPreferences.getString("profile", "");
+        fb_first_name = sharedPreferences.getString(Constants.fb_name_key, "");
+        fb_last_name = sharedPreferences.getString(Constants.fb_lastname_key, "");
+        fb_email = sharedPreferences.getString(Constants.fb_email_key, "");
+        imageUrl = sharedPreferences.getString(Constants.fb_profile_key, "");
         nav_header_Name.setText(fb_first_name + " " + fb_last_name);
         nav_header_Email.setText(fb_email);
         Glide.with(getApplicationContext()).load(imageUrl).into(circleImageView);
         return false;
+
 
     }
 
@@ -235,20 +244,49 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
     }
 
     void setDatatoRecycler(List<NotesModel> notesModel) {
-        if (notesModel == null) {
-            notesModels = new ArrayList<>();
-        } else {
-            notesModels = notesModel;
-        }
-        recyclerAdapter = new RecyclerAdapter(TodoMainActivity.this, notesModels);
-        allNotes=getWithoutArchive();
-        checkLayout();
+        allNotes = notesModel;
+        noteList = getWithoutArchiveItems();
+        recyclerAdapter = new RecyclerAdapter(TodoMainActivity.this, noteList);
         recyclerView.setAdapter(recyclerAdapter);
         recyclerAdapter.notifyDataSetChanged();
         progressDialog.dismiss();
 
     }
 
+    private List<NotesModel> getReminderItems() {
+
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat(getString(R.string.date_time));
+        String currentDate = format.format(date.getTime());
+        ArrayList<NotesModel> notesModelArrayList = new ArrayList<>();
+        for (NotesModel note : allNotes) {
+            if (note.getReminderDate().equals(currentDate)) {
+                notesModelArrayList.add(note);
+            }
+        }
+        return notesModelArrayList;
+    }
+
+    private List<NotesModel> getWithoutArchiveItems() {
+        ArrayList<NotesModel> todoHomeDataModel = new ArrayList<>();
+        for (NotesModel note : allNotes) {
+            if (!note.isArchieved()) {
+                todoHomeDataModel.add(note);
+            }
+        }
+        return todoHomeDataModel;
+    }
+
+    private List<NotesModel> getArchiveItems() {
+        ArrayList<NotesModel> todoHomeDataModel = new ArrayList<>();
+        for (NotesModel note : allNotes) {
+            if (note.isArchieved()) {
+                todoHomeDataModel.add(note);
+            }
+
+        }
+        return todoHomeDataModel;
+    }
 
     void initSwipeView() {
 
@@ -256,7 +294,8 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
 
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                return false;
+
+                return true;
             }
 
             @Override
@@ -265,24 +304,31 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
                 if (direction == ItemTouchHelper.LEFT) {
 
                     databaseReference = FirebaseDatabase.getInstance().getReference();
-                    notesModel = notesModels.get(position);
+                    notesModel = noteList.get(position);
                     databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).removeValue();
                     dataBaseUtility.delete(notesModel);
                     recyclerAdapter.deleteItem(position);
                     recyclerView.setAdapter(recyclerAdapter);
+                    snackbar = Snackbar
+                            .make(getCurrentFocus(), getString(R.string.item_deleted), Snackbar.LENGTH_LONG);
+
+                    snackbar.show();
 
                 }
-                if (direction==ItemTouchHelper.RIGHT){
-                    notesModel= notesModels.get(position);
+                if (direction == ItemTouchHelper.RIGHT) {
+                    noteList=getWithoutArchiveItems();
+                    notesModel = noteList.get(position);
                     notesModel.setArchieved(true);
-                    databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
+                    databaseReference.child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
+                    recyclerAdapter.archiveItem(position);
+                    recyclerView.setAdapter(recyclerAdapter);
                     Snackbar snackbar = Snackbar
                             .make(getCurrentFocus(), getString(R.string.item_archieved), Snackbar.LENGTH_LONG)
                             .setAction(getString(R.string.undo), new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
                                     notesModel.setArchieved(false);
-                                    databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
+                                    databaseReference.child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
                                     Snackbar snackbar1 = Snackbar.make(getCurrentFocus(), getString(R.string.item_restored), Snackbar.LENGTH_SHORT);
                                     snackbar1.show();
                                 }
@@ -301,6 +347,8 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
     @Override
     public void initView() {
         View view = getLayoutInflater().inflate(R.layout.activity_todonotes, null, false);
+        presenter=new TodoMainActivityPresenter(this,this);
+        textToSpeech = new TextToSpeech(this, this);
         floatingActionButton = (FloatingActionButton) findViewById(R.id.fabAddNotes);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerViewNotes);
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -314,6 +362,7 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
         nav_header_Name = (AppCompatTextView) header.findViewById(R.id.nav_header_appName);
         nav_header_Email = (AppCompatTextView) header.findViewById(R.id.nav_header_emailId);
         circleImageView = (CircleImageView) header.findViewById(R.id.profile_image);
+
         googleSignInOptions = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -385,14 +434,10 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
         String titleData = "";
         String contentData = "";
         String recentTimeData = "";
-
         if (resultCode == RESULT_OK) {
 
             Bundle bundle = data.getBundleExtra("bundle");
             if (bundle != null) {
-
-                Log.i("g", "onActivityResult: ");
-
                 titleData = bundle.getString(Constants.title_data);
                 contentData = bundle.getString(Constants.content_data);
                 recentTimeData = bundle.getString(Constants.date_data);
@@ -401,44 +446,55 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
             note.setTitle(titleData);
             note.setContent(contentData);
             note.setDate(recentTimeData);
-
-            Log.i("abc", "onActivityResult: ");
             recyclerAdapter.addNotes(note);
             recyclerAdapter.notifyDataSetChanged();
             recyclerView.setAdapter(recyclerAdapter);
 
         }
-
-        if (resultCode == RESULT_OK) {
-            if (requestCode == RESULT_LOAD_IMG) {
-                // Get the url from data
-                Uri selectedImageUri = data.getData();
-                if (null != selectedImageUri) {
-                    // Get the path from the Uri
-                    String path = getPathFromURI(selectedImageUri);
-                    Log.i(TAG, "Image Path : " + path);
-                    // Set the image in ImageView
-                    circleImageView.setImageURI(selectedImageUri);
-                }
-            }
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == PICK_IMAGE_GALLERY)
+                onSelectFromGalleryResult(data);
+            else if (requestCode == PICK_IMAGE_CAMERA)
+                onCaptureImageResult(data);
         }
-
 
         super.onActivityResult(requestCode, resultCode, data);
 
     }
 
-    /* Get the real path from the URI */
-    String getPathFromURI(Uri contentUri) {
-        String res = null;
-        String[] proj = {MediaStore.Images.Media.DATA};
-        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
-        if (cursor.moveToFirst()) {
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            res = cursor.getString(column_index);
+    private void onCaptureImageResult(Intent data) {
+
+        Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+        File destination = new File(Environment.getExternalStorageDirectory(),
+                System.currentTimeMillis() + ".jpg");
+        FileOutputStream fileOutputStream;
+        try {
+            destination.createNewFile();
+            fileOutputStream = new FileOutputStream(destination);
+            fileOutputStream.write(bytes.toByteArray());
+            fileOutputStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        cursor.close();
-        return res;
+        circleImageView.setImageBitmap(thumbnail);
+    }
+
+    private void onSelectFromGalleryResult(Intent data) {
+
+        Bitmap bitmap = null;
+        if (data != null) {
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), data.getData());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        circleImageView.setImageBitmap(bitmap);
+
     }
 
     @Override
@@ -452,6 +508,7 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
 
                 break;
             case R.id.profile_image:
+
                 profilePictureSet();
 
 
@@ -461,25 +518,51 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
     }
 
     void profilePictureSet() {
-
-        // Create intent to Open Image applications like Gallery, Google Photos
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        // Start the Intent
-        startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
+        try {
+            PackageManager pm = getPackageManager();
+            int hasPerm = pm.checkPermission(android.Manifest.permission.CAMERA, getPackageName());
+            if (hasPerm == PackageManager.PERMISSION_GRANTED) {
+                final CharSequence[] options = {"Take Photo", "Choose From Gallery", "Cancel"};
+                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+                builder.setTitle("Select Option");
+                builder.setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int item) {
+                        if (options[item].equals("Take Photo")) {
+                            dialog.dismiss();
+                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                            startActivityForResult(intent, PICK_IMAGE_CAMERA);
+                        } else if (options[item].equals("Choose From Gallery")) {
+                            dialog.dismiss();
+                            Intent pickPhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                            startActivityForResult(pickPhoto, PICK_IMAGE_GALLERY);
+                        } else if (options[item].equals("Cancel")) {
+                            dialog.dismiss();
+                        }
+                    }
+                });
+                builder.show();
+            } else
+                Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
+
             case R.id.notes:
 
                 getSupportFragmentManager()
                         .beginTransaction()
                         .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                        .replace(R.id.frameLayout_container, new NotesFragment(), NotesFragment.TAG).
-                        addToBackStack(null)
+                        .replace(R.id.frameLayout_container, new NotesFragment(), NotesFragment.TAG)
+                        .addToBackStack(null)
                         .commit();
+                recyclerView.setAdapter(recyclerAdapter);
                 setTitle(getString(R.string.notes));
                 Toast.makeText(this, getString(R.string.notes), LENGTH_SHORT).show();
                 drawer.closeDrawers();
@@ -492,25 +575,24 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
 
             case R.id.reminder:
 
+                getSupportFragmentManager().popBackStackImmediate();
+
                 getSupportFragmentManager().beginTransaction()
                         .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                        .replace(R.id.frameLayout_container, new ReminderFragment()).addToBackStack(null)
+                        .replace(R.id.frameLayout_container, new ReminderFragment(this), ReminderFragment.TAG)
+                        .addToBackStack(null)
                         .commit();
                 setTitle(getString(R.string.reminder));
-                /*reminderNotes=getReminderItems();
-                checkLayout();
-                recyclerAdapter=new RecyclerAdapter(this,reminderNotes);
-                recyclerView.setAdapter(recyclerAdapter);
-                recyclerAdapter.notifyDataSetChanged();
-                Toast.makeText(this, getString(R.string.reminder), Toast.LENGTH_SHORT).show();*/
+                Toast.makeText(this, getString(R.string.reminder), Toast.LENGTH_SHORT).show();
                 drawer.closeDrawers();
 
                 break;
+
             case R.id.trash:
 
                 getSupportFragmentManager().beginTransaction()
                         .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                        .replace(R.id.frameLayout_container, new TrashFragment())
+                        .replace(R.id.frameLayout_container, new TrashFragment(), TrashFragment.TAG)
                         .addToBackStack(null)
                         .commit();
                 setTitle(getString(R.string.trash));
@@ -520,19 +602,14 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
                 break;
 
             case R.id.archive:
-
+                getSupportFragmentManager().popBackStackImmediate();
+                //archiveNotes=getArchiveItems();
                 getSupportFragmentManager().beginTransaction()
                         .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                        .replace(R.id.frameLayout_container, new ArchiveFragment())
+                        .replace(R.id.frameLayout_container, new ArchiveFragment(this), ArchiveFragment.TAG)
                         .addToBackStack(null)
                         .commit();
                 setTitle(getString(R.string.archive));
-                /*checkLayout();
-                archiveNotes=getArchive();
-                recyclerAdapter=new RecyclerAdapter(this,archiveNotes);
-                recyclerView.setAdapter(recyclerAdapter);
-                recyclerAdapter.notifyDataSetChanged();*/
-
                 Toast.makeText(this, getString(R.string.archive), Toast.LENGTH_SHORT).show();
                 drawer.closeDrawers();
 
@@ -541,30 +618,22 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
 
                 getSupportFragmentManager().beginTransaction()
                         .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                        .replace(R.id.frameLayout_container, new AboutFragment()).
-                        addToBackStack(null)
+                        .replace(R.id.frameLayout_container, new AboutFragment(), AboutFragment.TAG)
+                        .addToBackStack(null)
                         .commit();
                 setTitle(getString(R.string.about));
 
                 Toast.makeText(this, getString(R.string.about), Toast.LENGTH_SHORT).show();
                 drawer.closeDrawers();
                 break;
+            case R.id.nav_share:
+                Toast.makeText(this, getString(R.string.logic), Toast.LENGTH_SHORT).show();
+                break;
 
         }
 
         return true;
     }
-
-    private void checkLayout() {
-            if (isView) {
-                recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
-
-            } else {
-                recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-
-            }
-        }
-
 
     void deleteAccessToken() {
 
@@ -607,20 +676,22 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
 
             if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
 
-                Log.i("test ", "onBackPressed: " + getSupportFragmentManager().getBackStackEntryCount());
+                 Log.i("test ", "onBackPressed: " + getSupportFragmentManager().getBackStackEntryCount());
 
                 if (getSupportFragmentManager().findFragmentByTag(NotesFragment.TAG) instanceof NotesFragment) {
                     finish();
 
                 } else {
-
+                    startActivity(new Intent(getApplicationContext(), TodoMainActivity.class));
                     getSupportFragmentManager()
                             .beginTransaction()
                             .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                            .replace(R.id.frameLayout_container, new NotesFragment(), NotesFragment.TAG).
-                            addToBackStack(null)
+                            .replace(R.id.frameLayout_container, new NotesFragment(), NotesFragment.TAG)
+                            .addToBackStack(null)
                             .commit();
                     setTitle(getString(R.string.notes));
+
+
                 }
             }
         }
@@ -649,7 +720,7 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
     public boolean onQueryTextChange(String newText) {
         newText = newText.toLowerCase();
         ArrayList<NotesModel> newList = new ArrayList<>();
-        for (NotesModel model : notesModels) {
+        for (NotesModel model : noteList) {
 
             String name = model.getTitle().toLowerCase();
             if (name.contains(newText))
@@ -659,43 +730,78 @@ public class TodoMainActivity extends BaseActivity implements SearchView.OnQuery
         return true;
     }
 
-    private List<NotesModel> getReminderItems(){
 
-        Date date = new Date();
-        SimpleDateFormat format = new SimpleDateFormat(getString(R.string.date_time));
-        String currentDate = format.format(date.getTime());
-        ArrayList<NotesModel> notesModelArrayList=new ArrayList<>();
-        for (NotesModel model:notesModels){
-            if(model.getReminderDate().equals(currentDate)){
-                notesModelArrayList.add(model);
+    @Override
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS) {
+
+            int result = textToSpeech.setLanguage(Locale.US);
+
+
+            if (result == TextToSpeech.LANG_MISSING_DATA
+                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TextToSpeech", "This Language is not supported");
+            } else {
+
+                //speakOut();
             }
+
+        } else {
+            Log.e("TextToSpeech", "Initilization Failed!");
         }
-        return notesModelArrayList;
     }
-    private List<NotesModel> getWithoutArchive() {
+
+    private void speakOut() {
+        String userName = "Welcome back " + fb_first_name;
+        Toast.makeText(this, userName, Toast.LENGTH_SHORT).show();
+        textToSpeech.speak(userName, TextToSpeech.QUEUE_FLUSH, null);
+
+    }
+
+    @Override
+    public void onDestroy() {
+
+        //Stopping textToSpeech
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void showDialog(String message) {
+        progressDialog = new ProgressDialog(this);
+        if(!isFinishing()){
+            progressDialog.setMessage(message);
+            progressDialog.show();
+        }
+    }
+
+    @Override
+    public void hideDialog() {
+        if(!isFinishing() && progressDialog != null){
+            progressDialog.dismiss();
+        }
+    }
+
+    @Override
+    public void getNotesListFailure(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void getNotesListSuccess(List<NotesModel> modelList) {
+        allNotes = modelList;
         ArrayList<NotesModel> todoHomeDataModel = new ArrayList<>();
-        for (NotesModel note : notesModelList) {
+        for (NotesModel note : allNotes) {
             if (!note.isArchieved()) {
                 todoHomeDataModel.add(note);
             }
         }
-        return todoHomeDataModel;
+        recyclerAdapter = new RecyclerAdapter(TodoMainActivity.this, todoHomeDataModel);
+        recyclerView.setAdapter(recyclerAdapter);
+        recyclerAdapter.notifyDataSetChanged();
     }
 
-    private List<NotesModel> getArchive() {
-        ArrayList<NotesModel> todoHomeDataModel = new ArrayList<>();
-        for (NotesModel note : notesModelList) {
-            if (note.isArchieved()) {
-                todoHomeDataModel.add(note);
-            }
-
-        }
-        return todoHomeDataModel;
-    }
-
-    public void showOrhideIcon(boolean isShow){
-        if(isShow){
-
-        }
-    }
 }
