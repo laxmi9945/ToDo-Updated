@@ -8,9 +8,9 @@ import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -48,10 +48,9 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view= inflater.inflate(R.layout.activity_archive_fragment,container,false);
+        View view= inflater.inflate(R.layout.fragment_archive,container,false);
         initView(view);
-        String uId=FirebaseAuth.getInstance().getCurrentUser().getUid();
-
+        setHasOptionsMenu(true);
        // presenter=new ArchiveFragmentPresenter(getContext(),this);
         presenter.getArchiveNote(uId);
         return view;
@@ -63,7 +62,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
     }
 
     private void initView(View view) {
-        initSwipeView();
+      //  initSwipeView();
         databaseReference = FirebaseDatabase.getInstance().getReference().child(getString(R.string.userData));
         archive_recyclerView= (RecyclerView) view.findViewById(R.id.archiveItem_recyclerView);
         firebaseAuth=FirebaseAuth.getInstance();
@@ -81,7 +80,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
         ((TodoMainActivity) getActivity()).showOrHideFab(false);
     }
 
-    void initSwipeView() {
+    /*void initSwipeView() {
 
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
@@ -113,7 +112,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
         itemTouchHelper.attachToRecyclerView(this.archive_recyclerView);
 
     }
-
+*/
     @Override
     public void showDialog(String message) {
         progressDialog = new ProgressDialog(getActivity());
@@ -140,7 +139,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
                 archiveNoteList.add(notesModel);
             }
         }
-        archive_adapter= new RecyclerAdapter(getActivity().getBaseContext(),archiveNoteList);
+        archive_adapter= new RecyclerAdapter(todoMainActivity,archiveNoteList);
         archive_recyclerView.setAdapter(archive_adapter);
 
          // Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
@@ -159,6 +158,36 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
     @Override
     public void archiveFailure(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+
+    }
+    /*@Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.getItem(R.id.menu_search).setVisible(false);
+        super.onCreateOptionsMenu(menu, inflater);
+    }*/
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.changeview) {
+            toggle(item);
+            return false;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    boolean isView = false;
+
+    void toggle(MenuItem item) {
+        if (!isView) {
+            archive_recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
+            item.setIcon(R.drawable.ic_action_straggered);
+            isView = true;
+        } else {
+            archive_recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+            item.setIcon(R.drawable.ic_action_list);
+            isView = false;
+        }
 
     }
 }

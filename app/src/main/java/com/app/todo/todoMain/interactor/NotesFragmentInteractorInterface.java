@@ -5,4 +5,5 @@ package com.app.todo.todoMain.interactor;
  */
 
 public interface NotesFragmentInteractorInterface {
+    void getNoteList(String uId);
 }

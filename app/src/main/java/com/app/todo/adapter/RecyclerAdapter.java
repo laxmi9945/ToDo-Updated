@@ -53,6 +53,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
         holder.dateTextView.setText(model.get(position).getDate());
         holder.timeTextView.setText(model.get(position).getTime());
         holder.contentTextView.setText(model.get(position).getContent());
+
         // Here you apply the animation when the view is bound
         setAnimation(holder.itemView, position);
     }
@@ -144,6 +145,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
             switch (v.getId()){
                 case R.id.myCardView:
                     NoteseditFragment fragment = new NoteseditFragment();
+                    ((AppCompatActivity)context).setTitle("Notes Update");
                     Bundle args = new Bundle();
                     NotesModel note=model.get(getAdapterPosition());
                     args.putString("title", note.getTitle());
@@ -151,6 +153,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
                     args.putString("date", note.getDate());
                     args.putString("time", note.getTime());
                     args.putInt("id", note.getId());
+                    args.putString("reminder",note.getReminderDate());
                     fragment.setArguments(args);
                     ((AppCompatActivity)context).getFragmentManager().beginTransaction().replace(R.id.frameLayout_container, fragment).addToBackStack(null).commit();
                     break;

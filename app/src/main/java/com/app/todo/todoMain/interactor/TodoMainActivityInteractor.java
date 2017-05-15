@@ -50,17 +50,15 @@ public class TodoMainActivityInteractor implements TodoMainInteractorInterface {
                         notesModel.addAll(notesModel_ArrayList);
 
                     }
-                    /*notesModel.removeAll(Collections.singleton(null));*/
-                    //setDatatoRecycler(notesModel);
                     presenter.getNoteListSuccess(notesModel);
                     presenter.hideDialog();
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    presenter.getNoteListFailure(context.getString(R.string.fail));
+
                     presenter.hideDialog();
-                    //Toast.makeText(context, getString(R.string.fetching_error) , Toast.LENGTH_SHORT).show();
+
                 }
             });
         }else {

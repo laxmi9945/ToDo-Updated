@@ -20,7 +20,7 @@ public class AboutFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view=inflater.inflate(R.layout.activity_aboutfragment, container, false);
+        View view=inflater.inflate(R.layout.fragment_about, container, false);
         setHasOptionsMenu(true);
         return view;
 

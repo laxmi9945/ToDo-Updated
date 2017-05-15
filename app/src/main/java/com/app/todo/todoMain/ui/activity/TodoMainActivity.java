@@ -28,7 +28,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,10 +41,10 @@ import com.app.todo.baseclass.BaseActivity;
 import com.app.todo.database.DataBaseUtility;
 import com.app.todo.login.ui.LoginActivity;
 import com.app.todo.model.NotesModel;
-import com.app.todo.todoMain.presenter.TodoMainActivityPresenter;
 import com.app.todo.todoMain.ui.fragment.AboutFragment;
 import com.app.todo.todoMain.ui.fragment.ArchiveFragment;
 import com.app.todo.todoMain.ui.fragment.NotesFragment;
+import com.app.todo.todoMain.ui.fragment.OnSearchTextChange;
 import com.app.todo.todoMain.ui.fragment.ReminderFragment;
 import com.app.todo.todoMain.ui.fragment.TrashFragment;
 import com.app.todo.utils.Constants;
@@ -115,13 +114,21 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     List<NotesModel> notesModelList = new ArrayList<>();
     private final int PICK_IMAGE_CAMERA = 1, PICK_IMAGE_GALLERY = 2;
     Snackbar snackbar;
-    TodoMainActivityPresenter presenter;
+//    TodoMainActivityPresenter presenter;
+
+
+    OnSearchTextChange searchTagListener;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_drawerlayout);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
+                .replace(R.id.frameLayout_container, new NotesFragment(), NotesFragment.TAG)
+                .addToBackStack(null)
+                .commit();
         sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
@@ -130,7 +137,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         firebaseAuth = FirebaseAuth.getInstance();
         uId = firebaseAuth.getCurrentUser().getUid();
         initView();
-        presenter.getNoteList(uId);
+//        presenter.getNoteList(uId);
         if (sharedPreferences.getBoolean(Constants.key_fb_login, false)) {
             isFbLogin();
 
@@ -144,13 +151,22 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
             nav_header_Email.setText(uEmail);
         }
 
-        initSwipeView();
+
+
+
+//        recyclerView.setAdapter(recyclerAdapter);
+        setTitle(getString(R.string.notes));
+
+
+
+
+       // initSwipeView();
         setSupportActionBar(toolbar);
         dataBaseUtility = new DataBaseUtility(this);
         //notesModels = dataBaseUtility.getDatafromDB();
         toolbar.setVisibility(View.VISIBLE);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
@@ -288,7 +304,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         return todoHomeDataModel;
     }
 
-    void initSwipeView() {
+    /*void initSwipeView() {
 
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
@@ -304,7 +320,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
                 if (direction == ItemTouchHelper.LEFT) {
 
                     databaseReference = FirebaseDatabase.getInstance().getReference();
-                    notesModel = noteList.get(position);
+                    notesModel = allNotes.get(position);
                     databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).removeValue();
                     dataBaseUtility.delete(notesModel);
                     recyclerAdapter.deleteItem(position);
@@ -342,12 +358,15 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
     }
-
+*/
 
     @Override
     public void initView() {
+
         View view = getLayoutInflater().inflate(R.layout.activity_todonotes, null, false);
-        presenter=new TodoMainActivityPresenter(this,this);
+
+
+//        presenter=new TodoMainActivityPresenter(this,this);
         textToSpeech = new TextToSpeech(this, this);
         floatingActionButton = (FloatingActionButton) findViewById(R.id.fabAddNotes);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerViewNotes);
@@ -409,7 +428,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         int id = item.getItemId();
         if (id == R.id.changeview) {
             toggle();
-            return true;
+            return false;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -501,12 +520,11 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.fabAddNotes:
+            /*case R.id.fabAddNotes:
 
                 Intent intent = new Intent(this, NotesAddActivity.class);
                 startActivityForResult(intent, 2);
-
-                break;
+                break;*/
             case R.id.profile_image:
 
                 profilePictureSet();
@@ -553,8 +571,9 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-
             case R.id.notes:
+
+
 
                 getSupportFragmentManager()
                         .beginTransaction()
@@ -672,9 +691,21 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        } else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStackImmediate();
+            if (getSupportFragmentManager().findFragmentById(R.id.frameLayout_container) instanceof NotesFragment) {
+                finish();
 
-            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            }
+            else if (getSupportFragmentManager().findFragmentById(R.id.frameLayout_container) instanceof ArchiveFragment) {
+              setTitle("Archive");
+
+            }
+        } else {
+            finish();
+        }
+    }
+            /*if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
 
                  Log.i("test ", "onBackPressed: " + getSupportFragmentManager().getBackStackEntryCount());
 
@@ -693,9 +724,8 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
 
 
                 }
-            }
-        }
-    }
+            }*/
+
 
     public void showOrHideFab(boolean show) {
         if (show) {
@@ -718,15 +748,9 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        newText = newText.toLowerCase();
-        ArrayList<NotesModel> newList = new ArrayList<>();
-        for (NotesModel model : noteList) {
 
-            String name = model.getTitle().toLowerCase();
-            if (name.contains(newText))
-                newList.add(model);
-        }
-        recyclerAdapter.setFilter(newList);
+            searchTagListener.onSearchTagChange(newText.trim());
+
         return true;
     }
 
@@ -780,7 +804,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
 
     @Override
     public void hideDialog() {
-        if(!isFinishing() && progressDialog != null){
+        if( progressDialog != null && progressDialog.isShowing()){
             progressDialog.dismiss();
         }
     }
@@ -802,6 +826,9 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         recyclerAdapter = new RecyclerAdapter(TodoMainActivity.this, todoHomeDataModel);
         recyclerView.setAdapter(recyclerAdapter);
         recyclerAdapter.notifyDataSetChanged();
+    }
+    public void setSearchTagListener(OnSearchTextChange searchTagListener){
+        this.searchTagListener = searchTagListener;
     }
 
 }

@@ -1,99 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:id="@+id/root"
         android:layout_height="40dp"
         android:orientation="horizontal"
-        android:weightSum="1"
-     >
+        android:weightSum="1">
+
         <android.support.v7.widget.AppCompatImageButton
-            android:layout_width="30dp"
-            android:layout_marginTop="3dp"
-            android:layout_height="wrap_content"
             android:id="@+id/back_button"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
             android:background="@drawable/back"
 
             />
-        <android.support.v7.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginTop="8dp"
-            android:textSize="20dp"
-            android:layout_marginLeft="10dp"
-            android:layout_toRightOf="@+id/back_button"
-            android:id="@+id/recenttime_textView"
-            android:clickable="false"
 
-          />
         <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/recenttime_textView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginTop="8dp"
-            android:textSize="20dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginTop="8dp"
             android:layout_toRightOf="@+id/back_button"
-            android:id="@+id/time_textView"
             android:clickable="false"
+            android:textSize="20dp" />
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/time_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="8dp"
+            android:layout_toRightOf="@+id/back_button"
+            android:clickable="false"
+            android:textSize="20dp"
 
             />
 
     </LinearLayout>
 
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/titleLayout"
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/imageView"
-        android:layout_centerHorizontal="true"
-        >
-    <android.support.v7.widget.AppCompatEditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/notesadd_title_hint"
-        android:id="@+id/title_edittext"
-        android:textSize="@dimen/notesadd_textSize"
-        android:textStyle="italic"
-        android:layout_marginLeft="@dimen/notesadd_mariginLeft"/>
-    </android.support.design.widget.TextInputLayout>
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <LinearLayout
+        android:layout_height="1dp"
+        android:id="@+id/view1"
+        android:layout_below="@+id/root"
+        android:background="@color/bg_button_login" />
+
+
+        <RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/contentLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/imageView"
-        android:layout_centerHorizontal="true"
-        >
-    <android.support.v7.widget.AppCompatEditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+            android:layout_below="@+id/view1"
+            >
 
-        android:background="@android:color/transparent"
-        android:hint="@string/notesadd_content_hint"
-        android:id="@+id/content_edittext"
-        android:textSize="@dimen/notesadd_textSize"
-        android:layout_marginLeft="@dimen/notesadd_mariginLeft"
-        android:textStyle="italic"
-        android:textCursorDrawable="@color/colorAccent"
-        />
-    </android.support.design.widget.TextInputLayout>
-    <android.support.v7.widget.AppCompatTextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/reminderDate"
-        android:textSize="15dp"
-        android:layout_marginLeft="@dimen/notesadd_mariginLeft"
-        android:textColor="#ff00"/>
-        </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/titleLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true">
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/title_edittext"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/notesadd_mariginLeft"
+                    android:background="@android:color/transparent"
+                    android:hint="@string/notesadd_title_hint"
+                    android:textSize="@dimen/notesadd_textSize"
+                    android:textStyle="italic" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/bg_button_login" />
+            </android.support.design.widget.TextInputLayout>
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/scroll"
+    android:layout_below="@+id/titleLayout">
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/contentLayout"
+                android:layout_below="@+id/scroll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true">
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/content_edittext"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/notesadd_mariginLeft"
+                    android:background="@android:color/transparent"
+                    android:hint="@string/notesadd_content_hint"
+                    android:textCursorDrawable="@color/colorAccent"
+                    android:textSize="@dimen/notesadd_textSize"
+                    android:textStyle="italic"
+                    android:layout_marginBottom="10dp"/>
+
+            </android.support.design.widget.TextInputLayout>
+</ScrollView>
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/reminderDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/notesadd_mariginLeft"
+                android:textColor="#ff00"
+                android:hint="reminder :"
+
+                android:layout_above="@+id/view2"
+                android:textSize="15dp"
+                android:layout_marginBottom="10dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:id="@+id/view2"
+                android:layout_above="@+id/info"
+                android:background="@color/bg_button_login" />
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="110dp"
+                android:text="\u0040 Notes add activity"
+                android:textSize="15dp" />
+
+        </RelativeLayout>
+</RelativeLayout>

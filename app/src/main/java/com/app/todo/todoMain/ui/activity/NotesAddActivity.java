@@ -141,7 +141,6 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
                 bundle.putString(Constants.reminderKey, reminderTextView.getText().toString());
 
                 presenter.addNoteToFirebase(bundle);
-
                 finish();
                 return super.onOptionsItemSelected(item);
 
@@ -158,6 +157,7 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
         reminderTextView.setText(sdf.format(myCalendar.getTime()));
         Calendar current = Calendar.getInstance();
         if ((myCalendar.compareTo(current) <= 0)) {
+
             //The set Date/Time already passed
             new DatePickerDialog(this, datePicker, myCalendar
                     .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),

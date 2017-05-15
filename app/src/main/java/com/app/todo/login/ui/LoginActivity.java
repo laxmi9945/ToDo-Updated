@@ -425,6 +425,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         editor.putString("uid",uid);
         sharedPreferences.edit().putBoolean(Constants.key_firebase_login,true).apply();
         startActivity(new Intent(getApplicationContext(), TodoMainActivity.class));
+       // startActivity(new Intent(getApplicationContext(), TodoMainActivity.class));
         finish();
     }
 
