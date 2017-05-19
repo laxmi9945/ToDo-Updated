@@ -19,7 +19,7 @@ public class TrashFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view=inflater.inflate(R.layout.fragment_trash, container, false);
-
+        getActivity().setTitle("Trash");
         return view;
 
     }

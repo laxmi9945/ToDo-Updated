@@ -1,8 +1,6 @@
 package com.app.todo.adapter;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
@@ -106,7 +104,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
 
             cardView.setOnClickListener(this);
 
-            cardView.setOnLongClickListener(new View.OnLongClickListener() {
+            /*cardView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
 
@@ -137,7 +135,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
 
                     return true;
                 }
-            });
+            });*/
+           // cardView.setOnLongClickListener(new MyclickListener());
+
         }
 
         @Override
@@ -156,6 +156,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
                     args.putString("reminder",note.getReminderDate());
                     fragment.setArguments(args);
                     ((AppCompatActivity)context).getFragmentManager().beginTransaction().replace(R.id.frameLayout_container, fragment).addToBackStack(null).commit();
+
                     break;
             }
         }
@@ -186,5 +187,36 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
         this.model.addAll(notesmodel);
         notifyDataSetChanged();
     }
+   /* private final class MyclickListener implements View.OnLongClickListener{
 
+        @Override
+        public boolean onLongClick(View view) {
+            // create it from the object's tag
+            ClipData.Item item = new ClipData.Item((CharSequence)view.getTag());
+
+            String[] mimeTypes = {
+                    ClipDescription.MIMETYPE_TEXT_PLAIN
+            };
+            ClipData data = new ClipData(view.getTag().toString(), mimeTypes, item);
+            View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
+
+            view.startDrag( data, //data to be dragged
+                    shadowBuilder, //drag shadow
+                    view, //local data about the drag and drop operation
+                    0   //no needed flags
+            );
+
+
+            view.setVisibility(View.INVISIBLE);
+            return true;
+        }
+    }
+    class MyDragListener implements View.OnDragListener{
+
+        @Override
+        public boolean onDrag(View v, DragEvent event) {
+            return false;
+        }
+    }
+*/
 }

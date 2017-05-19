@@ -2,24 +2,24 @@ package com.app.todo.todoMain.ui.activity;
 
 
 import android.animation.LayoutTransition;
-import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
+import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.AppCompatTextView;
@@ -28,6 +28,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -62,12 +63,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -75,7 +71,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
-public class TodoMainActivity extends BaseActivity implements TodoMainActivityInterface {
+public class TodoMainActivity extends BaseActivity implements TodoMainActivityInterface, TextToSpeech.OnInitListener, SearchView.OnQueryTextListener, View.OnClickListener,
+        NavigationView.OnNavigationItemSelectedListener {
+    static final String TAG = "NetworkStateReceiver";
+    private final int PICK_IMAGE_CAMERA = 100, PICK_IMAGE_GALLERY = 200, CROP_IMAGE = 1;
     RecyclerView recyclerView;
     TextToSpeech textToSpeech;
     boolean isView = false;
@@ -96,7 +95,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     CircleImageView circleImageView;
     DatabaseReference databaseReference;
     FirebaseAuth firebaseAuth;
-    List<NotesModel> allNotes, noteList, archiveNotes, reminderNotes;
+    List<NotesModel> allNotes;
     FloatingActionButton floatingActionButton;
     ProgressDialog progressDialog;
     String fb_first_name;
@@ -106,17 +105,13 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     String google_first_name;
     String google_email;
     String google_imageUrl;
-    NotesModel notesModel = new NotesModel();
-    static final String TAG = "NetworkStateReceiver";
     String uId;
     GoogleSignInOptions googleSignInOptions;
     GoogleApiClient googleApiClient;
-    List<NotesModel> notesModelList = new ArrayList<>();
-    private final int PICK_IMAGE_CAMERA = 1, PICK_IMAGE_GALLERY = 2;
-    Snackbar snackbar;
-//    TodoMainActivityPresenter presenter;
-
-
+    File file;
+    Uri uri;
+    Intent CamIntent, GalIntent, CropIntent;
+    //    TodoMainActivityPresenter presenter;
     OnSearchTextChange searchTagListener;
 
     @Override
@@ -127,17 +122,19 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
                 .beginTransaction()
                 .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
                 .replace(R.id.frameLayout_container, new NotesFragment(), NotesFragment.TAG)
-                .addToBackStack(null)
+                /*.addToBackStack(null)*/
                 .commit();
+
+
         sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
-
         //Getting reference to Firebase Database
         databaseReference = FirebaseDatabase.getInstance().getReference().child(getString(R.string.userData));
         firebaseAuth = FirebaseAuth.getInstance();
         uId = firebaseAuth.getCurrentUser().getUid();
+
         initView();
-//        presenter.getNoteList(uId);
+
         if (sharedPreferences.getBoolean(Constants.key_fb_login, false)) {
             isFbLogin();
 
@@ -145,25 +142,23 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
             isGoogleLogin();
 
         } else {
+            SharedPreferences shre = PreferenceManager.getDefaultSharedPreferences(this);
+            String previouslyEncodedImage = shre.getString("image_data", "");
+
+            if (!previouslyEncodedImage.equalsIgnoreCase("")) {
+                byte[] b = Base64.decode(previouslyEncodedImage, Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+                circleImageView.setImageBitmap(bitmap);
+            }
             String uName = firebaseAuth.getCurrentUser().getDisplayName();
             String uEmail = firebaseAuth.getCurrentUser().getEmail();
             nav_header_Name.setText(uName);
             nav_header_Email.setText(uEmail);
+            circleImageView.setOnClickListener(this);
         }
-
-
-
-
-//        recyclerView.setAdapter(recyclerAdapter);
         setTitle(getString(R.string.notes));
-
-
-
-
-       // initSwipeView();
         setSupportActionBar(toolbar);
         dataBaseUtility = new DataBaseUtility(this);
-        //notesModels = dataBaseUtility.getDatafromDB();
         toolbar.setVisibility(View.VISIBLE);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -172,63 +167,6 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
 
         floatingActionButton.setVisibility(View.VISIBLE);
-       /* progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage(getString(R.string.fetching_data));
-        progressDialog.show();
-
-        //retriving data from firebase
-        databaseReference.child(uId).addValueEventListener(new ValueEventListener() {
-
-            //String uId = firebaseAuth.getCurrentUser().getUid();
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                GenericTypeIndicator<ArrayList<NotesModel>> arrayListGenericTypeIndicator = new GenericTypeIndicator<ArrayList<NotesModel>>() {
-                };
-                ArrayList<NotesModel> notesModel = new ArrayList<>();
-
-                for (DataSnapshot post : dataSnapshot.getChildren()) {
-
-                    ArrayList<NotesModel> notesModel_ArrayList;
-                    notesModel_ArrayList = post.getValue(arrayListGenericTypeIndicator);
-                    notesModel.addAll(notesModel_ArrayList);
-
-                }
-
-                notesModel.removeAll(Collections.singleton(null));
-                setDatatoRecycler(notesModel);
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                //Toast.makeText(context, getString(R.string.fetching_error) , Toast.LENGTH_SHORT).show();
-            }
-        });
-*/
-
-        //Animating Fab button while Scrolling
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy > 0 || dy < 0 && floatingActionButton.isShown()) {
-                    floatingActionButton.hide();
-                }
-                //super.onScrolled(recyclerView, dx, dy);
-            }
-
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    floatingActionButton.show();
-                }
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-
-        });
 
     }
 
@@ -244,7 +182,6 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         Glide.with(getApplicationContext()).load(imageUrl).into(circleImageView);
         return false;
 
-
     }
 
     boolean isGoogleLogin() {
@@ -258,107 +195,6 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         Glide.with(getApplicationContext()).load(google_imageUrl).into(circleImageView);
         return false;
     }
-
-    void setDatatoRecycler(List<NotesModel> notesModel) {
-        allNotes = notesModel;
-        noteList = getWithoutArchiveItems();
-        recyclerAdapter = new RecyclerAdapter(TodoMainActivity.this, noteList);
-        recyclerView.setAdapter(recyclerAdapter);
-        recyclerAdapter.notifyDataSetChanged();
-        progressDialog.dismiss();
-
-    }
-
-    private List<NotesModel> getReminderItems() {
-
-        Date date = new Date();
-        SimpleDateFormat format = new SimpleDateFormat(getString(R.string.date_time));
-        String currentDate = format.format(date.getTime());
-        ArrayList<NotesModel> notesModelArrayList = new ArrayList<>();
-        for (NotesModel note : allNotes) {
-            if (note.getReminderDate().equals(currentDate)) {
-                notesModelArrayList.add(note);
-            }
-        }
-        return notesModelArrayList;
-    }
-
-    private List<NotesModel> getWithoutArchiveItems() {
-        ArrayList<NotesModel> todoHomeDataModel = new ArrayList<>();
-        for (NotesModel note : allNotes) {
-            if (!note.isArchieved()) {
-                todoHomeDataModel.add(note);
-            }
-        }
-        return todoHomeDataModel;
-    }
-
-    private List<NotesModel> getArchiveItems() {
-        ArrayList<NotesModel> todoHomeDataModel = new ArrayList<>();
-        for (NotesModel note : allNotes) {
-            if (note.isArchieved()) {
-                todoHomeDataModel.add(note);
-            }
-
-        }
-        return todoHomeDataModel;
-    }
-
-    /*void initSwipeView() {
-
-        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-
-            @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-
-                return true;
-            }
-
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                final int position = viewHolder.getAdapterPosition();
-                if (direction == ItemTouchHelper.LEFT) {
-
-                    databaseReference = FirebaseDatabase.getInstance().getReference();
-                    notesModel = allNotes.get(position);
-                    databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).removeValue();
-                    dataBaseUtility.delete(notesModel);
-                    recyclerAdapter.deleteItem(position);
-                    recyclerView.setAdapter(recyclerAdapter);
-                    snackbar = Snackbar
-                            .make(getCurrentFocus(), getString(R.string.item_deleted), Snackbar.LENGTH_LONG);
-
-                    snackbar.show();
-
-                }
-                if (direction == ItemTouchHelper.RIGHT) {
-                    noteList=getWithoutArchiveItems();
-                    notesModel = noteList.get(position);
-                    notesModel.setArchieved(true);
-                    databaseReference.child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
-                    recyclerAdapter.archiveItem(position);
-                    recyclerView.setAdapter(recyclerAdapter);
-                    Snackbar snackbar = Snackbar
-                            .make(getCurrentFocus(), getString(R.string.item_archieved), Snackbar.LENGTH_LONG)
-                            .setAction(getString(R.string.undo), new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    notesModel.setArchieved(false);
-                                    databaseReference.child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
-                                    Snackbar snackbar1 = Snackbar.make(getCurrentFocus(), getString(R.string.item_restored), Snackbar.LENGTH_SHORT);
-                                    snackbar1.show();
-                                }
-                            });
-                    snackbar.show();
-                }
-
-            }
-        };
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
-        itemTouchHelper.attachToRecyclerView(recyclerView);
-
-    }
-*/
 
     @Override
     public void initView() {
@@ -403,7 +239,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     @Override
     public void setClicklistener() {
         floatingActionButton.setOnClickListener(this);
-        circleImageView.setOnClickListener(this);
+
     }
 
     @Override
@@ -449,86 +285,13 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
 
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        String titleData = "";
-        String contentData = "";
-        String recentTimeData = "";
-        if (resultCode == RESULT_OK) {
-
-            Bundle bundle = data.getBundleExtra("bundle");
-            if (bundle != null) {
-                titleData = bundle.getString(Constants.title_data);
-                contentData = bundle.getString(Constants.content_data);
-                recentTimeData = bundle.getString(Constants.date_data);
-            }
-            NotesModel note = new NotesModel();
-            note.setTitle(titleData);
-            note.setContent(contentData);
-            note.setDate(recentTimeData);
-            recyclerAdapter.addNotes(note);
-            recyclerAdapter.notifyDataSetChanged();
-            recyclerView.setAdapter(recyclerAdapter);
-
-        }
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == PICK_IMAGE_GALLERY)
-                onSelectFromGalleryResult(data);
-            else if (requestCode == PICK_IMAGE_CAMERA)
-                onCaptureImageResult(data);
-        }
-
-        super.onActivityResult(requestCode, resultCode, data);
-
-    }
-
-    private void onCaptureImageResult(Intent data) {
-
-        Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
-        File destination = new File(Environment.getExternalStorageDirectory(),
-                System.currentTimeMillis() + ".jpg");
-        FileOutputStream fileOutputStream;
-        try {
-            destination.createNewFile();
-            fileOutputStream = new FileOutputStream(destination);
-            fileOutputStream.write(bytes.toByteArray());
-            fileOutputStream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        circleImageView.setImageBitmap(thumbnail);
-    }
-
-    private void onSelectFromGalleryResult(Intent data) {
-
-        Bitmap bitmap = null;
-        if (data != null) {
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), data.getData());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        circleImageView.setImageBitmap(bitmap);
-
-    }
-
-    @Override
     public void onClick(View v) {
 
         switch (v.getId()) {
-            /*case R.id.fabAddNotes:
 
-                Intent intent = new Intent(this, NotesAddActivity.class);
-                startActivityForResult(intent, 2);
-                break;*/
             case R.id.profile_image:
 
                 profilePictureSet();
-
 
                 break;
 
@@ -540,31 +303,131 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
             PackageManager pm = getPackageManager();
             int hasPerm = pm.checkPermission(android.Manifest.permission.CAMERA, getPackageName());
             if (hasPerm == PackageManager.PERMISSION_GRANTED) {
-                final CharSequence[] options = {"Take Photo", "Choose From Gallery", "Cancel"};
+                final CharSequence[] options = {getString(R.string.take_photo), getString(R.string.choose_from_gallery), getString(R.string.cancel)};
                 android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
-                builder.setTitle("Select Option");
+                builder.setTitle(getString(R.string.choose_option));
                 builder.setItems(options, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int item) {
-                        if (options[item].equals("Take Photo")) {
+                        if (options[item].equals(getString(R.string.take_photo))) {
                             dialog.dismiss();
-                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                            startActivityForResult(intent, PICK_IMAGE_CAMERA);
-                        } else if (options[item].equals("Choose From Gallery")) {
+                            ClickImageFromCamera();
+                        } else if (options[item].equals(getString(R.string.choose_from_gallery))) {
                             dialog.dismiss();
-                            Intent pickPhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                            startActivityForResult(pickPhoto, PICK_IMAGE_GALLERY);
-                        } else if (options[item].equals("Cancel")) {
+                            GetImageFromGallery();
+                        } else if (options[item].equals(getString(R.string.cancel))) {
                             dialog.dismiss();
                         }
                     }
                 });
                 builder.show();
             } else
-                Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.camera_permission_error), Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.camera_permission_error), Toast.LENGTH_SHORT).show();
             e.printStackTrace();
+        }
+    }
+
+    public void ClickImageFromCamera() {
+
+        CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+
+        file = new File(Environment.getExternalStorageDirectory(),
+                "file" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+        uri = Uri.fromFile(file);
+
+        CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
+
+        CamIntent.putExtra("return-data", true);
+
+        startActivityForResult(CamIntent, PICK_IMAGE_CAMERA);
+
+    }
+
+    public void GetImageFromGallery() {
+
+        GalIntent = new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+        startActivityForResult(Intent.createChooser(GalIntent, getString(R.string.select_img_from_gallery)), PICK_IMAGE_GALLERY);
+
+    }
+
+    public void ImageCropFunction() {
+
+        // Image Crop Code
+        try {
+            CropIntent = new Intent("com.android.camera.action.CROP");
+
+            CropIntent.setDataAndType(uri, "image/*");
+
+            CropIntent.putExtra("crop", "true");
+            CropIntent.putExtra("outputX", 180);
+            CropIntent.putExtra("outputY", 180);
+            CropIntent.putExtra("aspectX", 3);
+            CropIntent.putExtra("aspectY", 4);
+            CropIntent.putExtra("scaleUpIfNeeded", true);
+            CropIntent.putExtra("return-data", true);
+            startActivityForResult(CropIntent, CROP_IMAGE);
+
+        } catch (ActivityNotFoundException e) {
+
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        String titleData = "";
+        String contentData = "";
+        String recentTimeData = "";
+
+        Log.i(TAG, "onActivityResult: " + requestCode + "  " + resultCode);
+
+        if (resultCode == RESULT_OK && data != null) {
+
+            if (requestCode == PICK_IMAGE_GALLERY) {
+                uri = data.getData();
+                ImageCropFunction();
+            } else if (requestCode == PICK_IMAGE_CAMERA) {
+                uri = data.getData();
+                ImageCropFunction();
+            } else if (requestCode == CROP_IMAGE) {
+                if (data != null) {
+
+                    Bundle bundle = data.getExtras();
+                    Bitmap bitmap = bundle.getParcelable("data");
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    byte[] b = baos.toByteArray();
+
+                    String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+                    //  textEncode.setText(encodedImage);
+
+                    SharedPreferences shre = PreferenceManager.getDefaultSharedPreferences(this);
+                    SharedPreferences.Editor edit = shre.edit();
+                    edit.putString("image_data", encodedImage);
+                    edit.commit();
+                    Log.i(TAG, "pic: " + bitmap);
+
+                    circleImageView.setImageBitmap(bitmap);
+                } else {
+                    Bundle bundle = data.getBundleExtra("bundle");
+                    if (bundle != null) {
+                        titleData = bundle.getString(Constants.title_data);
+                        contentData = bundle.getString(Constants.content_data);
+                        recentTimeData = bundle.getString(Constants.date_data);
+                    }
+                    NotesModel note = new NotesModel();
+                    note.setTitle(titleData);
+                    note.setContent(contentData);
+                    note.setDate(recentTimeData);
+                    recyclerAdapter.addNotes(note);
+                    recyclerAdapter.notifyDataSetChanged();
+                    recyclerView.setAdapter(recyclerAdapter);
+                }
+            }
         }
     }
 
@@ -572,9 +435,6 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.notes:
-
-
-
                 getSupportFragmentManager()
                         .beginTransaction()
                         .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
@@ -665,6 +525,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
             @Override
             public void onResult(@NonNull Status status) {
                 finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 Toast.makeText(TodoMainActivity.this, getString(R.string.logout_success), Toast.LENGTH_SHORT).show();
             }
         });
@@ -676,8 +537,9 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         editor.putBoolean(Constants.key_google_login, false);
         editor.putBoolean(Constants.key_firebase_login, false);
         editor.apply();
-        finish();
         startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+        finish();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
     }
 
@@ -686,46 +548,18 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         recyclerView.setAdapter(recyclerAdapter);
     }
 
-
     @Override
     public void onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportFragmentManager().popBackStackImmediate();
-            if (getSupportFragmentManager().findFragmentById(R.id.frameLayout_container) instanceof NotesFragment) {
-                finish();
+        int count = getFragmentManager().getBackStackEntryCount();
+        if (count == 0) {
+            super.onBackPressed();
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
-            }
-            else if (getSupportFragmentManager().findFragmentById(R.id.frameLayout_container) instanceof ArchiveFragment) {
-              setTitle("Archive");
-
-            }
         } else {
-            finish();
+            getFragmentManager().popBackStack();
         }
+
     }
-            /*if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-
-                 Log.i("test ", "onBackPressed: " + getSupportFragmentManager().getBackStackEntryCount());
-
-                if (getSupportFragmentManager().findFragmentByTag(NotesFragment.TAG) instanceof NotesFragment) {
-                    finish();
-
-                } else {
-                    startActivity(new Intent(getApplicationContext(), TodoMainActivity.class));
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                            .replace(R.id.frameLayout_container, new NotesFragment(), NotesFragment.TAG)
-                            .addToBackStack(null)
-                            .commit();
-                    setTitle(getString(R.string.notes));
-
-
-                }
-            }*/
-
 
     public void showOrHideFab(boolean show) {
         if (show) {
@@ -740,7 +574,6 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         setTitle(title);
     }
 
-
     @Override
     public boolean onQueryTextSubmit(String query) {
         return false;
@@ -749,11 +582,10 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     @Override
     public boolean onQueryTextChange(String newText) {
 
-            searchTagListener.onSearchTagChange(newText.trim());
+        searchTagListener.onSearchTagChange(newText.trim());
 
         return true;
     }
-
 
     @Override
     public void onInit(int status) {
@@ -796,7 +628,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     @Override
     public void showDialog(String message) {
         progressDialog = new ProgressDialog(this);
-        if(!isFinishing()){
+        if (!isFinishing()) {
             progressDialog.setMessage(message);
             progressDialog.show();
         }
@@ -804,7 +636,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
 
     @Override
     public void hideDialog() {
-        if( progressDialog != null && progressDialog.isShowing()){
+        if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
     }
@@ -827,8 +659,8 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         recyclerView.setAdapter(recyclerAdapter);
         recyclerAdapter.notifyDataSetChanged();
     }
-    public void setSearchTagListener(OnSearchTextChange searchTagListener){
+
+    public void setSearchTagListener(OnSearchTextChange searchTagListener) {
         this.searchTagListener = searchTagListener;
     }
-
 }

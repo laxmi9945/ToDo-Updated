@@ -21,7 +21,7 @@
         android:id="@+id/tv"
         android:text="@string/developer_name"
         android:layout_marginTop="20dp"
-        android:textStyle="italic"/>
+        android:textStyle="italic|bold"/>
     <android.support.v7.widget.AppCompatTextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
         android:id="@+id/mobNo"
         android:text="@string/developer_mob"
         android:layout_marginTop="2dp"
-        android:textStyle="italic"/>
+        android:textStyle="italic|bold"/>
     <android.support.v7.widget.AppCompatTextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
         android:id="@+id/emailId"
         android:text="@string/developer_email"
         android:layout_marginTop="2dp"
-        android:textStyle="italic"/>
+        android:textStyle="italic|bold"/>
 
     <android.support.v7.widget.AppCompatTextView
         android:layout_width="match_parent"

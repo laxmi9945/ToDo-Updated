@@ -1,15 +1,18 @@
 package com.app.todo.registration.ui;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
-import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.view.View;
 import android.widget.Toast;
@@ -21,8 +24,15 @@ import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 import com.app.todo.utils.Constants;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class RegistrationActivity extends AppCompatActivity implements RegistrationActivityInterface{
@@ -32,7 +42,7 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
     private AppCompatEditText edittextmobNo;
     private AppCompatButton buttonSave;
     private AppCompatTextView textView;
-    AppCompatImageView profile_imageView;
+    CircleImageView profile_imageView;
     private Pattern pattern;
     private Pattern pattern2;
     private Matcher matcher;
@@ -40,12 +50,13 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
     private ProgressDialog progressDialog;
     private FirebaseAuth firebaseAuth;
     private UserInfoModel userInfoModel;
-
     private RegistrationPresenter registrationPresenter;
     private String Name;
     private String Email;
     private String Password;
     private String MobileNo;
+    //a Uri object to store file path
+    private Uri filePath;
     private final int PICK_IMAGE_CAMERA = 1, PICK_IMAGE_GALLERY = 2;
 
     @Override
@@ -56,11 +67,10 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
         registrationPresenter=new RegistrationPresenter(this,this);
         progressDialog = new ProgressDialog(this);
         initView();
-
     }
 
     private void initView() {
-        profile_imageView= (AppCompatImageView) findViewById(R.id.user_pic);
+        profile_imageView= (CircleImageView) findViewById(R.id.user_pic);
         buttonSave = (AppCompatButton) findViewById(R.id.save_button);
         edittextName = (AppCompatEditText) findViewById(R.id.name_edittext);
         edittextemail = (AppCompatEditText) findViewById(R.id.email_Edittext);
@@ -96,6 +106,7 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
 
             case R.id.allreadyacc_textview:
                 finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
             case R.id.user_pic:
                 addProfilePic();
@@ -231,6 +242,60 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
                     progressDialog.dismiss();
                 }
             }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        /*if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            filePath = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                imageView.setImageBitmap(bitmap);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }*/
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == PICK_IMAGE_GALLERY)
+                onSelectFromGalleryResult(data);
+            else if (requestCode == PICK_IMAGE_CAMERA)
+                onCaptureImageResult(data);
+        }
+
+    }
+
+    private void onCaptureImageResult(Intent data) {
+        Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+        File destination = new File(Environment.getExternalStorageDirectory(),
+                System.currentTimeMillis() + ".jpg");
+        FileOutputStream fileOutputStream;
+        try {
+            destination.createNewFile();
+            fileOutputStream = new FileOutputStream(destination);
+            fileOutputStream.write(bytes.toByteArray());
+            fileOutputStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        profile_imageView.setImageBitmap(thumbnail);
+    }
+
+    private void onSelectFromGalleryResult(Intent data) {
+        Bitmap bitmap = null;
+        if (data != null) {
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), data.getData());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        profile_imageView.setImageBitmap(bitmap);
     }
 }
 

@@ -47,7 +47,7 @@
     <string name="search_hint">Search note &#8230;</string>
     <string name="saved">Saved &#8230;</string>
     <string name="pined">pined &#8230;</string>
-    <string name="date_time">E MMMM dd, yyyy</string>
+    <string name="date_time">MMMM dd, yyyy</string>
     <string name="time">hh:mm a</string>
     <string name="enter_registered_email">Enter your registered email id</string>
     <string name="sending_reset_instruction">Sending reset password instruction &#8230;</string>
@@ -87,9 +87,9 @@
     <string name="developer_email">Email:laxmi9945@gmail.com</string>
     <string name="note_add_loading_message">note is adding &#8230;</string>
     <string name="share_using">Share using</string>
-    <string name="no_reminder">Empty Reminder </string>
-    <string name="empty_trash">Empty Trash</string>
-    <string name="archive_empty">Empty Archive </string>
+    <string name="no_reminder">Notes with upcoming reminders appear here </string>
+    <string name="empty_trash">No notes in Trash</string>
+    <string name="archive_empty">Your archived notes appear here  </string>
     <string name="nav_header_default_email">laxmi9945@gmail.com</string>
     <string name="nav_header_default_name">ToDo App</string>
     <string name="forgot_pwd">Forgot Password?</string>
@@ -103,6 +103,13 @@
     <string name="archive_failure">Archive failure</string>
     <string name="loading">Loading &#8230;</string>
     <string name="change_View">ChangeView</string>
+    <string name="blue_name">test</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="choose_from_gallery">Choose From Gallery</string>
+    <string name="cancel">Cancel</string>
+    <string name="choose_option">Select Option</string>
+    <string name="camera_permission_error">Camera Permission error</string>
+    <string name="select_img_from_gallery">Select Image From Gallery</string>
 
 
     <integer name="swing_anim_time">750</integer>

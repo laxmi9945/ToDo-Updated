@@ -66,7 +66,7 @@ public class NoteseditFragment extends Fragment implements NoteseditFragmentInte
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_todoitemsdetails, container, false);
+        View view = inflater.inflate(R.layout.fragment_edit_notes, container, false);
         setHasOptionsMenu(true);
         mContext = getActivity();
         reminderTextView = (AppCompatTextView) view.findViewById(R.id.reminderEdit_textView);

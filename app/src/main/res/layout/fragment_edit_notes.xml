@@ -7,16 +7,16 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="35dp"
             android:orientation="horizontal"
-            android:weightSum="1">
+            >
         <android.support.v7.widget.AppCompatImageButton
             android:layout_width="30dp"
             android:layout_marginTop="3dp"
             android:layout_height="wrap_content"
             android:id="@+id/back_button"
             android:background="@drawable/back"
-            android:layout_weight="0.1"
+
             />
             <android.support.v7.widget.AppCompatTextView
                 android:layout_width="wrap_content"
@@ -26,7 +26,8 @@
                 android:hint="reminder date"
                 android:textSize="25dp"
                 android:textColor="@color/colorRed"
-                android:layout_weight="0.9"/>
+                android:layout_marginLeft="15dp"
+                />
         </LinearLayout>
 
         <View
@@ -46,10 +47,28 @@
             android:hint="Title"
             android:layout_marginTop="2dp"
             android:background="@android:color/transparent"
-            android:textColor="#ff00"
+            android:textColor="@color/bg_button_login"
             android:textSize="@dimen/title_edittext"
-            android:textStyle="italic" />
+            android:textStyle="italic"
 
+            />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/bg_button_login"
+            android:layout_below="@+id/edit_title"
+            android:id="@+id/view4"
+            />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/view4"
+            android:layout_above="@+id/viewlast">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
         <android.support.v7.widget.AppCompatEditText
             android:id="@+id/edit_content"
             android:hint="Edit content"
@@ -58,15 +77,21 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="@android:color/transparent"
-            android:textColor="#ff00"
+            android:textColor="@color/bg_button_login"
             android:textSize="@dimen/content_edittext"
-            android:textStyle="italic" />
+            android:textStyle="italic"
+
+            />
+            </LinearLayout>
+        </ScrollView>
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
+            android:id="@+id/viewlast"
             android:background="@color/bg_button_login"
             android:layout_above="@+id/info"
             />
+
         <android.support.v7.widget.AppCompatTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

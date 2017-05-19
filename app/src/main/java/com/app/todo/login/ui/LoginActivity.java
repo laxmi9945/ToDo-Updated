@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatTextView;
@@ -169,6 +170,8 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
     }
 
+
+
     // [START on_start_check_user]
     @Override
     public void onStart() {
@@ -185,12 +188,16 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
             case R.id.createAccount_Textview:
 
                 Intent intent = new Intent(this, RegistrationActivity.class);
-                startActivity(intent);
+                Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(this,android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
+                startActivity(intent,bundle);
                 break;
 
             case R.id.forgot_textview:
 
-                startActivity(new Intent(getApplicationContext(), ResetPasswordActivity.class));
+                //startActivity(new Intent(getApplicationContext(), ResetPasswordActivity.class));
+                Intent intent2 = new Intent(this, ResetPasswordActivity.class);
+                Bundle bundle2 = ActivityOptionsCompat.makeCustomAnimation(this,android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
+                startActivity(intent2,bundle2);
                 break;
 
             case R.id.login_button:

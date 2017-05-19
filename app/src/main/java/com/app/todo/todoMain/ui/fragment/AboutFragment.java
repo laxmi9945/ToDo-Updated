@@ -21,7 +21,9 @@ public class AboutFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view=inflater.inflate(R.layout.fragment_about, container, false);
+        getActivity().setTitle("About");
         setHasOptionsMenu(true);
+        //((AppCompatActivity) getActivity()).getSupportActionBar().hide();
         return view;
 
     }

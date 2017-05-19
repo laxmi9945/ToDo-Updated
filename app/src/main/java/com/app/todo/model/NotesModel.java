@@ -8,6 +8,17 @@ public class NotesModel {
     private String reminderDate;
     private int id;
     private boolean isArchieved;
+    /*private boolean isDeleted;
+
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }*/
+
 
 
     public String getTime() {

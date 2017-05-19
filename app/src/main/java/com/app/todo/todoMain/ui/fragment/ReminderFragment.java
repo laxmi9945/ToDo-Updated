@@ -32,18 +32,19 @@ public class ReminderFragment extends Fragment implements ReminderFragmentInterf
     TodoMainActivity todoMainActivity;
     ReminderFragmentPresenterInterface presenter;
     FirebaseAuth firebaseAuth;
-    RecyclerView archive_recyclerView;
     RecyclerAdapter reminder_adapter;
     RecyclerView mrecyclerView;
     ProgressDialog progressDialog;
     AppCompatTextView reminderTextView;
     AppCompatImageView reminderImageView;
     LinearLayout linearLayout;
+    ArrayList<NotesModel> notesModelArrayList = new ArrayList<>();
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_reminder, container, false);
         initView(view);
+        getActivity().setTitle("Reminder");
         String uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         presenter.getReminderNotes(uId);
         return view;
@@ -55,7 +56,6 @@ public class ReminderFragment extends Fragment implements ReminderFragmentInterf
         reminderTextView= (AppCompatTextView) view.findViewById(R.id.reminder_textView);
         reminderImageView= (AppCompatImageView) view.findViewById(R.id.reminder_event_icon);
         firebaseAuth = FirebaseAuth.getInstance();
-
         mrecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
 
     }
@@ -89,20 +89,20 @@ public class ReminderFragment extends Fragment implements ReminderFragmentInterf
 
     @Override
     public void gettingReminderSuccess(List<NotesModel> notesModelList) {
+
         Date date = new Date();
         SimpleDateFormat format = new SimpleDateFormat(getString(R.string.date_time));
         String currentDate = format.format(date.getTime());
-        ArrayList<NotesModel> notesModelArrayList = new ArrayList<>();
-        for (NotesModel note : notesModelList) {
-            if (note.getReminderDate().equals(currentDate) && !note.isArchieved())
-            {
-                notesModelArrayList.add(note);
-                reminder_adapter.setNoteList(notesModelArrayList);
+        ArrayList<NotesModel> reminderNoteList=new ArrayList<>();
+        for (NotesModel notesModel: notesModelList){
+            if (notesModel.getReminderDate().equals(currentDate) && !(notesModel.isArchieved())){
+                reminderNoteList.add(notesModel);
             }
         }
-        reminder_adapter = new RecyclerAdapter(getActivity().getBaseContext(),notesModelArrayList);
+        reminder_adapter= new RecyclerAdapter(todoMainActivity,reminderNoteList);
         mrecyclerView.setAdapter(reminder_adapter);
-        if(notesModelArrayList.size()!=0){
+
+        if(reminderNoteList.size()!=0){
             reminderTextView.setVisibility(View.INVISIBLE);
             reminderImageView.setVisibility(View.INVISIBLE);
             linearLayout.setGravity(Gravity.START);

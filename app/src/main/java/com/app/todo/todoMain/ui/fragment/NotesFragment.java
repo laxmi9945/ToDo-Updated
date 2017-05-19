@@ -2,24 +2,32 @@ package com.app.todo.todoMain.ui.fragment;
 
 
 import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.app.todo.R;
@@ -41,11 +49,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.facebook.FacebookSdk.getApplicationContext;
 
-public class NotesFragment extends Fragment implements NotesFragmentInterface, OnSearchTextChange {
+
+public class NotesFragment extends Fragment implements NotesFragmentInterface, OnSearchTextChange,View.OnClickListener {
 
     public static final String TAG = "NotesFragment";
-    TodoMainActivity todoMainActivity;
 
     @BindView(R.id.recyclerViewNotes)
     RecyclerView recyclerViewNotes;
@@ -55,6 +64,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     @BindView(R.id.coordinatorRootNotesFragment)
     CoordinatorLayout coordinatorRootNotesFragment;
+
 
 
     RecyclerAdapter recyclerAdapter;
@@ -67,6 +77,8 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
     NotesModel notesModel = new NotesModel();
     DataBaseUtility dataBaseUtility;
     Snackbar snackbar;
+    private static final int REQUEST_CODE = 2;
+    View view;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -79,22 +91,27 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
         uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         presenter.getNoteList(uId);
         ButterKnife.bind(this, view);
+
         setHasOptionsMenu(true);
         fabAnimate();
         initSwipeView();
+        view.findViewById(R.id.coordinatorRootNotesFragment).setOnDragListener(new MyDragListener());
         recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes);
         recyclerViewNotes.setAdapter(recyclerAdapter);
-
         ((TodoMainActivity) getActivity()).setSearchTagListener(this);
         fabAddNotes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), NotesAddActivity.class);
-                startActivityForResult(intent, 2);
+                Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(getContext(),
+                        android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
+                startActivityForResult(intent, 2,bundle);
+
             }
         });
         return view;
+
     }
 
     private void fabAnimate() {
@@ -146,7 +163,9 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
                 startActivityForResult(intent, 2);*/
                 break;
             case R.id.coordinatorRootNotesFragment:
+
                 break;
+
         }
     }
 
@@ -168,7 +187,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     @Override
     public void getNotesListSuccess(List<NotesModel> modelList) {
-        filteredNotes.clear();
+       filteredNotes.clear();
         allNotes.clear();
         for (NotesModel note : modelList) {
             if (!note.isArchieved()) {
@@ -182,42 +201,20 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     @Override
     public void getNotesListFailure(String message) {
+
         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.fabAddNotes:
-                Intent intent = new Intent(getActivity(), NotesAddActivity.class);
-                startActivityForResult(intent, 2);
-                break;
-        }
+
     }
-
-    public void onTextChange(String searchKey) {
-        Log.i(TAG, "onTextChange: " + searchKey + filteredNotes.size());
-        searchKey = searchKey.toLowerCase();
-        ArrayList<NotesModel> newList = new ArrayList<>();
-        for (NotesModel model : filteredNotes) {
-
-            String name = model.getTitle().toLowerCase();
-
-            Log.i(TAG, "onTextChange: " + name);
-
-            if (name.contains(searchKey))
-                newList.add(model);
-        }
-        Log.i(TAG, "onTextChange: " + newList.size()
-        );
-    }
-
     @Override
     public void onSearchTagChange(String searchTag) {
         Log.i(TAG, "onSearchTagChange: " + searchTag);
         searchTag = searchTag.toLowerCase();
 
-        if (!TextUtils.isEmpty(searchTag)) {
+        if (!TextUtils.isEmpty(searchTag)) {;
 
             ArrayList<NotesModel> newList = new ArrayList<>();
             for (NotesModel model : allNotes) {
@@ -263,9 +260,16 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
                     /*recyclerAdapter.deleteItem(position);*/
                     /*recyclerViewNotes.setAdapter(recyclerAdapter);*/
                     snackbar = Snackbar
-                            .make(coordinatorRootNotesFragment, getString(R.string.item_deleted), Snackbar.LENGTH_LONG);
-
+                            .make(coordinatorRootNotesFragment, getString(R.string.item_deleted), Snackbar.LENGTH_LONG).setAction(getString(R.string.undo), new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Snackbar snackbar1 = Snackbar.make(coordinatorRootNotesFragment, getString(R.string.item_restored), Snackbar.LENGTH_SHORT);
+                                    snackbar1.show();
+                                }
+                            });
                     snackbar.show();
+
+
 
                 }
                 if (direction == ItemTouchHelper.RIGHT) {
@@ -324,8 +328,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     void toggle(MenuItem item) {
 
-        if (!isView)
-        {
+        if (!isView) {
             recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
             item.setIcon(R.drawable.ic_action_straggered);
             isView = true;
@@ -335,11 +338,105 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
             isView = false;
         }
     }
+
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         ((TodoMainActivity) getActivity()).showOrHideFab(false);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE) {
 
+        }
+    }
+    private final class MyClickListener implements View.OnLongClickListener {
+
+        // called when the item is long-clicked
+        @Override
+        public boolean onLongClick(View view) {
+            // TODO Auto-generated method stub
+
+            // create it from the object's tag
+            ClipData.Item item = new ClipData.Item((CharSequence)view.getTag());
+
+            String[] mimeTypes = {
+                    ClipDescription.MIMETYPE_TEXT_PLAIN
+            };
+            ClipData data = new ClipData(view.getTag().toString(), mimeTypes, item);
+            View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
+
+            view.startDrag( data, //data to be dragged
+                    shadowBuilder, //drag shadow
+                    view, //local data about the drag and drop operation
+                    0   //no needed flags
+            );
+
+
+            view.setVisibility(View.INVISIBLE);
+            return true;
+        }
+    }
+    class MyDragListener implements View.OnDragListener {
+        Drawable normalShape = getResources().getDrawable(R.drawable.normal_shape);
+        //Drawable targetShape = getResources().getDrawable(R.drawable.target_shape);
+
+        @Override
+        public boolean onDrag(View v, DragEvent event) {
+
+            // Handles each of the expected events
+            switch (event.getAction()) {
+
+                //signal for the start of a drag and drop operation.
+                case DragEvent.ACTION_DRAG_STARTED:
+                    // do nothing
+                    break;
+
+                //the drag point has entered the bounding box of the View
+                case DragEvent.ACTION_DRAG_ENTERED:
+                    v.setBackground(normalShape);	//change the shape of the view
+                    break;
+
+                //the user has moved the drag shadow outside the bounding box of the View
+                case DragEvent.ACTION_DRAG_EXITED:
+                    v.setBackground(normalShape);	//change the shape of the view back to normal
+                    break;
+
+                //drag shadow has been released,the drag point is within the bounding box of the View
+                case DragEvent.ACTION_DROP:
+                    // if the view is the bottomlinear, we accept the drag item
+                    if(v == view.findViewById(R.id.coordinatorRootNotesFragment)) {
+                        View view = (View) event.getLocalState();
+                        ViewGroup viewgroup = (ViewGroup) view.getParent();
+                        viewgroup.removeView(view);
+
+                        //change the text
+                        TextView text = (TextView) v.findViewById(R.id.text);
+                        text.setText("The item is dropped");
+
+                        LinearLayout containView = (LinearLayout) v;
+                        containView.addView(view);
+                        view.setVisibility(View.VISIBLE);
+                    } else {
+                        View view = (View) event.getLocalState();
+                        view.setVisibility(View.VISIBLE);
+                        Context context = getApplicationContext();
+                        Toast.makeText(context, "You can't drop the image here",
+                                Toast.LENGTH_LONG).show();
+                        break;
+                    }
+                    break;
+
+                //the drag and drop operation has concluded.
+                case DragEvent.ACTION_DRAG_ENDED:
+                    v.setBackground(normalShape);	//go back to normal shape
+
+                default:
+                    break;
+            }
+            return true;
+        }
+    }
 }

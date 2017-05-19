@@ -20,15 +20,15 @@
         android:orientation="vertical"
         android:paddingLeft="20dp"
         android:paddingRight="20dp">
-    <android.support.v7.widget.AppCompatImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:layout_width="100dp"
         android:layout_height="100dp"
-
         android:layout_marginTop="40dp"
         android:layout_gravity="center"
         android:src="@drawable/add_pic"
         android:id="@+id/user_pic"
-        android:alpha="0.5"/>
+        />
+
         <android.support.design.widget.TextInputLayout
             android:id="@+id/name_Layout"
             android:layout_width="match_parent"

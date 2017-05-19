@@ -3,7 +3,6 @@ package com.app.todo.todoMain.ui.activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,7 +10,6 @@ import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.AppCompatTextView;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,6 +48,7 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notesadd);
         firebaseAuth = FirebaseAuth.getInstance();
@@ -156,7 +155,7 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat);
         reminderTextView.setText(sdf.format(myCalendar.getTime()));
         Calendar current = Calendar.getInstance();
-        if ((myCalendar.compareTo(current) <= 0)) {
+        if ((myCalendar.compareTo(current) <-1)) {
 
             //The set Date/Time already passed
             new DatePickerDialog(this, datePicker, myCalendar
@@ -175,10 +174,11 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.back_button:
-                Log.i("abc", "onClick: ");
+                onBackPressed();
+                /*Log.i("abc", "onClick: ");
                 Intent intent = new Intent(this, TodoMainActivity.class);
                 startActivity(intent);
-                finish();
+                finish();*/
                 break;
 
         }
@@ -211,5 +211,9 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
     @Override
     public void noteAddFailure(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 }

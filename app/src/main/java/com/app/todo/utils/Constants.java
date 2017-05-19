@@ -1,6 +1,7 @@
 package com.app.todo.utils;
 
 public class Constants {
+    public static final String DATABASE_PATH_UPLOADS =  "gs://mytodoapp-1d9b3.appspot.com" ;
     public static String keys="laxmi";
     public static String key_fb_login="isFblogin";
     public static String key_google_login="isGooglelogin";

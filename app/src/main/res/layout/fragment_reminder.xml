@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
-        android:alpha="0.5"
+       android:textStyle="bold"
         android:text="@string/no_reminder"
         android:textSize="20dp"
         android:id="@+id/reminder_textView"

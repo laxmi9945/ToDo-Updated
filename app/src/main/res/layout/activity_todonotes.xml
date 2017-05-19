@@ -15,7 +15,8 @@
         android:paddingRight="10dp"
         app:cardBackgroundColor="#f5eddd"
         app:cardElevation="5dp"
-        app:cardUseCompatPadding="true">
+        app:cardUseCompatPadding="true"
+        >
 
 <LinearLayout
     android:layout_width="match_parent"
@@ -30,7 +31,9 @@
             android:maxLines="1"
             android:textColor="@color/colorAccent"
             android:textSize="25dp"
-            android:textStyle="bold|italic" />
+            android:textStyle="bold|italic"
+
+            />
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/content_TextView"
@@ -41,7 +44,9 @@
             android:ellipsize="end"
             android:textColor="#0e0e0e"
             android:textSize="20dp"
-            android:textStyle="italic" />
+            android:textStyle="italic"
+
+            />
     <!--android:ellipsize="end"
     android:maxLines="1"-->
         <android.support.v7.widget.AppCompatTextView
@@ -53,6 +58,8 @@
             android:textSize="15dp"
             android:gravity="end"
             android:textStyle="italic"
+
+
             />
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/time_TextView"
@@ -63,6 +70,8 @@
         android:textSize="15dp"
         android:gravity="end"
         android:textStyle="italic"
+
+
         />
 
 </LinearLayout>

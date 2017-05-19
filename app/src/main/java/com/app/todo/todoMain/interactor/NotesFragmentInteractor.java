@@ -54,7 +54,6 @@ public class NotesFragmentInteractor implements NotesFragmentInteractorInterface
                         ArrayList<NotesModel> notesModel_ArrayList;
                         notesModel_ArrayList = post.getValue(arrayListGenericTypeIndicator);
                         notesModel.addAll(notesModel_ArrayList);
-
                     }
 
                     Log.i("aaa", "onDataChange:  "+notesModel.size());

@@ -8,6 +8,7 @@ import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -31,9 +32,9 @@ import java.util.List;
 
 
 public class ArchiveFragment extends Fragment implements ArchiveFragmentInterface {
+    public static final String TAG = "NotesFragment";
     ArchiveFragmentPresenterInterface presenter;
     ProgressDialog progressDialog;
-    public static final String TAG = "NotesFragment";
     FirebaseAuth firebaseAuth;
     RecyclerView archive_recyclerView;
     RecyclerAdapter archive_adapter;
@@ -41,36 +42,41 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
     TodoMainActivity todoMainActivity;
     AppCompatTextView archive_textView;
     AppCompatImageView archive_imageView;
-    NotesModel notesModel=new NotesModel();
+    NotesModel notesModel = new NotesModel();
     LinearLayout linearLayout;
     DatabaseReference databaseReference;
     String uId;
+    List<NotesModel> allNotes = new ArrayList<>();
+    boolean isView = false;
+
+    public ArchiveFragment(TodoMainActivity todoMainActivity) {
+        this.todoMainActivity = todoMainActivity;
+        presenter = new ArchiveFragmentPresenter(todoMainActivity, this);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view= inflater.inflate(R.layout.fragment_archive,container,false);
+        View view = inflater.inflate(R.layout.fragment_archive, container, false);
         initView(view);
         setHasOptionsMenu(true);
-       // presenter=new ArchiveFragmentPresenter(getContext(),this);
+        getActivity().setTitle("Archive");
         presenter.getArchiveNote(uId);
         return view;
-    }
 
-    public ArchiveFragment(TodoMainActivity todoMainActivity) {
-        this.todoMainActivity=todoMainActivity;
-        presenter=new ArchiveFragmentPresenter(todoMainActivity,this);
     }
 
     private void initView(View view) {
-      //  initSwipeView();
+        initSwipeView();
+
         databaseReference = FirebaseDatabase.getInstance().getReference().child(getString(R.string.userData));
-        archive_recyclerView= (RecyclerView) view.findViewById(R.id.archiveItem_recyclerView);
-        firebaseAuth=FirebaseAuth.getInstance();
+        archive_recyclerView = (RecyclerView) view.findViewById(R.id.archiveItem_recyclerView);
+        firebaseAuth = FirebaseAuth.getInstance();
         uId = firebaseAuth.getCurrentUser().getUid();
-        archive_textView= (AppCompatTextView) view.findViewById(R.id.archive_textView);
-        archive_imageView= (AppCompatImageView) view.findViewById(R.id.archive_icon);
-        archive_recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
-        linearLayout= (LinearLayout) view.findViewById(R.id.root_archive_recycler);
+        archive_textView = (AppCompatTextView) view.findViewById(R.id.archive_textView);
+        archive_imageView = (AppCompatImageView) view.findViewById(R.id.archive_icon);
+        archive_recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+        linearLayout = (LinearLayout) view.findViewById(R.id.root_archive_recycler);
 
     }
 
@@ -80,7 +86,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
         ((TodoMainActivity) getActivity()).showOrHideFab(false);
     }
 
-    /*void initSwipeView() {
+    void initSwipeView() {
 
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
@@ -95,14 +101,12 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
                 final int position = viewHolder.getAdapterPosition();
                 if (direction == ItemTouchHelper.LEFT) {
 
-                    notesModel = archiveItem.get(position);
+                    notesModel = allNotes.get(position);
                     Toast.makeText(todoMainActivity, "Left swipe..", Toast.LENGTH_SHORT).show();
 
                 }
                 if (direction == ItemTouchHelper.RIGHT) {
-                    notesModel.setArchieved(false);
-                    databaseReference.child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
-                    notesModel = archiveItem.get(position);
+                    notesModel = allNotes.get(position);
                     Toast.makeText(todoMainActivity, "Right swipe..", Toast.LENGTH_SHORT).show();
                 }
 
@@ -112,12 +116,12 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
         itemTouchHelper.attachToRecyclerView(this.archive_recyclerView);
 
     }
-*/
+
     @Override
     public void showDialog(String message) {
         progressDialog = new ProgressDialog(getActivity());
 
-        if(!getActivity().isFinishing()){
+        if (!getActivity().isFinishing()) {
             progressDialog.setMessage(message);
             progressDialog.show();
         }
@@ -125,7 +129,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
 
     @Override
     public void hideDialog() {
-        if(!getActivity().isFinishing() && progressDialog != null){
+        if (!getActivity().isFinishing() && progressDialog != null) {
             progressDialog.dismiss();
         }
     }
@@ -133,38 +137,31 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
     @Override
     public void archiveSuccess(List<NotesModel> modelList) {
 
-        ArrayList<NotesModel> archiveNoteList=new ArrayList<>();
-        for (NotesModel notesModel: modelList){
-            if (notesModel.isArchieved()){
+        ArrayList<NotesModel> archiveNoteList = new ArrayList<>();
+        for (NotesModel notesModel : modelList) {
+            if (notesModel.isArchieved()) {
                 archiveNoteList.add(notesModel);
             }
         }
-        archive_adapter= new RecyclerAdapter(todoMainActivity,archiveNoteList);
+        archive_adapter = new RecyclerAdapter(todoMainActivity, archiveNoteList);
         archive_recyclerView.setAdapter(archive_adapter);
 
-         // Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-        if(archiveNoteList.size()!=0){
+        if (archiveNoteList.size() != 0) {
             archive_textView.setVisibility(View.INVISIBLE);
             archive_imageView.setVisibility(View.INVISIBLE);
             linearLayout.setGravity(Gravity.START);
-        }else {
+        } else {
             archive_textView.setVisibility(View.VISIBLE);
             archive_imageView.setVisibility(View.VISIBLE);
             linearLayout.setGravity(Gravity.CENTER);
 
         }
     }
-
     @Override
     public void archiveFailure(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
 
     }
-    /*@Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.getItem(R.id.menu_search).setVisible(false);
-        super.onCreateOptionsMenu(menu, inflater);
-    }*/
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -175,8 +172,6 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
         }
         return super.onOptionsItemSelected(item);
     }
-
-    boolean isView = false;
 
     void toggle(MenuItem item) {
         if (!isView) {
