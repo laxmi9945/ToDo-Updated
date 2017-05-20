@@ -77,7 +77,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     private final int PICK_IMAGE_CAMERA = 100, PICK_IMAGE_GALLERY = 200, CROP_IMAGE = 1;
     RecyclerView recyclerView;
     TextToSpeech textToSpeech;
-    boolean isView = false;
+    boolean isList = false;
     RecyclerAdapter recyclerAdapter;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
@@ -114,6 +114,8 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     //    TodoMainActivityPresenter presenter;
     OnSearchTextChange searchTagListener;
 
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -128,6 +130,14 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
 
         sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
+
+        if(sharedPreferences.getBoolean("isList",false)){
+            isList = false;
+        }
+        else{
+            isList = true;
+        }
+
         //Getting reference to Firebase Database
         databaseReference = FirebaseDatabase.getInstance().getReference().child(getString(R.string.userData));
         firebaseAuth = FirebaseAuth.getInstance();
@@ -199,7 +209,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     @Override
     public void initView() {
 
-        View view = getLayoutInflater().inflate(R.layout.activity_todonotes, null, false);
+        View view = getLayoutInflater().inflate(R.layout.activity_todonotes_cards, null, false);
 
 
 //        presenter=new TodoMainActivityPresenter(this,this);
@@ -263,7 +273,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.changeview) {
-            toggle();
+            //toggle();
             return false;
         }
         return super.onOptionsItemSelected(item);
@@ -271,14 +281,22 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
 
     void toggle() {
         MenuItem item = menu.findItem(R.id.changeview);
-        if (!isView) {
+        if (!isList) {
+
             recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
             item.setIcon(R.drawable.ic_action_straggered);
-            isView = true;
+            SharedPreferences.Editor edit = sharedPreferences.edit();
+            edit.putBoolean("isList",true);
+            edit.commit();
+            isList = true;
         } else {
             recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
             item.setIcon(R.drawable.ic_action_list);
-            isView = false;
+
+            SharedPreferences.Editor edit = sharedPreferences.edit();
+            edit.putBoolean("isList",false);
+            edit.commit();
+            isList = false;
         }
 
     }
@@ -454,7 +472,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
 
             case R.id.reminder:
 
-                getSupportFragmentManager().popBackStackImmediate();
+                //getSupportFragmentManager().popBackStackImmediate();
 
                 getSupportFragmentManager().beginTransaction()
                         .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
@@ -481,7 +499,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
                 break;
 
             case R.id.archive:
-                getSupportFragmentManager().popBackStackImmediate();
+               // getSupportFragmentManager().popBackStackImmediate();
                 //archiveNotes=getArchiveItems();
                 getSupportFragmentManager().beginTransaction()
                         .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
@@ -663,4 +681,11 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     public void setSearchTagListener(OnSearchTextChange searchTagListener) {
         this.searchTagListener = searchTagListener;
     }
+
+
+   /* public void setSelectionMenuItem(final MenuItem menuItemSelected){
+
+        onOptionsItemSelected(menuItemSelected);
+    }
+*/
 }

@@ -1,35 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="5dp"
     android:gravity="center"
     android:id="@+id/Linear_rootLayout"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:background="@drawable/login_bg"
+    android:background="@drawable/login_gradient"
     >
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="vertical"
+        android:alpha="0.7"
         >
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:drawable/screen_background_light_transparent"
         android:orientation="vertical"
-        android:alpha="0.8"
+        android:padding="@dimen/dimen_10dp"
         >
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#FFFFFF"
         android:layout_gravity="center"
         >
 
@@ -97,7 +95,7 @@
         android:layout_height="35dp"
         android:layout_marginLeft="@dimen/login_btn_marigin"
         android:layout_marginRight="@dimen/login_btn_marigin"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="10dp"
         android:background="@drawable/loginbtn"
         android:text="@string/login_button"
 
@@ -107,7 +105,7 @@
         android:id="@+id/createAccount_Textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="15dp"
         android:text="@string/register_textView"
         android:textAlignment="center"
         android:textSize="15dp" />
@@ -119,8 +117,9 @@
         android:orientation="vertical"
         >
         <com.facebook.login.widget.LoginButton
-            android:layout_width="match_parent"
+            android:layout_width="250dp"
             android:layout_height="@dimen/google_btn_height"
+            android:layout_gravity="center"
             android:id="@+id/fb_login_button"
             >
 
@@ -128,15 +127,18 @@
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/google_button"
-            android:layout_width="match_parent"
+            android:layout_width="250dp"
+            android:layout_gravity="center"
             android:layout_height="@dimen/google_btn_height"
             android:layout_marginTop="@dimen/google_btn_marigin_top"
             android:background="@drawable/google_button"
-            android:text="Login with G+"
+            android:text="  G+                 Login with G+"
             android:textSize="15dp"
             android:textColor="#fbfcfcfc"
-
-            android:textAllCaps="false"/>
+            android:textAlignment="textStart"
+            android:textAllCaps="false"
+            android:layout_marginBottom="10dp"
+            />
     </LinearLayout>
     </LinearLayout>
     </LinearLayout>

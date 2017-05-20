@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#303F9F</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#FF9800</color>
+    <color name="colorPrimaryDark">#F57C00</color>
     <color name="colorAccent">#FF4081</color>
     <color name="white">#ffffff</color>
     <color name="bg_gradient_start">#b21331</color>
@@ -9,4 +9,43 @@
     <color name="bg_button_login">#380813</color>
     <color name="colorHint">#546E7A</color>
     <color name="colorRed">#ff00</color>
+
+
+    <color name="color1">#ffebee</color>
+    <color name="color2">#dfdfdf</color>
+    <color name="color3">#f3e5f5</color>
+    <color name="color4">#e1bee7</color>
+    <color name="color5">#e3f2fd</color>
+    <color name="color6">#bbdefb</color>
+    <color name="color7">#ede7f6</color>
+    <color name="color8">#e0f2f1</color>
+    <color name="color9">#b2dfdb</color>
+    <color name="color10">#c8e6c9</color>
+    <color name="color11">#dcedc8</color>
+    <color name="color12">#f9fbe7</color>
+    <color name="color13">#f0f4c3</color>
+    <color name="color14">#fff9c4</color>
+    <color name="color15">#ffe0b2</color>
+    <color name="color16">#ffccbc</color>
+    <color name="color17">#cfd8dc</color>
+    <array name="colorList">
+        <item>#ffebee</item>
+        <item>#dfdfdf</item>
+        <item>#f3e5f5</item>
+        <item>#e1bee7</item>
+        <item>#e3f2fd</item>
+        <item>#bbdefb</item>
+        <item>#ede7f6</item>
+        <item>#e0f2f1</item>
+        <item>#b2dfdb</item>
+        <item>#c8e6c9</item>
+        <item>#dcedc8</item>
+        <item>#f9fbe7</item>
+        <item>#f0f4c3</item>
+        <item>#fff9c4</item>
+        <item>#ffe0b2</item>
+        <item>#ffccbc</item>
+        <item>#cfd8dc</item>
+    </array>
+
 </resources>

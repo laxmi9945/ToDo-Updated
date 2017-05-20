@@ -6,6 +6,7 @@ import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -52,21 +53,16 @@ import butterknife.OnClick;
 import static com.facebook.FacebookSdk.getApplicationContext;
 
 
-public class NotesFragment extends Fragment implements NotesFragmentInterface, OnSearchTextChange,View.OnClickListener {
+public class NotesFragment extends Fragment implements NotesFragmentInterface, OnSearchTextChange, View.OnClickListener {
 
     public static final String TAG = "NotesFragment";
-
+    private static final int REQUEST_CODE = 2;
     @BindView(R.id.recyclerViewNotes)
     RecyclerView recyclerViewNotes;
-
     @BindView(R.id.fabAddNotes)
     FloatingActionButton fabAddNotes;
-
     @BindView(R.id.coordinatorRootNotesFragment)
     CoordinatorLayout coordinatorRootNotesFragment;
-
-
-
     RecyclerAdapter recyclerAdapter;
     List<NotesModel> allNotes = new ArrayList<>();
     List<NotesModel> filteredNotes = new ArrayList<>();
@@ -77,8 +73,11 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
     NotesModel notesModel = new NotesModel();
     DataBaseUtility dataBaseUtility;
     Snackbar snackbar;
-    private static final int REQUEST_CODE = 2;
     View view;
+    SharedPreferences sharedPreferences;
+    boolean isList = false;
+    boolean isView = false;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -96,7 +95,19 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
         fabAnimate();
         initSwipeView();
         view.findViewById(R.id.coordinatorRootNotesFragment).setOnDragListener(new MyDragListener());
-        recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+
+        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
+
+        if (sharedPreferences.getBoolean("isList", false)) {
+            isList = false;
+
+            recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
+        } else {
+            isList = true;
+            recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+        }
+
+
         recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes);
         recyclerViewNotes.setAdapter(recyclerAdapter);
         ((TodoMainActivity) getActivity()).setSearchTagListener(this);
@@ -106,7 +117,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
                 Intent intent = new Intent(getActivity(), NotesAddActivity.class);
                 Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(getContext(),
                         android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
-                startActivityForResult(intent, 2,bundle);
+                startActivityForResult(intent, 2, bundle);
 
             }
         });
@@ -139,7 +150,6 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
         });
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
@@ -159,8 +169,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
         switch (view.getId()) {
 
             case R.id.fabAddNotes:
-               /* Intent intent = new Intent(getActivity(), NotesAddActivity.class);
-                startActivityForResult(intent, 2);*/
+
                 break;
             case R.id.coordinatorRootNotesFragment:
 
@@ -187,7 +196,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     @Override
     public void getNotesListSuccess(List<NotesModel> modelList) {
-       filteredNotes.clear();
+        filteredNotes.clear();
         allNotes.clear();
         for (NotesModel note : modelList) {
             if (!note.isArchieved()) {
@@ -209,12 +218,14 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
     public void onClick(View v) {
 
     }
+
     @Override
     public void onSearchTagChange(String searchTag) {
         Log.i(TAG, "onSearchTagChange: " + searchTag);
         searchTag = searchTag.toLowerCase();
 
-        if (!TextUtils.isEmpty(searchTag)) {;
+        if (!TextUtils.isEmpty(searchTag)) {
+            ;
 
             ArrayList<NotesModel> newList = new ArrayList<>();
             for (NotesModel model : allNotes) {
@@ -257,8 +268,6 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
                     notesModel = allNotes.get(position);
                     databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).removeValue();
                     dataBaseUtility.delete(notesModel);
-                    /*recyclerAdapter.deleteItem(position);*/
-                    /*recyclerViewNotes.setAdapter(recyclerAdapter);*/
                     snackbar = Snackbar
                             .make(coordinatorRootNotesFragment, getString(R.string.item_deleted), Snackbar.LENGTH_LONG).setAction(getString(R.string.undo), new View.OnClickListener() {
                                 @Override
@@ -268,7 +277,6 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
                                 }
                             });
                     snackbar.show();
-
 
 
                 }
@@ -324,18 +332,23 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
         return super.onOptionsItemSelected(item);
     }
 
-    boolean isView = false;
-
     void toggle(MenuItem item) {
 
-        if (!isView) {
+        if (!isList) {
             recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
             item.setIcon(R.drawable.ic_action_straggered);
-            isView = true;
+            isList = true;
+            SharedPreferences.Editor edit = sharedPreferences.edit();
+            edit.putBoolean("isList", true);
+            edit.commit();
+
         } else {
             recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
             item.setIcon(R.drawable.ic_action_list);
-            isView = false;
+            SharedPreferences.Editor edit = sharedPreferences.edit();
+            edit.putBoolean("isList", false);
+            edit.commit();
+            isList = false;
         }
     }
 
@@ -352,6 +365,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
         }
     }
+
     private final class MyClickListener implements View.OnLongClickListener {
 
         // called when the item is long-clicked
@@ -360,7 +374,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
             // TODO Auto-generated method stub
 
             // create it from the object's tag
-            ClipData.Item item = new ClipData.Item((CharSequence)view.getTag());
+            ClipData.Item item = new ClipData.Item((CharSequence) view.getTag());
 
             String[] mimeTypes = {
                     ClipDescription.MIMETYPE_TEXT_PLAIN
@@ -368,7 +382,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
             ClipData data = new ClipData(view.getTag().toString(), mimeTypes, item);
             View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
 
-            view.startDrag( data, //data to be dragged
+            view.startDrag(data, //data to be dragged
                     shadowBuilder, //drag shadow
                     view, //local data about the drag and drop operation
                     0   //no needed flags
@@ -379,6 +393,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
             return true;
         }
     }
+
     class MyDragListener implements View.OnDragListener {
         Drawable normalShape = getResources().getDrawable(R.drawable.normal_shape);
         //Drawable targetShape = getResources().getDrawable(R.drawable.target_shape);
@@ -396,18 +411,18 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
                 //the drag point has entered the bounding box of the View
                 case DragEvent.ACTION_DRAG_ENTERED:
-                    v.setBackground(normalShape);	//change the shape of the view
+                    v.setBackground(normalShape);    //change the shape of the view
                     break;
 
                 //the user has moved the drag shadow outside the bounding box of the View
                 case DragEvent.ACTION_DRAG_EXITED:
-                    v.setBackground(normalShape);	//change the shape of the view back to normal
+                    v.setBackground(normalShape);    //change the shape of the view back to normal
                     break;
 
                 //drag shadow has been released,the drag point is within the bounding box of the View
                 case DragEvent.ACTION_DROP:
                     // if the view is the bottomlinear, we accept the drag item
-                    if(v == view.findViewById(R.id.coordinatorRootNotesFragment)) {
+                    if (v == view.findViewById(R.id.coordinatorRootNotesFragment)) {
                         View view = (View) event.getLocalState();
                         ViewGroup viewgroup = (ViewGroup) view.getParent();
                         viewgroup.removeView(view);
@@ -431,7 +446,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
                 //the drag and drop operation has concluded.
                 case DragEvent.ACTION_DRAG_ENDED:
-                    v.setBackground(normalShape);	//go back to normal shape
+                    v.setBackground(normalShape);    //go back to normal shape
 
                 default:
                     break;

@@ -159,7 +159,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
     }
     @Override
     public void archiveFailure(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
 
     }
 

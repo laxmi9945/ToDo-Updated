@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="layout_marginTop">5dp</dimen>
+    <dimen name="layout_marginTop">10dp</dimen>
     <dimen name="padding">5dp</dimen>
     <dimen name="imageview_width_140dp">140dp</dimen>
     <dimen name="imageview_height_140dp">130dp</dimen>

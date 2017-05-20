@@ -1,7 +1,10 @@
 package com.app.todo.adapter;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.CardView;
@@ -11,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
+import android.widget.LinearLayout;
 
 import com.app.todo.R;
 import com.app.todo.model.NotesModel;
@@ -26,6 +30,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
     Context context;
     List<NotesModel> model;
     private int lastPosition = -1;
+    Integer[] colorList = {R.color.color1,R.color.color2,R.color.color3,R.color.color4,R.color.color5,R.color.color6
+            ,R.color.color7,R.color.color8,R.color.color9,R.color.color10,R.color.color11,R.color.color12,R.color.color13
+            ,R.color.color14,R.color.color15,R.color.color16,R.color.color17} ;
 
     public RecyclerAdapter(Context context, List<NotesModel> model)  {
       //  model=new ArrayList<>();
@@ -40,7 +47,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
     @Override
     public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType)   {
 
-        View view = LayoutInflater.from(context).inflate(R.layout.activity_todonotes, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.activity_todonotes_cards, parent, false);
         TaskViewHolder myViewHolder = new TaskViewHolder(view);
         return myViewHolder;
     }
@@ -51,6 +58,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
         holder.dateTextView.setText(model.get(position).getDate());
         holder.timeTextView.setText(model.get(position).getTime());
         holder.contentTextView.setText(model.get(position).getContent());
+
+        holder.linearLayoutNoteItem.setBackgroundColor(ContextCompat.getColor(context,colorList[position%17]));
 
         // Here you apply the animation when the view is bound
         setAnimation(holder.itemView, position);
@@ -92,6 +101,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
 
         AppCompatTextView titleTextView, dateTextView, contentTextView,timeTextView;
         CardView cardView;
+        LinearLayout linearLayoutNoteItem;
 
         public TaskViewHolder(final View itemView)
         {
@@ -101,10 +111,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
             timeTextView = (AppCompatTextView) itemView.findViewById(R.id.time_TextView);
             contentTextView = (AppCompatTextView) itemView.findViewById(R.id.content_TextView);
             cardView = (CardView) itemView.findViewById(R.id.myCardView);
-
+            linearLayoutNoteItem = (LinearLayout) itemView.findViewById(R.id.linearLayoutNoteItem);
             cardView.setOnClickListener(this);
 
-            /*cardView.setOnLongClickListener(new View.OnLongClickListener() {
+            cardView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
 
@@ -135,7 +145,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
 
                     return true;
                 }
-            });*/
+            });
            // cardView.setOnLongClickListener(new MyclickListener());
 
         }

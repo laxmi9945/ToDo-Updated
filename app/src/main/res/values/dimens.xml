@@ -14,9 +14,11 @@
     <dimen name="splash_img_marginTop">183dp</dimen>
     <dimen name="imageview_width_100dp">100dp</dimen>
     <dimen name="login_btn_marigin">70dp</dimen>
-    <dimen name="google_btn_height">40dp</dimen>
+    <dimen name="google_btn_height">30dp</dimen>
     <dimen name="google_btn_marigin_top">15dp</dimen>
     <dimen name="fab_margin_right">23dp</dimen>
     <dimen name="frame_layout_margintop">60dp</dimen>
     <dimen name="about_img_width">150dp</dimen>
+    <dimen name="dimen_10dp">10dp</dimen>
+    <dimen name="dimen_5dp">5dp</dimen>
 </resources>

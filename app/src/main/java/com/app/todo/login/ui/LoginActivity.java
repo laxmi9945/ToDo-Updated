@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -156,6 +157,9 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
         setClicklistener();
         loginPresenter=new LoginPresenter(this,this);
+
+        Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeue-Regular.ttf");
+
 
     }
 

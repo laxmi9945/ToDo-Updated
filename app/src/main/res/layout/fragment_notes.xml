@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="#DCDCDC"
     android:id="@+id/coordinatorRootNotesFragment">
 
 
@@ -14,6 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="none"
+        android:padding="@dimen/dimen_5dp"
         >
 
     </android.support.v7.widget.RecyclerView>
@@ -26,7 +27,7 @@
         android:layout_marginRight="@dimen/fab_margin_right"
         android:layout_marginEnd="@dimen/fab_margin_right"
         android:layout_marginBottom="@dimen/fab_margin_right"
-        android:src="@drawable/pluss"
+        android:src="@drawable/ic_add_black_2"
         android:layout_gravity="bottom|right|end"
         />
 
