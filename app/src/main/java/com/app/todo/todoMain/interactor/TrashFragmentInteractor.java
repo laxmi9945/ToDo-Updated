@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.app.todo.R;
 import com.app.todo.model.NotesModel;
-import com.app.todo.todoMain.presenter.ArchiveFragmentPresenterInterface;
+import com.app.todo.todoMain.presenter.TrashFragmentPresenter;
 import com.app.todo.utils.CommonChecker;
 import com.app.todo.utils.Constants;
 import com.google.firebase.auth.FirebaseAuth;
@@ -17,13 +17,12 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class ArchiveFragmentInteractor implements ArchiveFragmentInteractorInterface {
+public class TrashFragmentInteractor implements TrashFragmentInteractorInterface {
     Context context;
-    ArchiveFragmentPresenterInterface presenter;
+    TrashFragmentPresenter presenter;
     FirebaseAuth firebaseAuth;
     DatabaseReference databaseReference;
-
-    public ArchiveFragmentInteractor(Context context,ArchiveFragmentPresenterInterface presenter){
+    public TrashFragmentInteractor(Context context, TrashFragmentPresenter presenter) {
         this.context=context;
         this.presenter=presenter;
         firebaseAuth=FirebaseAuth.getInstance();
@@ -31,12 +30,13 @@ public class ArchiveFragmentInteractor implements ArchiveFragmentInteractorInter
     }
 
     @Override
-    public void getArchiveNote(String uId) {
-        presenter.showDialog(context.getString(R.string.getting_archive_notes));
-        if (CommonChecker.isNetworkConnected(context)){
-            databaseReference.child(uId).addValueEventListener(new ValueEventListener() {
-                //String uId = firebaseAuth.getCurrentUser().getUid();
+    public void getDeleteNote(String uId) {
+        presenter.showDialog(context.getString(R.string.getting_deleted_notes));
 
+        if (CommonChecker.isNetworkConnected(context)){
+            
+            databaseReference.child(uId).addValueEventListener(new ValueEventListener() {
+                //String uId = firebaseAuth.getCurrentUser().getUid();=
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     GenericTypeIndicator<ArrayList<NotesModel>> arrayListGenericTypeIndicator = new GenericTypeIndicator<ArrayList<NotesModel>>() {
@@ -48,8 +48,9 @@ public class ArchiveFragmentInteractor implements ArchiveFragmentInteractorInter
                         ArrayList<NotesModel> notesModel_ArrayList;
                         notesModel_ArrayList = post.getValue(arrayListGenericTypeIndicator);
                         notesModel.addAll(notesModel_ArrayList);
+
                     }
-                    presenter.noteArchiveSuccess(notesModel);
+                    presenter.noteDeleteSuccess(notesModel);
                     presenter.hideDialog();
                 }
 
@@ -57,16 +58,18 @@ public class ArchiveFragmentInteractor implements ArchiveFragmentInteractorInter
                 public void onCancelled(DatabaseError databaseError) {
 
                     //Toast.makeText(context, getString(R.string.fetching_error) , Toast.LENGTH_SHORT).show();
-                    presenter.noteArchiveFailure(context.getString(R.string.archive_failure));
+                    presenter.noteDeleteFailure(context.getString(R.string.delete_failure));
                     presenter.hideDialog();
+
                 }
             });
 
         }else {
-            presenter.noteArchiveFailure(context.getString(R.string.fail));
+            presenter.noteDeleteFailure(context.getString(R.string.fail));
             presenter.hideDialog();
         }
 
 
     }
-}
+        
+    }

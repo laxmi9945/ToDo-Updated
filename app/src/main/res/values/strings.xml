@@ -98,9 +98,11 @@
     <string name="reset_pwd">Reset Password</string>
     <string name="timeStamp">yyyyMMdd_HHmmss</string>
     <string name="getting_archive_notes">Fetching archive notes</string>
+    <string name="getting_deleted_notes">Fetching deleted notes</string>
     <string name="ok">OK</string>
     <string name="item_deleted">Item is deleted</string>
     <string name="archive_failure">Archive failure</string>
+    <string name="delete_failure">Delete failure</string>
     <string name="loading">Loading &#8230;</string>
     <string name="change_View">ChangeView</string>
     <string name="blue_name">test</string>
@@ -110,6 +112,8 @@
     <string name="choose_option">Select Option</string>
     <string name="camera_permission_error">Camera Permission error</string>
     <string name="select_img_from_gallery">Select Image From Gallery</string>
+    <string name="custom_transition">transitionView</string>
+    <string name="title">Select color</string>
 
 
     <integer name="swing_anim_time">750</integer>

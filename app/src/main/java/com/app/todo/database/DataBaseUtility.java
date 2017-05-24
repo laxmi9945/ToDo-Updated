@@ -22,6 +22,7 @@ public class DataBaseUtility extends SQLiteOpenHelper {
     private static final String Time="time";
     private static final String Content_table = "content";
     private static final String Id="id";
+    private static final String Trash="trash";
     NotesModel model;
     SQLiteDatabase sqLiteDatabase;
     Cursor cursor;
@@ -37,7 +38,7 @@ public class DataBaseUtility extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        String Todo_table = "CREATE TABLE " + Todo_Notes + "("+Id+ " INTEGER PRIMARY KEY, " + Title_table + " TEXT," + Content_table + " TEXT," + Time+ " TEXT" + ")";
+        String Todo_table = "CREATE TABLE " + Todo_Notes + "("+Id+ " INTEGER PRIMARY KEY, " + Title_table + " TEXT," + Content_table + " TEXT," + Time+ " TEXT," +Trash+ " Trash " + ")";
         db.execSQL(Todo_table);
     }
 

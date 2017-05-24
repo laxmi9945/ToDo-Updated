@@ -4,13 +4,10 @@ import com.app.todo.model.NotesModel;
 
 import java.util.List;
 
-
-public interface NotesFragmentInterface   {
+public interface TrashFragmentInterface {
     void showDialog(String message);
-
     void hideDialog();
 
-    void getNotesListSuccess(List<NotesModel> modelList);
-
-    void getNotesListFailure(String message);
+    void deleteSuccess(List<NotesModel> modelList);
+    void deleteFailure(String message);
 }

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:clickable="true"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:background="@android:color/white"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:transitionName="@string/custom_transition">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:orientation="horizontal"
+        >
+        <android.support.v7.widget.AppCompatImageButton
+            android:layout_width="30dp"
+            android:layout_marginTop="3dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/back_button"
+            android:background="@drawable/back"
+
+            />
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/reminderEdit_textView"
+            android:layout_marginTop="3dp"
+            android:hint="reminder date"
+            android:textSize="25dp"
+            android:textColor="@color/colorRed"
+            android:layout_marginLeft="15dp"
+            />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/bg_button_login"/>
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/edit_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Title"
+            android:layout_marginTop="2dp"
+            android:background="@android:color/transparent"
+            android:textColor="@color/bg_button_login"
+            android:textSize="@dimen/title_edittext"
+            android:textStyle="italic"
+
+            />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/bg_button_login"
+            android:layout_below="@+id/edit_title"
+            android:id="@+id/view4"
+            />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/view4"
+            android:layout_above="@+id/viewlast">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/edit_content"
+                    android:hint="Edit content"
+                    android:layout_below="@+id/edit_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@android:color/transparent"
+                    android:textColor="@color/bg_button_login"
+                    android:textSize="@dimen/content_edittext"
+                    android:textStyle="italic"
+
+                    />
+            </LinearLayout>
+        </ScrollView>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:id="@+id/viewlast"
+            android:background="@color/bg_button_login"
+            android:layout_above="@+id/info"
+            />
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="\u0040 Notes update fragment"
+            android:textSize="15dp"
+            android:id="@+id/info"
+            android:layout_marginLeft="110dp"
+            android:layout_alignParentBottom="true"/>
+    </RelativeLayout>
+</LinearLayout>

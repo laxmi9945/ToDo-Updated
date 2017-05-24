@@ -4,7 +4,10 @@ import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceFragment;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatImageButton;
@@ -14,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.app.todo.R;
@@ -24,6 +28,7 @@ import com.app.todo.utils.Constants;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.jrummyapps.android.colorpicker.ColorPickerDialog;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -43,9 +48,9 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
     private Calendar myCalendar;
     private DatePickerDialog.OnDateSetListener datePicker;
     private static final String TAG = "NetworkStateReceiver";
-
+    LinearLayout linearLayout;
     NotesAddPresenterInterface presenter;
-
+    private static final int DIALOG_ID = 0;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
@@ -82,7 +87,7 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
     public void initView() {
 
         presenter = new NotesAddPresenter(this, this);
-
+        linearLayout= (LinearLayout) findViewById(R.id.root_layout);
         myCalendar = Calendar.getInstance();
         imageButton = (AppCompatImageButton) findViewById(R.id.back_button);
         dateTextView = (AppCompatTextView) findViewById(R.id.recenttime_textView);
@@ -130,8 +135,6 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
                 return super.onOptionsItemSelected(item);
 
             case R.id.action_save:
-
-
                 Bundle bundle = new Bundle();
                 bundle.putString(Constants.currentTimeKey, timeTextView.getText().toString());
                 bundle.putString(Constants.titleKey, titleEdittext.getText().toString());
@@ -142,7 +145,27 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
                 presenter.addNoteToFirebase(bundle);
                 finish();
                 return super.onOptionsItemSelected(item);
+            case R.id.action_color_pick:
+                /*ColorChooserDialog dialog = new ColorChooserDialog(this);
+                dialog.setTitle(R.string.title);
+                dialog.setColorListener(new ColorListener() {
+                    @Override
+                    public void OnColorClick(View v, int color) {
 
+                        //do whatever you want to with the values
+                    }
+                });
+                //customize the dialog however you want
+                dialog.show();*/
+                //ColorPickerDialog.newBuilder().setColor(color).show(activity);
+                ColorPickerDialog.newBuilder()
+                        .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
+                        .setAllowPresets(false)
+                        .setDialogId(DIALOG_ID)
+                        .setColor(Color.BLACK)
+                        .setShowAlphaSlider(true)
+                        .show(this);
+                return super.onOptionsItemSelected(item);
             default:
                 return super.onOptionsItemSelected(item);
 
@@ -215,5 +238,30 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    @Override
+    public void onColorSelected(int dialogId, @ColorInt int color) {
+        switch (dialogId) {
+            case DIALOG_ID:
+
+                // We got result from the dialog that is shown when clicking on the icon in the action bar.
+                Toast.makeText(this, "Selected Color: #" + Integer.toHexString(color), Toast.LENGTH_SHORT).show();
+
+                break;
+        }
+    }
+
+    @Override
+    public void onDialogDismissed(int dialogId) {
+
+    }
+    public static class ExamplePreferenceFragment extends PreferenceFragment {
+
+        @Override public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.main);
+        }
+
     }
 }

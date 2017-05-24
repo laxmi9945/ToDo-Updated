@@ -3,6 +3,7 @@ package com.app.todo.todoMain.ui.fragment;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
@@ -15,14 +16,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.app.todo.R;
 import com.app.todo.adapter.RecyclerAdapter;
+import com.app.todo.database.DataBaseUtility;
 import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.presenter.ArchiveFragmentPresenter;
 import com.app.todo.todoMain.presenter.ArchiveFragmentPresenterInterface;
 import com.app.todo.todoMain.ui.activity.TodoMainActivity;
+import com.app.todo.utils.Constants;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -48,6 +50,8 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
     String uId;
     List<NotesModel> allNotes = new ArrayList<>();
     boolean isView = false;
+    DataBaseUtility dataBaseUtility;
+    Snackbar snackbar;
 
     public ArchiveFragment(TodoMainActivity todoMainActivity) {
         this.todoMainActivity = todoMainActivity;
@@ -67,8 +71,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
     }
 
     private void initView(View view) {
-        initSwipeView();
-
+        dataBaseUtility = new DataBaseUtility(getActivity());
         databaseReference = FirebaseDatabase.getInstance().getReference().child(getString(R.string.userData));
         archive_recyclerView = (RecyclerView) view.findViewById(R.id.archiveItem_recyclerView);
         firebaseAuth = FirebaseAuth.getInstance();
@@ -77,6 +80,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
         archive_imageView = (AppCompatImageView) view.findViewById(R.id.archive_icon);
         archive_recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         linearLayout = (LinearLayout) view.findViewById(R.id.root_archive_recycler);
+        initSwipeView();
 
     }
 
@@ -101,20 +105,42 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
                 final int position = viewHolder.getAdapterPosition();
                 if (direction == ItemTouchHelper.LEFT) {
 
+                    databaseReference = FirebaseDatabase.getInstance().getReference();
                     notesModel = allNotes.get(position);
-                    Toast.makeText(todoMainActivity, "Left swipe..", Toast.LENGTH_SHORT).show();
+                    notesModel.setDeleted(true);
+                    databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
+                    archive_adapter.deleteItem(position);
+                    dataBaseUtility.delete(notesModel);
+                    archive_recyclerView.setAdapter(archive_adapter);
+                    snackbar = Snackbar
+                            .make(linearLayout, getString(R.string.item_deleted), Snackbar.LENGTH_LONG);
+                    snackbar.show();
 
                 }
                 if (direction == ItemTouchHelper.RIGHT) {
+                    //allNotes = getWithoutArchiveItems();
                     notesModel = allNotes.get(position);
-                    Toast.makeText(todoMainActivity, "Right swipe..", Toast.LENGTH_SHORT).show();
+                    notesModel.setArchieved(true);
+                    databaseReference.child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
+                    archive_adapter.archiveItem(position);
+                    archive_recyclerView.setAdapter(archive_adapter);
+                    Snackbar snackbar = Snackbar
+                            .make(linearLayout, getString(R.string.item_archieved), Snackbar.LENGTH_LONG)
+                            .setAction(getString(R.string.undo), new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    notesModel.setArchieved(false);
+                                    databaseReference.child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
+                                    Snackbar snackbar1 = Snackbar.make(linearLayout, getString(R.string.item_restored), Snackbar.LENGTH_SHORT);
+                                    snackbar1.show();
+                                }
+                            });
+                    snackbar.show();
                 }
-
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
-        itemTouchHelper.attachToRecyclerView(this.archive_recyclerView);
-
+        itemTouchHelper.attachToRecyclerView(archive_recyclerView);
     }
 
     @Override
@@ -143,7 +169,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
                 archiveNoteList.add(notesModel);
             }
         }
-        archive_adapter = new RecyclerAdapter(todoMainActivity, archiveNoteList);
+        archive_adapter = new RecyclerAdapter(getActivity(), archiveNoteList, this);
         archive_recyclerView.setAdapter(archive_adapter);
 
         if (archiveNoteList.size() != 0) {
@@ -157,6 +183,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
 
         }
     }
+
     @Override
     public void archiveFailure(String message) {
         //Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
@@ -185,4 +212,6 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
         }
 
     }
+
+
 }

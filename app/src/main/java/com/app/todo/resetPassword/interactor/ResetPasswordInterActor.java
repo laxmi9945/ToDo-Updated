@@ -36,7 +36,7 @@ public class ResetPasswordInterActor implements ResetPasswordInterActorInterface
                         } else {
                             Toast.makeText(context, context.getString(R.string.failed_message), Toast.LENGTH_SHORT).show();
                         }
-
+                       // presenterInterface.resetPasswordSuccess();
                         presenterInterface.hideDialog();
                     }
                 });

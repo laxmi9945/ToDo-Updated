@@ -41,7 +41,7 @@ public class ArchiveFragmentPresenter implements ArchiveFragmentPresenterInterfa
     }
 
     @Override
-    public void noteAddFailure(String message) {
+    public void noteArchiveFailure(String message) {
 
         viewInterface.archiveFailure(message );
 

@@ -10,5 +10,5 @@ public interface ArchiveFragmentPresenterInterface {
     void hideDialog();
     void getArchiveNote(String uId);
     void noteArchiveSuccess(List<NotesModel> notesModelList);
-    void noteAddFailure(String message);
+    void noteArchiveFailure(String message);
 }

@@ -15,6 +15,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.AppCompatImageView;
+import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -61,6 +63,10 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
     RecyclerView recyclerViewNotes;
     @BindView(R.id.fabAddNotes)
     FloatingActionButton fabAddNotes;
+    @BindView(R.id. list_empty_imageView)
+    AppCompatImageView empty_list_imageView;
+    @BindView(R.id.list_empty_textView)
+    AppCompatTextView empty_list_textView;
     @BindView(R.id.coordinatorRootNotesFragment)
     CoordinatorLayout coordinatorRootNotesFragment;
     RecyclerAdapter recyclerAdapter;
@@ -75,8 +81,9 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
     Snackbar snackbar;
     View view;
     SharedPreferences sharedPreferences;
-    boolean isList = false;
-    boolean isView = false;
+    boolean isGrid = false;
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -89,27 +96,30 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
         databaseReference = FirebaseDatabase.getInstance().getReference().child(getString(R.string.userData));
         uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         presenter.getNoteList(uId);
-        ButterKnife.bind(this, view);
 
+        ButterKnife.bind(this, view);
         setHasOptionsMenu(true);
+
         fabAnimate();
         initSwipeView();
+
         view.findViewById(R.id.coordinatorRootNotesFragment).setOnDragListener(new MyDragListener());
 
         sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
 
         if (sharedPreferences.getBoolean("isList", false)) {
-            isList = false;
+            isGrid = false;
 
             recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
         } else {
-            isList = true;
+            isGrid = true;
             recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         }
 
 
-        recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes);
+        recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes, this);
         recyclerViewNotes.setAdapter(recyclerAdapter);
+
         ((TodoMainActivity) getActivity()).setSearchTagListener(this);
         fabAddNotes.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,7 +132,6 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
             }
         });
         return view;
-
     }
 
     private void fabAnimate() {
@@ -199,13 +208,23 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
         filteredNotes.clear();
         allNotes.clear();
         for (NotesModel note : modelList) {
-            if (!note.isArchieved()) {
+            if (!note.isArchieved() && !note.isDeleted()) {
                 allNotes.add(note);
             }
         }
         filteredNotes.addAll(allNotes);
         Log.i(TAG, "getNotesListSuccess: " + allNotes.size());
         recyclerAdapter.notifyDataSetChanged();
+        if (filteredNotes.size() != 0) {
+            empty_list_textView.setVisibility(View.INVISIBLE);
+            empty_list_imageView.setVisibility(View.INVISIBLE);
+            //coordinatorRootNotesFragment.setGravity(Gravity.START);
+        } else {
+            empty_list_textView.setVisibility(View.VISIBLE);
+            empty_list_imageView.setVisibility(View.VISIBLE);
+            //coordinatorRootNotesFragment.setGravity(Gravity.CENTER);
+
+        }
     }
 
     @Override
@@ -266,18 +285,14 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
                     databaseReference = FirebaseDatabase.getInstance().getReference();
                     notesModel = allNotes.get(position);
-                    databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).removeValue();
+                    notesModel.setDeleted(true);
+                    databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
+                    recyclerAdapter.deleteItem(position);
                     dataBaseUtility.delete(notesModel);
+                    recyclerViewNotes.setAdapter(recyclerAdapter);
                     snackbar = Snackbar
-                            .make(coordinatorRootNotesFragment, getString(R.string.item_deleted), Snackbar.LENGTH_LONG).setAction(getString(R.string.undo), new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Snackbar snackbar1 = Snackbar.make(coordinatorRootNotesFragment, getString(R.string.item_restored), Snackbar.LENGTH_SHORT);
-                                    snackbar1.show();
-                                }
-                            });
+                            .make(coordinatorRootNotesFragment, getString(R.string.item_deleted), Snackbar.LENGTH_LONG);
                     snackbar.show();
-
 
                 }
                 if (direction == ItemTouchHelper.RIGHT) {
@@ -334,10 +349,10 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     void toggle(MenuItem item) {
 
-        if (!isList) {
+        if (!isGrid) {
             recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
             item.setIcon(R.drawable.ic_action_straggered);
-            isList = true;
+            isGrid = true;
             SharedPreferences.Editor edit = sharedPreferences.edit();
             edit.putBoolean("isList", true);
             edit.commit();
@@ -348,7 +363,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
             SharedPreferences.Editor edit = sharedPreferences.edit();
             edit.putBoolean("isList", false);
             edit.commit();
-            isList = false;
+            isGrid = false;
         }
     }
 

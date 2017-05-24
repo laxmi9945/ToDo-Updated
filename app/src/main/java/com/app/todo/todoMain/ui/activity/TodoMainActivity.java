@@ -111,9 +111,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     File file;
     Uri uri;
     Intent CamIntent, GalIntent, CropIntent;
-    //    TodoMainActivityPresenter presenter;
     OnSearchTextChange searchTagListener;
-
 
 
     @Override
@@ -124,17 +122,14 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
                 .beginTransaction()
                 .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
                 .replace(R.id.frameLayout_container, new NotesFragment(), NotesFragment.TAG)
-                /*.addToBackStack(null)*/
                 .commit();
-
 
         sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
-        if(sharedPreferences.getBoolean("isList",false)){
+        if (sharedPreferences.getBoolean("isList", false)) {
             isList = false;
-        }
-        else{
+        } else {
             isList = true;
         }
 
@@ -147,7 +142,6 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
 
         if (sharedPreferences.getBoolean(Constants.key_fb_login, false)) {
             isFbLogin();
-
         } else if (sharedPreferences.getBoolean(Constants.key_google_login, false)) {
             isGoogleLogin();
 
@@ -210,9 +204,6 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     public void initView() {
 
         View view = getLayoutInflater().inflate(R.layout.activity_todonotes_cards, null, false);
-
-
-//        presenter=new TodoMainActivityPresenter(this,this);
         textToSpeech = new TextToSpeech(this, this);
         floatingActionButton = (FloatingActionButton) findViewById(R.id.fabAddNotes);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerViewNotes);
@@ -273,32 +264,9 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.changeview) {
-            //toggle();
             return false;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    void toggle() {
-        MenuItem item = menu.findItem(R.id.changeview);
-        if (!isList) {
-
-            recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
-            item.setIcon(R.drawable.ic_action_straggered);
-            SharedPreferences.Editor edit = sharedPreferences.edit();
-            edit.putBoolean("isList",true);
-            edit.commit();
-            isList = true;
-        } else {
-            recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-            item.setIcon(R.drawable.ic_action_list);
-
-            SharedPreferences.Editor edit = sharedPreferences.edit();
-            edit.putBoolean("isList",false);
-            edit.commit();
-            isList = false;
-        }
-
     }
 
 
@@ -471,9 +439,6 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
                 break;
 
             case R.id.reminder:
-
-                //getSupportFragmentManager().popBackStackImmediate();
-
                 getSupportFragmentManager().beginTransaction()
                         .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
                         .replace(R.id.frameLayout_container, new ReminderFragment(this), ReminderFragment.TAG)
@@ -482,14 +447,13 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
                 setTitle(getString(R.string.reminder));
                 Toast.makeText(this, getString(R.string.reminder), Toast.LENGTH_SHORT).show();
                 drawer.closeDrawers();
-
                 break;
 
             case R.id.trash:
 
                 getSupportFragmentManager().beginTransaction()
                         .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                        .replace(R.id.frameLayout_container, new TrashFragment(), TrashFragment.TAG)
+                        .replace(R.id.frameLayout_container, new TrashFragment(this), TrashFragment.TAG)
                         .addToBackStack(null)
                         .commit();
                 setTitle(getString(R.string.trash));
@@ -499,8 +463,6 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
                 break;
 
             case R.id.archive:
-               // getSupportFragmentManager().popBackStackImmediate();
-                //archiveNotes=getArchiveItems();
                 getSupportFragmentManager().beginTransaction()
                         .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
                         .replace(R.id.frameLayout_container, new ArchiveFragment(this), ArchiveFragment.TAG)
@@ -626,6 +588,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     }
 
     private void speakOut() {
+
         String userName = "Welcome back " + fb_first_name;
         Toast.makeText(this, userName, Toast.LENGTH_SHORT).show();
         textToSpeech.speak(userName, TextToSpeech.QUEUE_FLUSH, null);
@@ -673,7 +636,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
                 todoHomeDataModel.add(note);
             }
         }
-        recyclerAdapter = new RecyclerAdapter(TodoMainActivity.this, todoHomeDataModel);
+        recyclerAdapter = new RecyclerAdapter(TodoMainActivity.this, todoHomeDataModel, this);
         recyclerView.setAdapter(recyclerAdapter);
         recyclerAdapter.notifyDataSetChanged();
     }
@@ -681,11 +644,4 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     public void setSearchTagListener(OnSearchTextChange searchTagListener) {
         this.searchTagListener = searchTagListener;
     }
-
-
-   /* public void setSelectionMenuItem(final MenuItem menuItemSelected){
-
-        onOptionsItemSelected(menuItemSelected);
-    }
-*/
 }

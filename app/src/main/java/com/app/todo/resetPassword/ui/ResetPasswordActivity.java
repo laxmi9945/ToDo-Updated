@@ -85,26 +85,21 @@ public class ResetPasswordActivity extends AppCompatActivity implements ResetPas
                 break;
         }
     }
-/*
-    private void resetPassword() {
-        String email = reset_editText.getText().toString();
-
-        presenter.resetPassword(email);
-
-        if (TextUtils.isEmpty(email)) {
-            Toast.makeText(getApplication(), getString(R.string.enter_registered_email), Toast.LENGTH_SHORT).show();
-            return;
-        }
-    }*/
-
     @Override
     public void showDialog(String message) {
+        progressDialog = new ProgressDialog(this);
 
+        if (!isFinishing()) {
+            progressDialog.setMessage(message);
+            progressDialog.show();
+        }
     }
 
     @Override
     public void hideDialog() {
-
+        if (!isFinishing() && progressDialog != null) {
+            progressDialog.dismiss();
+        }
     }
 
     @Override

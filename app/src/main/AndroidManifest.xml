@@ -49,6 +49,7 @@
         <activity android:name=".registration.ui.RegistrationActivity"  />
         <activity android:name=".resetPassword.ui.ResetPasswordActivity"/>
         <activity android:name=".todoMain.ui.activity.NotesAddActivity"/>
+        <activity android:name=".todoMain.ui.activity.DummyActivity"/>
         <fragment android:name=".fragment.ArchiveFragment"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 

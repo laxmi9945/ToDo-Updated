@@ -61,7 +61,6 @@ public class NoteseditFragment extends Fragment implements NoteseditFragmentInte
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         ((TodoMainActivity) getActivity()).showOrHideFab(false);
-
     }
 
     @Override
@@ -95,6 +94,7 @@ public class NoteseditFragment extends Fragment implements NoteseditFragmentInte
             }
 
         };
+
        /* dateTextView = (AppCompatTextView)view.findViewById(R.id.recenttime_textView);
         timeTextView = (AppCompatTextView)view.findViewById(R.id.time_textView);*/
 
@@ -195,9 +195,7 @@ public class NoteseditFragment extends Fragment implements NoteseditFragmentInte
         } else {
             Toast.makeText(getApplicationContext(), getString(R.string.reminder_set) + reminderTextView.getText().toString(), Toast.LENGTH_SHORT).show();
         }
-
     }
-
 
     @Override
     public void showDialog(String message) {

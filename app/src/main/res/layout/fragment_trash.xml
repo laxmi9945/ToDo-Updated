@@ -1,28 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_trash_recycler"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ffffff"
     android:clickable="true"
-    android:gravity="center"
     android:orientation="vertical">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/deleteItem_recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </android.support.v7.widget.RecyclerView>
 
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/trash_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/appCompatTextView2"
+        android:layout_gravity="center"
         android:alpha="0.2"
-        android:background="@drawable/recycle_bin"
-        android:layout_gravity="center"/>
+        android:background="@drawable/recycle_bin" />
 
     <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/appCompatTextView2"
+        android:id="@+id/trashTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:gravity="center"
         android:text="@string/empty_trash"
-        android:textStyle="bold"
-        android:textSize="20dp" />
+        android:textSize="20sp"
+        android:textStyle="bold" />
 </LinearLayout>

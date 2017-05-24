@@ -18,6 +18,22 @@
         >
 
     </android.support.v7.widget.RecyclerView>
+    <android.support.v7.widget.AppCompatImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:id="@+id/list_empty_imageView"
+        android:alpha="0.5"
+        android:src="@drawable/ic_action_empty_list"/>
+    <android.support.v7.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:id="@+id/list_empty_textView"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:alpha="0.5"
+        android:layout_marginTop="50dp"
+        android:text="list is currently empty."/>
 
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"

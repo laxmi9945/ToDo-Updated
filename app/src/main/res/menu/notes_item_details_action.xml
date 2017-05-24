@@ -9,14 +9,21 @@
         app:showAsAction="always"
         android:orderInCategory="0"/>
     <item
+        android:id="@+id/action_color_pick"
+        android:icon="@drawable/ic_action_color_pick"
+        android:title="@string/pushpin"
+        app:showAsAction="always"
+        android:orderInCategory="0"/>
+
+    <item
         android:id="@+id/action_reminder"
-        android:icon="@drawable/reminder"
+        android:icon="@drawable/ic_action_reminder_alert"
         android:title="@string/reminder"
         app:showAsAction="always"
         android:orderInCategory="0"/>
     <item
         android:id="@+id/action_save"
-        android:icon="@drawable/savefilebutton"
+        android:icon="@drawable/ic_action_note_save"
         android:title="@string/save"
         app:showAsAction="always"
         android:orderInCategory="0"/>

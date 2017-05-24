@@ -99,7 +99,7 @@ public class ReminderFragment extends Fragment implements ReminderFragmentInterf
                 reminderNoteList.add(notesModel);
             }
         }
-        reminder_adapter= new RecyclerAdapter(todoMainActivity,reminderNoteList);
+        reminder_adapter= new RecyclerAdapter(todoMainActivity,reminderNoteList, this);
         mrecyclerView.setAdapter(reminder_adapter);
 
         if(reminderNoteList.size()!=0){
