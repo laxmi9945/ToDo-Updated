@@ -2,22 +2,23 @@ package com.app.todo.todoMain.ui.activity;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatEditText;
-import android.support.v7.widget.AppCompatImageButton;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
+import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.app.todo.R;
@@ -25,40 +26,51 @@ import com.app.todo.baseclass.BaseActivity;
 import com.app.todo.todoMain.presenter.NotesAddPresenter;
 import com.app.todo.todoMain.presenter.NotesAddPresenterInterface;
 import com.app.todo.utils.Constants;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.jrummyapps.android.colorpicker.ColorPickerDialog;
+import com.jrummyapps.android.colorpicker.ColorPickerDialogListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class NotesAddActivity extends BaseActivity implements NotesAddActivityInterface {
-    private AppCompatImageButton imageButton;
-    private AppCompatTextView dateTextView;
-    private AppCompatTextView timeTextView;
-    private AppCompatTextView reminderTextView;
-    private AppCompatEditText titleEdittext;
-    private AppCompatEditText contentEdittext;
+import io.fabric.sdk.android.Fabric;
+
+public class NotesAddActivity extends BaseActivity implements NotesAddActivityInterface,
+        View.OnClickListener, ColorPickerDialogListener {
+    private static final String TAG = "NetworkStateReceiver";
+    private static final int DIALOG_ID = 0;
+    LinearLayout linearLayout;
+    NotesAddPresenterInterface presenter;
+    String color_pick;
+    Toolbar toolbar;
+    AppCompatImageView backIcon, reminderIcon, saveIcon, colorpickIcon;
+    ProgressDialog progressDialog;
+    DatePickerDialog datePickerDialog;
+    TimePickerDialog timePickerDialog;
+    private AppCompatTextView timeTextView, dateTextView, reminderTextView,commaSeparator,lastComma,reminderTimetextView;
+    private AppCompatEditText titleEdittext, contentEdittext;
     private DatabaseReference mDatabaseReference;
     private FirebaseAuth firebaseAuth;
     private SharedPreferences sharedPreferences;
     private Date date;
     private Calendar myCalendar;
-    private DatePickerDialog.OnDateSetListener datePicker;
-    private static final String TAG = "NetworkStateReceiver";
-    LinearLayout linearLayout;
-    NotesAddPresenterInterface presenter;
-    private static final int DIALOG_ID = 0;
+    private DatePickerDialog.OnDateSetListener onDateSetListener;
+    LinearLayout timeLayout;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_notesadd);
+        //setTitle(getString(R.string.notes_add));
         firebaseAuth = FirebaseAuth.getInstance();
 
         initView();
+
         date = new Date();
         CharSequence sequence = DateFormat.format(getString(R.string.date_time), date.getTime());
         CharSequence sequence2 = DateFormat.format(getString(R.string.time), date.getTime());
@@ -67,9 +79,7 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
         timeTextView.setText(sequence2);
         sharedPreferences = this.getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
-
-
-        datePicker = new DatePickerDialog.OnDateSetListener() {
+        onDateSetListener = new DatePickerDialog.OnDateSetListener() {
 
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear,
@@ -78,142 +88,124 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
                 myCalendar.set(Calendar.MONTH, monthOfYear);
                 myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                 updateLabel();
-            }
+                setreminderTime();
+                Log.i(TAG, "onDateSet: " + year + "    " + dayOfMonth);
 
+            }
         };
+
+        datePickerDialog = new DatePickerDialog(this, onDateSetListener, myCalendar
+                .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                myCalendar.get(Calendar.DAY_OF_MONTH));
+        datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
+
+    }
+
+    private void setreminderTime() {
+        Calendar mcurrentTime = Calendar.getInstance();
+        int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+        int minute = mcurrentTime.get(Calendar.MINUTE);
+        timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                reminderTimetextView.setText( selectedHour + ":" + selectedMinute);
+                Toast.makeText(NotesAddActivity.this, getString(R.string.reminder_time_set) +reminderTimetextView.getText().toString(), Toast.LENGTH_SHORT).show();
+                lastComma.setVisibility(View.VISIBLE);
+            }
+        }, hour, minute, true);//24hr time
+        timePickerDialog.show();
     }
 
     @Override
     public void initView() {
 
         presenter = new NotesAddPresenter(this, this);
-        linearLayout= (LinearLayout) findViewById(R.id.root_layout);
+        backIcon = (AppCompatImageView) findViewById(R.id.back_icon);
+        saveIcon = (AppCompatImageView) findViewById(R.id.save_icon);
+        reminderIcon = (AppCompatImageView) findViewById(R.id.reminder_icon);
+        colorpickIcon = (AppCompatImageView) findViewById(R.id.color_pick_icon);
+        linearLayout = (LinearLayout) findViewById(R.id.root_layout);
         myCalendar = Calendar.getInstance();
-        imageButton = (AppCompatImageButton) findViewById(R.id.back_button);
+        timeLayout= (LinearLayout) findViewById(R.id.time_layout);
         dateTextView = (AppCompatTextView) findViewById(R.id.recenttime_textView);
+        commaSeparator= (AppCompatTextView) findViewById(R.id.comma);
+        lastComma= (AppCompatTextView) findViewById(R.id.reminderTime_comma);
         timeTextView = (AppCompatTextView) findViewById(R.id.time_textView);
-        titleEdittext = (AppCompatEditText) findViewById(R.id.title_edittext);
-        contentEdittext = (AppCompatEditText) findViewById(R.id.content_edittext);
-        reminderTextView = (AppCompatTextView) findViewById(R.id.reminderDate);
-
+        titleEdittext = (AppCompatEditText) findViewById(R.id.title_editText);
+        reminderTextView = (AppCompatTextView) findViewById(R.id.reminder_textView);
+        reminderTimetextView= (AppCompatTextView) findViewById(R.id.reminderTime_textView);
+        contentEdittext = (AppCompatEditText) findViewById(R.id.content_editText);
+        toolbar = (Toolbar) findViewById(R.id.notes_add_toolbar);
         setClicklistener();
-
-
 
     }
 
     @Override
     public void setClicklistener() {
-        imageButton.setOnClickListener(this);
         dateTextView.setOnClickListener(this);
         titleEdittext.setOnClickListener(this);
         contentEdittext.setOnClickListener(this);
-    }
+        backIcon.setOnClickListener(this);
+        saveIcon.setOnClickListener(this);
+        reminderIcon.setOnClickListener(this);
+        colorpickIcon.setOnClickListener(this);
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.notes_item_details_action, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-
-            case R.id.action_pushpin:
-
-                Toast.makeText(this, getString(R.string.pined), Toast.LENGTH_SHORT).show();
-                return super.onOptionsItemSelected(item);
-
-            case R.id.action_reminder:
-
-                new DatePickerDialog(this, datePicker, myCalendar
-                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-
-                return super.onOptionsItemSelected(item);
-
-            case R.id.action_save:
-                Bundle bundle = new Bundle();
-                bundle.putString(Constants.currentTimeKey, timeTextView.getText().toString());
-                bundle.putString(Constants.titleKey, titleEdittext.getText().toString());
-                bundle.putString(Constants.descriptionKey, contentEdittext.getText().toString());
-                bundle.putString(Constants.currentDateKey, dateTextView.getText().toString());
-                bundle.putString(Constants.reminderKey, reminderTextView.getText().toString());
-
-                presenter.addNoteToFirebase(bundle);
-                finish();
-                return super.onOptionsItemSelected(item);
-            case R.id.action_color_pick:
-                /*ColorChooserDialog dialog = new ColorChooserDialog(this);
-                dialog.setTitle(R.string.title);
-                dialog.setColorListener(new ColorListener() {
-                    @Override
-                    public void OnColorClick(View v, int color) {
-
-                        //do whatever you want to with the values
-                    }
-                });
-                //customize the dialog however you want
-                dialog.show();*/
-                //ColorPickerDialog.newBuilder().setColor(color).show(activity);
-                ColorPickerDialog.newBuilder()
-                        .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
-                        .setAllowPresets(false)
-                        .setDialogId(DIALOG_ID)
-                        .setColor(Color.BLACK)
-                        .setShowAlphaSlider(true)
-                        .show(this);
-                return super.onOptionsItemSelected(item);
-            default:
-                return super.onOptionsItemSelected(item);
-
-        }
     }
 
     private void updateLabel() {
-
-        String myFormat = "MMMM dd, yyyy"; //In which you need put here
+        String myFormat = getString(R.string.month_year_format); //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat);
         reminderTextView.setText(sdf.format(myCalendar.getTime()));
-        Calendar current = Calendar.getInstance();
-        if ((myCalendar.compareTo(current) <-1)) {
-
-            //The set Date/Time already passed
-            new DatePickerDialog(this, datePicker, myCalendar
-                    .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
-                    myCalendar.get(Calendar.DAY_OF_MONTH)).show();
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.invalid_date),
-                    Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(this, getString(R.string.reminder_set) + reminderTextView.getText().toString(), Toast.LENGTH_SHORT).show();
-        }
-
+        Toast.makeText(this, getString(R.string.reminder_date_set) + reminderTextView.getText().toString(),
+                Toast.LENGTH_SHORT).show();
+        commaSeparator.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.back_button:
-                onBackPressed();
-                /*Log.i("abc", "onClick: ");
-                Intent intent = new Intent(this, TodoMainActivity.class);
-                startActivity(intent);
-                finish();*/
+            case R.id.back_icon:
+                //saveNotes();
+                finish();
+                //overridePendingTransition(android.R.anim.fade_out, android.R.anim.fade_in);
+                break;
+            case R.id.save_icon:
+                saveNotes();
+                finish();
+                break;
+            case R.id.reminder_icon:
+                datePickerDialog.show();
+                break;
+            case R.id.color_pick_icon:
+                ColorPickerDialog.newBuilder()
+                        .setDialogType(ColorPickerDialog.TYPE_CUSTOM)
+                        .setAllowPresets(true)
+                        .setDialogId(DIALOG_ID)
+                        .setColor(Color.BLACK)
+                        .setShowAlphaSlider(true)
+                        .show(this);
                 break;
 
         }
     }
 
-    ProgressDialog progressDialog;
+    private void saveNotes() {
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.currentTimeKey, timeTextView.getText().toString());
+        bundle.putString(Constants.titleKey, titleEdittext.getText().toString());
+        bundle.putString(Constants.descriptionKey, contentEdittext.getText().toString());
+        bundle.putString(Constants.currentDateKey, dateTextView.getText().toString());
+        bundle.putString(Constants.reminderDate, reminderTextView.getText().toString());
+        bundle.putString(Constants.reminderTime,reminderTimetextView.getText().toString());
+        bundle.putString(Constants.colorKey, color_pick);
+        presenter.addNoteToFirebase(bundle);
+    }
 
     @Override
     public void showDialog(String message) {
         progressDialog = new ProgressDialog(this);
 
-        if(!isFinishing()){
+        if (!isFinishing()) {
             progressDialog.setMessage(message);
             progressDialog.show();
         }
@@ -221,7 +213,7 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
 
     @Override
     public void hideDialog() {
-        if(!isFinishing() && progressDialog != null){
+        if (!isFinishing() && progressDialog != null) {
             progressDialog.dismiss();
         }
     }
@@ -235,6 +227,7 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
     public void noteAddFailure(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -245,8 +238,11 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
         switch (dialogId) {
             case DIALOG_ID:
 
+                color_pick = String.valueOf(color);
+                linearLayout.setBackgroundColor(color);
                 // We got result from the dialog that is shown when clicking on the icon in the action bar.
-                Toast.makeText(this, "Selected Color: #" + Integer.toHexString(color), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Selected Color: #" + Integer.toHexString(color),
+                        Toast.LENGTH_SHORT).show();
 
                 break;
         }
@@ -256,12 +252,10 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
     public void onDialogDismissed(int dialogId) {
 
     }
-    public static class ExamplePreferenceFragment extends PreferenceFragment {
 
-        @Override public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.main);
-        }
-
+    @Override
+    public void onBackPressed() {
+        saveNotes();
+        super.onBackPressed();
     }
 }

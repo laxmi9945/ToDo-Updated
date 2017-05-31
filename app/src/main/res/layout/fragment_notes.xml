@@ -4,10 +4,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#DCDCDC"
+    android:background="#edecec"
     android:id="@+id/coordinatorRootNotesFragment">
-
-
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerViewNotes"
@@ -16,8 +14,8 @@
         android:scrollbars="none"
         android:padding="@dimen/dimen_5dp"
         >
-
     </android.support.v7.widget.RecyclerView>
+
     <android.support.v7.widget.AppCompatImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

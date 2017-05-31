@@ -39,7 +39,8 @@ public class TodoMainActivityInteractor implements TodoMainInteractorInterface {
 
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    GenericTypeIndicator<ArrayList<NotesModel>> arrayListGenericTypeIndicator = new GenericTypeIndicator<ArrayList<NotesModel>>() {
+                    GenericTypeIndicator<ArrayList<NotesModel>> arrayListGenericTypeIndicator = new
+                            GenericTypeIndicator<ArrayList<NotesModel>>() {
                     };
                     ArrayList<NotesModel> notesModel = new ArrayList<>();
 

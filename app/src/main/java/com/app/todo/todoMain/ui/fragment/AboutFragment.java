@@ -10,16 +10,19 @@ import android.view.ViewGroup;
 
 import com.app.todo.R;
 import com.app.todo.todoMain.ui.activity.TodoMainActivity;
+import com.crashlytics.android.Crashlytics;
+
+import io.fabric.sdk.android.Fabric;
 
 
 public class AboutFragment extends Fragment {
 
-    public static final String TAG = "NotesFragment";
+    public static final String TAG = "AboutFragment";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        Fabric.with(getActivity(), new Crashlytics());
         View view=inflater.inflate(R.layout.fragment_about, container, false);
         getActivity().setTitle("About");
         setHasOptionsMenu(true);

@@ -28,13 +28,14 @@ public class NotesAddPresenter implements NotesAddPresenterInterface {
 
         NotesModel model = new NotesModel();
 
-        model.setArchieved(false);
+        model.setArchived(false);
         model.setTime(bundle.getString(Constants.currentTimeKey));
         model.setDate(bundle.getString(Constants.currentDateKey));
         model.setTitle(bundle.getString(Constants.titleKey));
         model.setContent(bundle.getString(Constants.descriptionKey));
-        model.setReminderDate(bundle.getString(Constants.reminderKey));
-
+        model.setReminderDate(bundle.getString(Constants.reminderDate));
+        model.setReminderTime(bundle.getString(Constants.reminderTime));
+        model.setColor(bundle.getString(Constants.colorKey));
         interactor.addNoteToFirebase(model);
     }
 

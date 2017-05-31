@@ -17,7 +17,10 @@
         android:title="@string/change_View"
         app:showAsAction="always"
         />
-
-
+    <item
+        android:id="@+id/notify"
+        android:title="notify"
+        android:icon="@drawable/alarm_bell"
+        app:showAsAction="always"/>
 
 </menu>

@@ -16,6 +16,9 @@ import com.app.todo.R;
 import com.app.todo.resetPassword.presenter.ResetPasswordPresenter;
 import com.app.todo.resetPassword.presenter.ResetPasswordPresenterInterface;
 import com.app.todo.utils.CommonChecker;
+import com.crashlytics.android.Crashlytics;
+
+import io.fabric.sdk.android.Fabric;
 
 
 public class ResetPasswordActivity extends AppCompatActivity implements ResetPasswordActivityInterface {
@@ -29,6 +32,8 @@ public class ResetPasswordActivity extends AppCompatActivity implements ResetPas
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
+
         setContentView(R.layout.activity_resetpassword);
 
         presenter = new ResetPasswordPresenter(this, this);
@@ -63,7 +68,8 @@ public class ResetPasswordActivity extends AppCompatActivity implements ResetPas
 
             // Changing action button text color
             View sbView = snackbar.getView();
-            AppCompatTextView textView = (AppCompatTextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
+            AppCompatTextView textView = (AppCompatTextView) sbView
+                    .findViewById(android.support.design.R.id.snackbar_text);
             textView.setTextColor(Color.YELLOW);
             snackbar.show();
 

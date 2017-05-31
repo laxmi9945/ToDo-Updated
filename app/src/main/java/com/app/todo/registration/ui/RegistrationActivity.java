@@ -22,6 +22,7 @@ import com.app.todo.model.UserInfoModel;
 import com.app.todo.registration.presenter.RegistrationPresenter;
 import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 import com.app.todo.utils.Constants;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.ByteArrayOutputStream;
@@ -33,6 +34,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.fabric.sdk.android.Fabric;
 
 
 public class RegistrationActivity extends AppCompatActivity implements RegistrationActivityInterface{
@@ -62,6 +64,7 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_registration);
         firebaseAuth = FirebaseAuth.getInstance();
         registrationPresenter=new RegistrationPresenter(this,this);
@@ -120,7 +123,8 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
             int hasPerm = pm.checkPermission(android.Manifest.permission.CAMERA, getPackageName());
             if (hasPerm == PackageManager.PERMISSION_GRANTED) {
                 final CharSequence[] options = {"Take Photo", "Choose From Gallery", "Cancel"};
-                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+                android.support.v7.app.AlertDialog.Builder builder = new
+                        android.support.v7.app.AlertDialog.Builder(this);
                 builder.setTitle("Select Option");
                 builder.setItems(options, new DialogInterface.OnClickListener() {
                     @Override
@@ -131,7 +135,8 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
                             startActivityForResult(intent, PICK_IMAGE_CAMERA);
                         } else if (options[item].equals("Choose From Gallery")) {
                             dialog.dismiss();
-                            Intent pickPhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                            Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                             startActivityForResult(pickPhoto, PICK_IMAGE_GALLERY);
                         } else if (options[item].equals("Cancel")) {
                             dialog.dismiss();
@@ -247,16 +252,6 @@ public class RegistrationActivity extends AppCompatActivity implements Registrat
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        /*if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            filePath = data.getData();
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                imageView.setImageBitmap(bitmap);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }*/
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == PICK_IMAGE_GALLERY)
                 onSelectFromGalleryResult(data);

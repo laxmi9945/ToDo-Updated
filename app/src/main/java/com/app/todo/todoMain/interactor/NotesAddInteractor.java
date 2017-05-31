@@ -47,7 +47,8 @@ public class NotesAddInteractor implements NotesAddInteractorInterface {
                     .addValueEventListener(new ValueEventListener() {
                         NotesModel notesModel = model;
 
-                        final GenericTypeIndicator<ArrayList<NotesModel>> typeIndicator = new GenericTypeIndicator<ArrayList<NotesModel>>() {
+                        final GenericTypeIndicator<ArrayList<NotesModel>> typeIndicator = new
+                                GenericTypeIndicator<ArrayList<NotesModel>>() {
                         };
 
                         @Override

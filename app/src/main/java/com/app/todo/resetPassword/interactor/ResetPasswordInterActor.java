@@ -32,9 +32,12 @@ public class ResetPasswordInterActor implements ResetPasswordInterActorInterface
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Log.i("abc", "onComplete: hi");
-                            Toast.makeText(context, context.getString(R.string.server_info), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context,
+                                    context.getString(R.string.server_info), Toast.LENGTH_SHORT)
+                                    .show();
                         } else {
-                            Toast.makeText(context, context.getString(R.string.failed_message), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, context.getString(R.string.failed_message), Toast.LENGTH_SHORT)
+                                    .show();
                         }
                        // presenterInterface.resetPasswordSuccess();
                         presenterInterface.hideDialog();

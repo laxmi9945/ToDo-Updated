@@ -5,7 +5,7 @@
     android:id="@+id/root_trash_recycler"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffff"
+    android:background="#edecec"
     android:clickable="true"
     android:orientation="vertical">
 

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Todo</string>
+    <string name="app_name">Todo Notes</string>
     <string name="enter_email">Email</string>
     <string name="enter_password">Password</string>
     <string name="password_forgot">Forgot password</string>
@@ -67,6 +67,7 @@
     <string name="fetching_error">Error while fetching data</string>
     <string name="close_app">Close app?</string>
     <string name="facebook_app_id">414255355608534</string>
+    <string name="fabric_key">1e0275c993a7b60bb8eb5521e71b464821743311</string>
     <string name="login_attempt_warn">Login attempt canceled</string>
     <string name="auth_failed">Authentication failed.</string>
     <string name="retry">Retry</string>
@@ -81,7 +82,7 @@
     <string name="trash">Trash</string>
     <string name="welcome">Welcome :</string>
     <string name="invalid_date">Invalid/Passed Date</string>
-    <string name="reminder_set">Reminder set:</string>
+    <string name="reminder_date_set">Reminder set:</string>
     <string name="developer_name">Dev by:Laxmi Mishra</string>
     <string name="developer_mob">Mob No:7978787272</string>
     <string name="developer_email">Email:laxmi9945@gmail.com</string>
@@ -114,6 +115,13 @@
     <string name="select_img_from_gallery">Select Image From Gallery</string>
     <string name="custom_transition">transitionView</string>
     <string name="title">Select color</string>
+    <string name="notes_add">Notes add</string>
+    <string name="item_moved">item moved to Notes</string>
+    <string name="item_moved_trash">item moved Trash</string>
+    <string name="wait_logging_in">Wait u r logging into app</string>
+    <string name="comma">,</string>
+    <string name="reminder_time_set">Reminder time :</string>
+    <string name="month_year_format">MMMM dd, yyyy</string>
 
 
     <integer name="swing_anim_time">750</integer>

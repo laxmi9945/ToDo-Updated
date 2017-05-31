@@ -7,9 +7,13 @@
     <uses-feature android:name="android.hardware.camera" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
-    <!-- GET_ACCOUNTS is necessary to display email address of logged in user. This permission is optional
---><uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <permission
+        android:name="com.app.todo.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.app.todo.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <application
         android:allowBackup="true"
         android:icon="@drawable/todo"
@@ -48,14 +52,26 @@
 
         <activity android:name=".registration.ui.RegistrationActivity"  />
         <activity android:name=".resetPassword.ui.ResetPasswordActivity"/>
-        <activity android:name=".todoMain.ui.activity.NotesAddActivity"/>
-        <activity android:name=".todoMain.ui.activity.DummyActivity"/>
-        <fragment android:name=".fragment.ArchiveFragment"
+        <activity android:name=".todoMain.ui.activity.NotesAddActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity android:name=".todoMain.ui.activity.NotesEditActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
 
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="1e0275c993a7b60bb8eb5521e71b464821743311" />
+
+        <receiver
+            android:exported="true"
+            android:name="com.apsalar.sdk.ApsalarReceiver">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER"/>
+            </intent-filter>
+        </receiver>
+       <!-- <receiver android:name=".todoMain.ui.activity.ReminderReceiver"></receiver>-->
+        <activity android:name=".todoMain.ui.activity.ReminderReceiver"/>
     </application>
-   <!-- <receiver android:name=".todoMain.ui.activity.NotesAddActivity" />-->
-    <!--android:theme="@style/homeTheme"-->
+
 </manifest>

@@ -2,6 +2,8 @@ package com.app.todo.todoMain.ui.activity;
 
 
 import android.animation.LayoutTransition;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -16,6 +18,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -34,6 +37,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
 import com.app.todo.R;
@@ -45,11 +49,15 @@ import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.ui.fragment.AboutFragment;
 import com.app.todo.todoMain.ui.fragment.ArchiveFragment;
 import com.app.todo.todoMain.ui.fragment.NotesFragment;
+import com.app.todo.todoMain.ui.fragment.NoteseditFragmentInterface;
 import com.app.todo.todoMain.ui.fragment.OnSearchTextChange;
 import com.app.todo.todoMain.ui.fragment.ReminderFragment;
 import com.app.todo.todoMain.ui.fragment.TrashFragment;
+import com.app.todo.todoMain.ui.fragment.viewFragment;
 import com.app.todo.utils.Constants;
+import com.apsalar.sdk.Apsalar;
 import com.bumptech.glide.Glide;
+import com.crashlytics.android.Crashlytics;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -64,16 +72,17 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-
-import static android.widget.Toast.LENGTH_SHORT;
+import io.fabric.sdk.android.Fabric;
 
 public class TodoMainActivity extends BaseActivity implements TodoMainActivityInterface, TextToSpeech.OnInitListener, SearchView.OnQueryTextListener, View.OnClickListener,
-        NavigationView.OnNavigationItemSelectedListener {
+        NavigationView.OnNavigationItemSelectedListener, NoteseditFragmentInterface, viewFragment {
     static final String TAG = "NetworkStateReceiver";
+    private static final int DIALOG_ID = 0;
     private final int PICK_IMAGE_CAMERA = 100, PICK_IMAGE_GALLERY = 200, CROP_IMAGE = 1;
     RecyclerView recyclerView;
     TextToSpeech textToSpeech;
@@ -112,12 +121,21 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     Uri uri;
     Intent CamIntent, GalIntent, CropIntent;
     OnSearchTextChange searchTagListener;
-
+    NotesFragment notesFragment;
+    String color_pick;
+    ShareActionProvider shareActionProvider;
+    PendingIntent pendingIntent;
+    AlarmManager manager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_drawerlayout);
+        // Retrieve a PendingIntent that will perform a broadcast
+        Intent reminderIntent = new Intent(this, ReminderReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(this, 0, reminderIntent, 0);
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
@@ -139,7 +157,10 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         uId = firebaseAuth.getCurrentUser().getUid();
 
         initView();
-
+        Intent intent = getIntent();
+        Uri data = intent.getData();
+        Apsalar.startSession(this, "laxmi9945", "lLVQuEN2", data);
+        //setActionBar(toolbar);
         if (sharedPreferences.getBoolean(Constants.key_fb_login, false)) {
             isFbLogin();
         } else if (sharedPreferences.getBoolean(Constants.key_google_login, false)) {
@@ -161,7 +182,6 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
             circleImageView.setOnClickListener(this);
         }
         setTitle(getString(R.string.notes));
-        setSupportActionBar(toolbar);
         dataBaseUtility = new DataBaseUtility(this);
         toolbar.setVisibility(View.VISIBLE);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -218,6 +238,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         nav_header_Name = (AppCompatTextView) header.findViewById(R.id.nav_header_appName);
         nav_header_Email = (AppCompatTextView) header.findViewById(R.id.nav_header_emailId);
         circleImageView = (CircleImageView) header.findViewById(R.id.profile_image);
+        setSupportActionBar(toolbar);
 
         googleSignInOptions = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -344,14 +365,13 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
 
         // Image Crop Code
         try {
+
             CropIntent = new Intent("com.android.camera.action.CROP");
-
             CropIntent.setDataAndType(uri, "image/*");
-
             CropIntent.putExtra("crop", "true");
-            CropIntent.putExtra("outputX", 180);
-            CropIntent.putExtra("outputY", 180);
-            CropIntent.putExtra("aspectX", 3);
+            CropIntent.putExtra("outputX", 200);
+            CropIntent.putExtra("outputY", 200);
+            CropIntent.putExtra("aspectX", 4);
             CropIntent.putExtra("aspectY", 4);
             CropIntent.putExtra("scaleUpIfNeeded", true);
             CropIntent.putExtra("return-data", true);
@@ -421,15 +441,17 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.notes:
+                notesFragment = new NotesFragment();
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                        .replace(R.id.frameLayout_container, new NotesFragment(), NotesFragment.TAG)
+                        .setCustomAnimations(R.anim.anim_slide_in_from_left,
+                                R.anim.anim_slide_out_from_left)
+                        .replace(R.id.frameLayout_container, notesFragment, NotesFragment.TAG)
                         .addToBackStack(null)
                         .commit();
                 recyclerView.setAdapter(recyclerAdapter);
                 setTitle(getString(R.string.notes));
-                Toast.makeText(this, getString(R.string.notes), LENGTH_SHORT).show();
+                //Toast.makeText(this, getString(R.string.notes), LENGTH_SHORT).show();
                 drawer.closeDrawers();
                 break;
 
@@ -440,52 +462,62 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
 
             case R.id.reminder:
                 getSupportFragmentManager().beginTransaction()
-                        .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                        .replace(R.id.frameLayout_container, new ReminderFragment(this), ReminderFragment.TAG)
+                        .setCustomAnimations(R.anim.anim_slide_in_from_left,
+                                R.anim.anim_slide_out_from_left)
+                        .replace(R.id.frameLayout_container, new ReminderFragment(this),
+                                ReminderFragment.TAG)
                         .addToBackStack(null)
                         .commit();
                 setTitle(getString(R.string.reminder));
-                Toast.makeText(this, getString(R.string.reminder), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, getString(R.string.reminder), Toast.LENGTH_SHORT).show();
                 drawer.closeDrawers();
                 break;
 
             case R.id.trash:
 
                 getSupportFragmentManager().beginTransaction()
-                        .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                        .replace(R.id.frameLayout_container, new TrashFragment(this), TrashFragment.TAG)
+                        .setCustomAnimations(R.anim.anim_slide_in_from_left,
+                                R.anim.anim_slide_out_from_left)
+                        .replace(R.id.frameLayout_container, new TrashFragment(this),
+                                TrashFragment.TAG)
                         .addToBackStack(null)
                         .commit();
                 setTitle(getString(R.string.trash));
-                Toast.makeText(this, getString(R.string.trash), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, getString(R.string.trash), Toast.LENGTH_SHORT).show();
                 drawer.closeDrawers();
 
                 break;
 
             case R.id.archive:
                 getSupportFragmentManager().beginTransaction()
-                        .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                        .replace(R.id.frameLayout_container, new ArchiveFragment(this), ArchiveFragment.TAG)
+                        .setCustomAnimations(R.anim.anim_slide_in_from_left,
+                                R.anim.anim_slide_out_from_left)
+                        .replace(R.id.frameLayout_container, new ArchiveFragment(this),
+                                ArchiveFragment.TAG)
                         .addToBackStack(null)
                         .commit();
                 setTitle(getString(R.string.archive));
-                Toast.makeText(this, getString(R.string.archive), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, getString(R.string.archive), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Currently resolving problem", Toast.LENGTH_SHORT).show();
                 drawer.closeDrawers();
 
                 break;
             case R.id.about:
 
                 getSupportFragmentManager().beginTransaction()
-                        .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
-                        .replace(R.id.frameLayout_container, new AboutFragment(), AboutFragment.TAG)
+                        .setCustomAnimations(R.anim.anim_slide_in_from_left,
+                                R.anim.anim_slide_out_from_left)
+                        .replace(R.id.frameLayout_container, new AboutFragment(),
+                                AboutFragment.TAG)
                         .addToBackStack(null)
                         .commit();
                 setTitle(getString(R.string.about));
 
-                Toast.makeText(this, getString(R.string.about), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, getString(R.string.about), Toast.LENGTH_SHORT).show();
                 drawer.closeDrawers();
                 break;
             case R.id.nav_share:
+
                 Toast.makeText(this, getString(R.string.logic), Toast.LENGTH_SHORT).show();
                 break;
 
@@ -506,11 +538,13 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
             public void onResult(@NonNull Status status) {
                 finish();
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                Toast.makeText(TodoMainActivity.this, getString(R.string.logout_success), Toast.LENGTH_SHORT).show();
+                Toast.makeText(TodoMainActivity.this, getString(R.string.logout_success), Toast.LENGTH_SHORT)
+                        .show();
             }
         });
 
-        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
+        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys,
+                Context.MODE_PRIVATE);
         editor.clear();
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(Constants.key_fb_login, false);
@@ -632,7 +666,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         allNotes = modelList;
         ArrayList<NotesModel> todoHomeDataModel = new ArrayList<>();
         for (NotesModel note : allNotes) {
-            if (!note.isArchieved()) {
+            if (!note.isArchived()) {
                 todoHomeDataModel.add(note);
             }
         }
@@ -644,4 +678,49 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     public void setSearchTagListener(OnSearchTextChange searchTagListener) {
         this.searchTagListener = searchTagListener;
     }
+
+    @Override
+    public void onColorSelected(int dialogId, @ColorInt int color) {
+        Toast.makeText(this, "" + String.valueOf(color), Toast.LENGTH_SHORT).show();
+//        notesFragment.setColorForFragment(String.valueOf(color));
+    }
+
+    @Override
+    public void onDialogDismissed(int dialogId) {
+        Toast.makeText(this, "Dialog dismissed", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void implementFragment() {
+
+    }
+
+    public void start() {
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        int interval = 8000;
+
+        manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval,
+                pendingIntent);
+        Toast.makeText(this, "Alarm Set", Toast.LENGTH_SHORT).show();
+    }
+
+    public void cancel() {
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        manager.cancel(pendingIntent);
+        Toast.makeText(this, "Alarm Canceled", Toast.LENGTH_SHORT).show();
+    }
+
+    public void startAt10() {
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        int interval = 1000 * 60 * 20;
+        /* Set the alarm to start at 10:30 AM */
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 11);
+        calendar.set(Calendar.MINUTE, 10);
+
+    }
+
+
+
 }

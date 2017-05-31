@@ -1,13 +1,15 @@
 package com.app.todo.todoMain.ui.fragment;
 
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
-import android.content.ClipData;
-import android.content.ClipDescription;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
@@ -15,6 +17,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
@@ -22,15 +25,12 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.app.todo.R;
@@ -39,8 +39,10 @@ import com.app.todo.database.DataBaseUtility;
 import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.presenter.NotesFragmentPresenter;
 import com.app.todo.todoMain.ui.activity.NotesAddActivity;
+import com.app.todo.todoMain.ui.activity.ReminderReceiver;
 import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 import com.app.todo.utils.Constants;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -51,11 +53,13 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.fabric.sdk.android.Fabric;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
 
 
-public class NotesFragment extends Fragment implements NotesFragmentInterface, OnSearchTextChange, View.OnClickListener {
+public class NotesFragment extends Fragment implements NotesFragmentInterface, OnSearchTextChange,
+        View.OnClickListener,viewFragment{
 
     public static final String TAG = "NotesFragment";
     private static final int REQUEST_CODE = 2;
@@ -82,17 +86,15 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
     View view;
     SharedPreferences sharedPreferences;
     boolean isGrid = false;
-
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Fabric.with(getActivity(), new Crashlytics());
 
+        View view = inflater.inflate(R.layout.fragment_notes, container, false);
         dataBaseUtility = new DataBaseUtility(getActivity());
         presenter = new NotesFragmentPresenter(getContext(), this);
-        View view = inflater.inflate(R.layout.fragment_notes, container, false);
-
+        //cardView= (CardView) view.findViewById(R.id.myCardView);
         databaseReference = FirebaseDatabase.getInstance().getReference().child(getString(R.string.userData));
         uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         presenter.getNoteList(uId);
@@ -102,22 +104,22 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
         fabAnimate();
         initSwipeView();
-
-        view.findViewById(R.id.coordinatorRootNotesFragment).setOnDragListener(new MyDragListener());
-
-        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
+        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys,
+                Context.MODE_PRIVATE);
 
         if (sharedPreferences.getBoolean("isList", false)) {
             isGrid = false;
 
-            recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
+            recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(1,
+                    StaggeredGridLayoutManager.VERTICAL));
         } else {
             isGrid = true;
-            recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+            recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(2,
+                    StaggeredGridLayoutManager.VERTICAL));
         }
 
 
-        recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes, this);
+        recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes,this);
         recyclerViewNotes.setAdapter(recyclerAdapter);
 
         ((TodoMainActivity) getActivity()).setSearchTagListener(this);
@@ -135,6 +137,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
     }
 
     private void fabAnimate() {
+
         //Animating Fab button while Scrolling
         recyclerViewNotes.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
@@ -208,7 +211,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
         filteredNotes.clear();
         allNotes.clear();
         for (NotesModel note : modelList) {
-            if (!note.isArchieved() && !note.isDeleted()) {
+            if (!note.isArchived() && !note.isDeleted()) {
                 allNotes.add(note);
             }
         }
@@ -223,7 +226,6 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
             empty_list_textView.setVisibility(View.VISIBLE);
             empty_list_imageView.setVisibility(View.VISIBLE);
             //coordinatorRootNotesFragment.setGravity(Gravity.CENTER);
-
         }
     }
 
@@ -235,29 +237,20 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     @Override
     public void onClick(View v) {
-
+        Toast.makeText(getActivity(), "hii", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onSearchTagChange(String searchTag) {
-        Log.i(TAG, "onSearchTagChange: " + searchTag);
         searchTag = searchTag.toLowerCase();
 
         if (!TextUtils.isEmpty(searchTag)) {
-            ;
-
             ArrayList<NotesModel> newList = new ArrayList<>();
             for (NotesModel model : allNotes) {
-
                 String name = model.getTitle().toLowerCase();
-
-                Log.i(TAG, "onTextChange: " + name);
-
                 if (name.contains(searchTag))
                     newList.add(model);
             }
-            Log.i(TAG, "onTextChange: " + newList.size());
-
             filteredNotes.clear();
             filteredNotes.addAll(newList);
         } else {
@@ -270,11 +263,15 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     void initSwipeView() {
 
-        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper
+                .SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT|ItemTouchHelper.UP
+                | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
             @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                                  RecyclerView.ViewHolder target) {
+                    recyclerAdapter.notifyItemMoved(viewHolder.getAdapterPosition(),
+                            target.getAdapterPosition());
                 return true;
             }
 
@@ -286,30 +283,38 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
                     databaseReference = FirebaseDatabase.getInstance().getReference();
                     notesModel = allNotes.get(position);
                     notesModel.setDeleted(true);
-                    databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
+                    databaseReference.child(Constants.userdata).child(uId)
+                            .child(notesModel.getDate()).child(String.valueOf(notesModel.getId()))
+                            .setValue(notesModel);
                     recyclerAdapter.deleteItem(position);
                     dataBaseUtility.delete(notesModel);
                     recyclerViewNotes.setAdapter(recyclerAdapter);
                     snackbar = Snackbar
-                            .make(coordinatorRootNotesFragment, getString(R.string.item_deleted), Snackbar.LENGTH_LONG);
+                            .make(coordinatorRootNotesFragment, getString(R.string.item_deleted),
+                                    Snackbar.LENGTH_LONG);
                     snackbar.show();
 
                 }
                 if (direction == ItemTouchHelper.RIGHT) {
                     allNotes = getWithoutArchiveItems();
                     notesModel = allNotes.get(position);
-                    notesModel.setArchieved(true);
-                    databaseReference.child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
+                    notesModel.setArchived(true);
+                    databaseReference.child(uId).child(notesModel.getDate()).child(String
+                            .valueOf(notesModel.getId())).setValue(notesModel);
                     recyclerAdapter.archiveItem(position);
                     recyclerViewNotes.setAdapter(recyclerAdapter);
                     Snackbar snackbar = Snackbar
-                            .make(coordinatorRootNotesFragment, getString(R.string.item_archieved), Snackbar.LENGTH_LONG)
+                            .make(coordinatorRootNotesFragment, getString(R.string.item_archieved),
+                                    Snackbar.LENGTH_LONG)
                             .setAction(getString(R.string.undo), new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    notesModel.setArchieved(false);
-                                    databaseReference.child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
-                                    Snackbar snackbar1 = Snackbar.make(coordinatorRootNotesFragment, getString(R.string.item_restored), Snackbar.LENGTH_SHORT);
+                                    notesModel.setArchived(false);
+                                    databaseReference.child(uId).child(notesModel.getDate())
+                                            .child(String.valueOf(notesModel.getId()))
+                                            .setValue(notesModel);
+                                    Snackbar snackbar1 = Snackbar.make(coordinatorRootNotesFragment,
+                                            getString(R.string.item_restored), Snackbar.LENGTH_SHORT);
                                     snackbar1.show();
                                 }
                             });
@@ -324,8 +329,8 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     private List<NotesModel> getWithoutArchiveItems() {
         ArrayList<NotesModel> todoHomeDataModel = new ArrayList<>();
-        for (NotesModel note : allNotes) {
-            if (!note.isArchieved()) {
+        for (NotesModel note : allNotes ) {
+            if (!note.isArchived()) {
                 todoHomeDataModel.add(note);
             }
         }
@@ -339,30 +344,40 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
+        switch (item.getItemId()){
+            case R.id.changeview:
+                toggle(item);
+                break;
+            case R.id.notify:
+                notifyReminder();
+                break;
+        }
+        /*int id = item.getItemId();
         if (id == R.id.changeview) {
             toggle(item);
             return false;
-        }
+        }*/
         return super.onOptionsItemSelected(item);
     }
 
     void toggle(MenuItem item) {
 
         if (!isGrid) {
-            recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
+            recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(1,
+                    StaggeredGridLayoutManager.VERTICAL));
             item.setIcon(R.drawable.ic_action_straggered);
             isGrid = true;
             SharedPreferences.Editor edit = sharedPreferences.edit();
             edit.putBoolean("isList", true);
-            edit.commit();
+            edit.apply();
 
         } else {
-            recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+            recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(2,
+                    StaggeredGridLayoutManager.VERTICAL));
             item.setIcon(R.drawable.ic_action_list);
             SharedPreferences.Editor edit = sharedPreferences.edit();
             edit.putBoolean("isList", false);
-            edit.commit();
+            edit.apply();
             isGrid = false;
         }
     }
@@ -381,92 +396,51 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
         }
     }
 
-    private final class MyClickListener implements View.OnLongClickListener {
+    @Override
+    public void implementFragment() {
 
-        // called when the item is long-clicked
-        @Override
-        public boolean onLongClick(View view) {
-            // TODO Auto-generated method stub
+        Toast.makeText(getActivity(), "clicked...", Toast.LENGTH_SHORT).show();
 
-            // create it from the object's tag
-            ClipData.Item item = new ClipData.Item((CharSequence) view.getTag());
-
-            String[] mimeTypes = {
-                    ClipDescription.MIMETYPE_TEXT_PLAIN
-            };
-            ClipData data = new ClipData(view.getTag().toString(), mimeTypes, item);
-            View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
-
-            view.startDrag(data, //data to be dragged
-                    shadowBuilder, //drag shadow
-                    view, //local data about the drag and drop operation
-                    0   //no needed flags
-            );
-
-
-            view.setVisibility(View.INVISIBLE);
-            return true;
-        }
     }
 
-    class MyDragListener implements View.OnDragListener {
-        Drawable normalShape = getResources().getDrawable(R.drawable.normal_shape);
-        //Drawable targetShape = getResources().getDrawable(R.drawable.target_shape);
 
-        @Override
-        public boolean onDrag(View v, DragEvent event) {
 
-            // Handles each of the expected events
-            switch (event.getAction()) {
+    public void notifyReminder(){
 
-                //signal for the start of a drag and drop operation.
-                case DragEvent.ACTION_DRAG_STARTED:
-                    // do nothing
-                    break;
+        NotificationManager nManager=
+                (NotificationManager)getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
 
-                //the drag point has entered the bounding box of the View
-                case DragEvent.ACTION_DRAG_ENTERED:
-                    v.setBackground(normalShape);    //change the shape of the view
-                    break;
+        NotificationCompat.Builder builder=new
+                NotificationCompat.Builder(getActivity());
 
-                //the user has moved the drag shadow outside the bounding box of the View
-                case DragEvent.ACTION_DRAG_EXITED:
-                    v.setBackground(normalShape);    //change the shape of the view back to normal
-                    break;
+        builder.setSmallIcon(R.drawable.alarm_bell);
 
-                //drag shadow has been released,the drag point is within the bounding box of the View
-                case DragEvent.ACTION_DROP:
-                    // if the view is the bottomlinear, we accept the drag item
-                    if (v == view.findViewById(R.id.coordinatorRootNotesFragment)) {
-                        View view = (View) event.getLocalState();
-                        ViewGroup viewgroup = (ViewGroup) view.getParent();
-                        viewgroup.removeView(view);
+        builder.setContentTitle("Sample Notification");
 
-                        //change the text
-                        TextView text = (TextView) v.findViewById(R.id.text);
-                        text.setText("The item is dropped");
+        builder.setContentText("Sample Notification for reminder...");
 
-                        LinearLayout containView = (LinearLayout) v;
-                        containView.addView(view);
-                        view.setVisibility(View.VISIBLE);
-                    } else {
-                        View view = (View) event.getLocalState();
-                        view.setVisibility(View.VISIBLE);
-                        Context context = getApplicationContext();
-                        Toast.makeText(context, "You can't drop the image here",
-                                Toast.LENGTH_LONG).show();
-                        break;
-                    }
-                    break;
+        builder.setSubText("Sample Notification for reminder...");
 
-                //the drag and drop operation has concluded.
-                case DragEvent.ACTION_DRAG_ENDED:
-                    v.setBackground(normalShape);    //go back to normal shape
+        Bitmap bmp= BitmapFactory.decodeResource(getResources(),
+                R.drawable.alarm_bell);
 
-                default:
-                    break;
-            }
-            return true;
-        }
+        builder.setLargeIcon(bmp);
+
+        Intent i=new Intent();
+        Bundle bundle=new Bundle();
+        bundle.putString("name","value");
+        i.putExtras(bundle);
+
+        i.setComponent(new ComponentName(getApplicationContext(),
+                ReminderReceiver.class));
+
+
+        PendingIntent pIntent=PendingIntent.getActivity(getApplicationContext(),
+                0,i,0);
+
+        builder.setContentIntent(pIntent);
+
+        nManager.notify(1,builder.build());
+
     }
 }

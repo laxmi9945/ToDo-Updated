@@ -16,6 +16,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatTextView;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ import com.app.todo.resetPassword.ui.ResetPasswordActivity;
 import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 import com.app.todo.utils.CommonChecker;
 import com.app.todo.utils.Constants;
+import com.crashlytics.android.Crashlytics;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -57,6 +59,8 @@ import org.json.JSONObject;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import io.fabric.sdk.android.Fabric;
+
 public class LoginActivity extends BaseActivity implements LoginActivityInterface {
 
     SharedPreferences.Editor editor = null;
@@ -74,11 +78,12 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
     LoginPresenter loginPresenter;
     Snackbar snackbar;
     private LinearLayout linearLayout;
-
+    private LinearLayout linearMain;
+    FrameLayout frameLayout;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_login);
 
         progressDialog = new ProgressDialog(this);
@@ -88,7 +93,8 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         initView();
         checkNetwork();
         loginButton.setReadPermissions("public_profile email");
-        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
+        sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys,
+                Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
 
@@ -116,7 +122,8 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
             // Changing action button text color
             View sbView = snackbar.getView();
-            AppCompatTextView textView = (AppCompatTextView) sbView.findViewById(android.support.design.R.id.snackbar_text);
+            AppCompatTextView textView = (AppCompatTextView) sbView.
+                    findViewById(android.support.design.R.id.snackbar_text);
             textView.setTextColor(Color.YELLOW);
             snackbar.show();
 
@@ -130,7 +137,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
     @Override
     public void initView() {
-
+        frameLayout= (FrameLayout) findViewById(R.id.login_frame);
         editTextEmail = (AppCompatEditText) findViewById(R.id.email_Edittext);
         editTextPassword = (AppCompatEditText) findViewById(R.id.password_Edittext);
         createAccountTextview = (AppCompatTextView) findViewById(R.id.createAccount_Textview);
@@ -139,6 +146,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         loginButton = (LoginButton) findViewById(R.id.fb_login_button);
         googleButton = (AppCompatButton) findViewById(R.id.google_button);
         linearLayout= (LinearLayout) findViewById(R.id.Linear_rootLayout);
+        linearMain= (LinearLayout) findViewById(R.id.linearMain);
         //initializing google signin options
         googleSignInOptions = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -158,7 +166,8 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
         setClicklistener();
         loginPresenter=new LoginPresenter(this,this);
 
-        Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeue-Regular.ttf");
+        Typeface custom_font = Typeface.createFromAsset(getAssets(),
+                "fonts/HelveticaNeue-Regular.ttf");
 
 
     }
@@ -192,7 +201,8 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
             case R.id.createAccount_Textview:
 
                 Intent intent = new Intent(this, RegistrationActivity.class);
-                Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(this,android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
+                Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(this,
+                        android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
                 startActivity(intent,bundle);
                 break;
 
@@ -200,14 +210,16 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
                 //startActivity(new Intent(getApplicationContext(), ResetPasswordActivity.class));
                 Intent intent2 = new Intent(this, ResetPasswordActivity.class);
-                Bundle bundle2 = ActivityOptionsCompat.makeCustomAnimation(this,android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
+                Bundle bundle2 = ActivityOptionsCompat.makeCustomAnimation(this,
+                        android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
                 startActivity(intent2,bundle2);
                 break;
 
             case R.id.login_button:
 
                 //loginUser();
-                loginPresenter.loginResponse(editTextEmail.getText().toString(),editTextPassword.getText().toString());
+                loginPresenter.loginResponse(editTextEmail.getText().toString(),
+                        editTextPassword.getText().toString());
 
                 break;
 
@@ -231,7 +243,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
     //Facebook Social Login
 
     private void facebookLogin() {
-
+        linearMain.setVisibility(View.GONE);
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
 
             @Override
@@ -241,7 +253,8 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                 handleFacebookAccessToken(loginResult.getAccessToken());
                 //String accessToken = loginResult.getAccessToken().getToken();
 
-                GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
+                GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(),
+                        new GraphRequest.GraphJSONObjectCallback() {
 
                     @Override
 
@@ -253,11 +266,20 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
 
                         String emailid = bFacebookData.getString(Constants.fb_email);
                         editor.putString(Constants.fb_email_key, emailid);
-                        editor.putString(Constants.fb_profile_key, bFacebookData.getString(Constants.fb_profile_pic));
-                        editor.putString(Constants.fb_name_key, bFacebookData.getString(Constants.fb_first_name));
-                        editor.putString(Constants.fb_lastname_key, bFacebookData.getString(Constants.fb_last_name));
+                        editor.putString(Constants.fb_profile_key, bFacebookData
+                                .getString(Constants.fb_profile_pic));
+                        editor.putString(Constants.fb_name_key, bFacebookData
+                                .getString(Constants.fb_first_name));
+                        editor.putString(Constants.fb_lastname_key, bFacebookData
+                                .getString(Constants.fb_last_name));
                         editor.apply();
-                        Toast.makeText(LoginActivity.this, getString(R.string.welcome) + bFacebookData.getString(Constants.fb_first_name), Toast.LENGTH_SHORT).show();
+                        linearMain.setVisibility(View.GONE);
+                        frameLayout.setVisibility(View.VISIBLE);
+                        progressDialog.setMessage(getString(R.string.wait_logging_in));
+                        progressDialog.show();
+
+                        Toast.makeText(LoginActivity.this, getString(R.string.welcome) + bFacebookData
+                                .getString(Constants.fb_first_name), Toast.LENGTH_SHORT).show();
 
                     }
 
@@ -276,7 +298,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
             @Override
 
             public void onCancel() {
-
+                linearMain.setVisibility(View.VISIBLE);
                 Toast.makeText(LoginActivity.this,getString(R.string.login_attempt_warn), Toast.LENGTH_SHORT).show();
 
             }
@@ -284,7 +306,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
             @Override
 
             public void onError(FacebookException e) {
-
+                linearMain.setVisibility(View.VISIBLE);
                 Toast.makeText(LoginActivity.this, getString(R.string.error), Toast.LENGTH_SHORT).show();
 
             }
@@ -301,22 +323,20 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+
                         if (task.isSuccessful()) {
+
                             startActivity(new Intent(getApplicationContext(), TodoMainActivity.class));
 
                             sharedPreferences.edit().putBoolean(Constants.key_fb_login,true).apply();
-                           // Log.i("ghg", "onComplete: ............."+sharedPreferences.edit().putBoolean(Constants.key_fb_login,true));
                             finish();
-                            //updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
-                            //Log.w(TAG, "signInWithCredential:failure", task.getException());
+
                             Toast.makeText(LoginActivity.this, getString(R.string.auth_failed),
                                     Toast.LENGTH_SHORT).show();
                             //updateUI(null);
                         }
-
-
                     }
                 });
     }
@@ -371,6 +391,8 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        linearLayout.setVisibility(View.GONE);
+        frameLayout.setVisibility(View.VISIBLE);
         callbackManager.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RC_SIGN_IN) {
@@ -389,14 +411,14 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
             String person_email=account.getEmail();
             Uri profile_pic=account.getPhotoUrl();
             String person_id=account.getId();
-            sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
+            sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys,
+                    Context.MODE_PRIVATE);
             editor = sharedPreferences.edit();
             editor.putString(Constants.Name,person_name);
             editor.putString(Constants.Email,person_email);
             editor.putString(Constants.id,person_id);
             editor.putString(Constants.profile_pic,profile_pic.toString());
             editor.apply();
-            //Toast.makeText(this, "info"+person_name+person_email+person_id+profile_pic, Toast.LENGTH_SHORT).show();
             AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
             firebaseAuth.signInWithCredential(credential)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -404,14 +426,13 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
 
-                                startActivity(new Intent(getApplicationContext(), TodoMainActivity.class));
+                                startActivity(new Intent(getApplicationContext(),
+                                        TodoMainActivity.class));
                                 finish();
-                                sharedPreferences.edit().putBoolean(Constants.key_google_login,true).apply();
-                                // Sign in success, update UI with the signed-in user's information
+                                sharedPreferences.edit().putBoolean(Constants
+                                        .key_google_login,true).apply();
 
                             } else {
-                                // If sign in fails, display a message to the user.
-                                //Log.w(TAG, "signInWithCredential:failure", task.getException());
                                 Toast.makeText(LoginActivity.this, getString(R.string.auth_failed),
                                         Toast.LENGTH_SHORT).show();
                             }

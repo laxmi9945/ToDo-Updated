@@ -38,7 +38,9 @@ public class DataBaseUtility extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        String Todo_table = "CREATE TABLE " + Todo_Notes + "("+Id+ " INTEGER PRIMARY KEY, " + Title_table + " TEXT," + Content_table + " TEXT," + Time+ " TEXT," +Trash+ " Trash " + ")";
+        String Todo_table = "CREATE TABLE " + Todo_Notes + "("+Id+ " INTEGER PRIMARY KEY, "
+                + Title_table + " TEXT," + Content_table + " TEXT," + Time+ " TEXT," +Trash+
+                " Trash " + ")";
         db.execSQL(Todo_table);
     }
 

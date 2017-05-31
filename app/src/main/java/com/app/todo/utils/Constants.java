@@ -32,11 +32,17 @@ public class Constants {
     public static String titleKey = "noteTitle";
     public static String descriptionKey = "noteDescription";
     public static String currentTimeKey = "currentTime";
-    public static String reminderKey = "reminderDate";
+    public static String reminderDate = "reminderDate";
     public static String fb_name_key ="firstname";
     public static String fb_lastname_key="lastname";
     public static String fb_email_key="email";
     public static String fb_profile_key="profile";
+    public static String colorKey="color";
+    public static String reminderTime="reminderTime";
+    public static String notes_titile="title";
+    public static String notes_content="content";
+    public static String notes_date="date";
+    public static String notes_time="time";
 
     public interface ErrorType{
         public static final int ERROR_NO_INTERNET_CONNECTION=0;

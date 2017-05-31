@@ -15,6 +15,8 @@ import com.app.todo.R;
 import com.app.todo.login.ui.LoginActivity;
 import com.app.todo.utils.Constants;
 import com.google.firebase.auth.FirebaseAuth;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 
 public class SplashActivity extends AppCompatActivity  {
 
@@ -25,8 +27,10 @@ public class SplashActivity extends AppCompatActivity  {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_splash);
         firebaseAuth = FirebaseAuth.getInstance();
+
         if (firebaseAuth.getCurrentUser() != null) {
             finish();
             startActivity(new Intent(this, TodoMainActivity.class));

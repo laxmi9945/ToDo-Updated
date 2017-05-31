@@ -23,7 +23,8 @@ public class RegistrationInterActor implements RegistrationInterActorInterface {
     private final FirebaseAuth firebaseAuth;
     private String uId;
 
-    public RegistrationInterActor(Context context, RegistrationPresenterInterface registrationPresenterInterface) {
+    public RegistrationInterActor(Context context, RegistrationPresenterInterface
+            registrationPresenterInterface) {
         this.context = context;
         this.registrationPresenterInterface = registrationPresenterInterface;
         firebaseAuth = FirebaseAuth.getInstance();
@@ -37,18 +38,22 @@ public class RegistrationInterActor implements RegistrationInterActorInterface {
         String userRegistrationEmail = userInfoModel.getEmail();
         String userRegistrationPassword = userInfoModel.getPassword();
 
-        firebaseAuth.createUserWithEmailAndPassword(userRegistrationEmail, userRegistrationPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+        firebaseAuth.createUserWithEmailAndPassword(userRegistrationEmail,
+                userRegistrationPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    databaseReference.child(Constants.firebase_userInfo).child(task.getResult().getUser().getUid()).setValue(userInfoModel);
-                    firebaseAuth.signInWithEmailAndPassword(userInfoModel.getEmail(), userInfoModel.getPassword())
+                    databaseReference.child(Constants.firebase_userInfo).child(task.getResult()
+                            .getUser().getUid()).setValue(userInfoModel);
+                    firebaseAuth.signInWithEmailAndPassword(userInfoModel.getEmail(),
+                            userInfoModel.getPassword())
                             .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()) {
                                         uId = firebaseAuth.getCurrentUser().getUid();
-                                        registrationPresenterInterface.registrationSuccess(userInfoModel, uId);
+                                        registrationPresenterInterface
+                                                .registrationSuccess(userInfoModel, uId);
                                     } else {
                                         registrationPresenterInterface.registrationFailure
                                                 (context.getString(R.string.after_reg_login_fail_message));

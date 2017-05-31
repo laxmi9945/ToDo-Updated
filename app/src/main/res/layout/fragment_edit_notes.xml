@@ -3,42 +3,15 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:clickable="true"
+    android:id="@+id/update_layout"
     android:background="@android:color/white"
     xmlns:android="http://schemas.android.com/apk/res/android">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="35dp"
-            android:orientation="horizontal"
-            >
-        <android.support.v7.widget.AppCompatImageButton
-            android:layout_width="30dp"
-            android:layout_marginTop="3dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/back_button"
-            android:background="@drawable/back"
-
-            />
-            <android.support.v7.widget.AppCompatTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/reminderEdit_textView"
-                android:layout_marginTop="3dp"
-                android:hint="reminder date"
-                android:textSize="25dp"
-                android:textColor="@color/colorRed"
-                android:layout_marginLeft="15dp"
-                />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/bg_button_login"/>
 
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
           >
         <android.support.v7.widget.AppCompatEditText
             android:id="@+id/edit_title"
@@ -52,17 +25,10 @@
             android:textStyle="italic"
 
             />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/bg_button_login"
-            android:layout_below="@+id/edit_title"
-            android:id="@+id/view4"
-            />
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/view4"
+            android:layout_below="@+id/edit_title"
             android:layout_above="@+id/viewlast">
             <LinearLayout
                 android:layout_width="match_parent"
@@ -95,7 +61,7 @@
         <android.support.v7.widget.AppCompatTextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="\u0040 Notes update fragment"
+            android:text="\u0040 Notes update"
             android:textSize="15dp"
             android:id="@+id/info"
             android:layout_marginLeft="110dp"

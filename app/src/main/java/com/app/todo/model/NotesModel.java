@@ -7,10 +7,31 @@ public class NotesModel {
     private String time;
     private String reminderDate;
     private int id;
-    private boolean isArchieved;
+    private boolean isArchived;
     private boolean isDeleted;
-    /*private boolean isDeleted;
+    private String color;
+    private String reminderTime;
 
+
+    public NotesModel() {
+
+    }
+
+    public String getReminderTime() {
+        return reminderTime;
+    }
+
+    public void setReminderTime(String reminderTime) {
+        this.reminderTime = reminderTime;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
 
     public boolean isDeleted() {
         return isDeleted;
@@ -18,16 +39,8 @@ public class NotesModel {
 
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
-    }*/
-
-
-    public boolean isDeleted() {
-        return isDeleted;
     }
 
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
     public String getTime() {
         return time;
     }
@@ -36,20 +49,6 @@ public class NotesModel {
         this.time = time;
     }
 
-    public NotesModel() {
-
-    }
-
-    /*
-
-    public NotesModel(String time,String date, String content, int id, String title) {
-        this.title = title;
-        this.content = content;
-        this.date = date;
-        this.time = time;
-        this.id = id;
-    }
-*/
     public String getTitle() {
         return title;
     }
@@ -90,12 +89,12 @@ public class NotesModel {
         this.reminderDate = reminderDate;
     }
 
-    public boolean isArchieved() {
-        return isArchieved;
+    public boolean isArchived() {
+        return isArchived;
     }
 
-    public void setArchieved(boolean archieved) {
-        isArchieved = archieved;
+    public void setArchived(boolean archived) {
+        this.isArchived = archived;
     }
 
 }

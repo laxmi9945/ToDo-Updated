@@ -21,4 +21,7 @@
     <dimen name="about_img_width">150dp</dimen>
     <dimen name="dimen_10dp">10dp</dimen>
     <dimen name="dimen_5dp">5dp</dimen>
+    <integer name="anim_duration_very_long">1500</integer>
+    <integer name="anim_duration_long">500</integer>
+    <integer name="anim_duration_medium">300</integer>
 </resources>

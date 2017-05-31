@@ -8,8 +8,10 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -24,7 +26,7 @@ import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.presenter.ArchiveFragmentPresenter;
 import com.app.todo.todoMain.presenter.ArchiveFragmentPresenterInterface;
 import com.app.todo.todoMain.ui.activity.TodoMainActivity;
-import com.app.todo.utils.Constants;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -32,9 +34,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.fabric.sdk.android.Fabric;
 
-public class ArchiveFragment extends Fragment implements ArchiveFragmentInterface {
-    public static final String TAG = "NotesFragment";
+
+public class ArchiveFragment extends Fragment implements ArchiveFragmentInterface,viewFragment,
+        SearchView.OnQueryTextListener {
+    public static final String TAG = "ArchiveFragment";
     ArchiveFragmentPresenterInterface presenter;
     ProgressDialog progressDialog;
     FirebaseAuth firebaseAuth;
@@ -48,6 +53,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
     LinearLayout linearLayout;
     DatabaseReference databaseReference;
     String uId;
+    List<NotesModel> filteredNotes = new ArrayList<>();
     List<NotesModel> allNotes = new ArrayList<>();
     boolean isView = false;
     DataBaseUtility dataBaseUtility;
@@ -60,7 +66,9 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        Fabric.with(getActivity(), new Crashlytics());
         View view = inflater.inflate(R.layout.fragment_archive, container, false);
         initView(view);
         setHasOptionsMenu(true);
@@ -78,7 +86,8 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
         uId = firebaseAuth.getCurrentUser().getUid();
         archive_textView = (AppCompatTextView) view.findViewById(R.id.archive_textView);
         archive_imageView = (AppCompatImageView) view.findViewById(R.id.archive_icon);
-        archive_recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+        archive_recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,
+                StaggeredGridLayoutManager.VERTICAL));
         linearLayout = (LinearLayout) view.findViewById(R.id.root_archive_recycler);
         initSwipeView();
 
@@ -92,10 +101,12 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
 
     void initSwipeView() {
 
-        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0,
+                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
             @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                                  RecyclerView.ViewHolder target) {
 
                 return true;
             }
@@ -104,38 +115,33 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 final int position = viewHolder.getAdapterPosition();
                 if (direction == ItemTouchHelper.LEFT) {
+                    try{
+                        notesModel = allNotes.get(position);
+                        databaseReference.child(uId).child(notesModel.getDate())
+                                .child(String.valueOf(notesModel.getId())).child("deleted")
+                                .setValue(true);
+                        snackbar = Snackbar
+                                .make(linearLayout, getString(R.string.item_moved_trash), Snackbar.LENGTH_LONG);
+                        snackbar.show();
+                    }catch (IndexOutOfBoundsException e){
+                        e.printStackTrace();
+                    }
 
-                    databaseReference = FirebaseDatabase.getInstance().getReference();
-                    notesModel = allNotes.get(position);
-                    notesModel.setDeleted(true);
-                    databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
-                    archive_adapter.deleteItem(position);
-                    dataBaseUtility.delete(notesModel);
-                    archive_recyclerView.setAdapter(archive_adapter);
-                    snackbar = Snackbar
-                            .make(linearLayout, getString(R.string.item_deleted), Snackbar.LENGTH_LONG);
-                    snackbar.show();
 
                 }
                 if (direction == ItemTouchHelper.RIGHT) {
-                    //allNotes = getWithoutArchiveItems();
-                    notesModel = allNotes.get(position);
-                    notesModel.setArchieved(true);
-                    databaseReference.child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
-                    archive_adapter.archiveItem(position);
-                    archive_recyclerView.setAdapter(archive_adapter);
-                    Snackbar snackbar = Snackbar
-                            .make(linearLayout, getString(R.string.item_archieved), Snackbar.LENGTH_LONG)
-                            .setAction(getString(R.string.undo), new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    notesModel.setArchieved(false);
-                                    databaseReference.child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
-                                    Snackbar snackbar1 = Snackbar.make(linearLayout, getString(R.string.item_restored), Snackbar.LENGTH_SHORT);
-                                    snackbar1.show();
-                                }
-                            });
-                    snackbar.show();
+                    try {
+                        notesModel = allNotes.get(position);
+                        databaseReference.child(uId).child(notesModel.getDate())
+                                .child(String.valueOf(notesModel.getId())).child("archived")
+                                .setValue(false);
+                        Snackbar snackbar = Snackbar
+                                .make(linearLayout, getString(R.string.item_moved), Snackbar.LENGTH_LONG);
+                        snackbar.show();
+                    }catch (IndexOutOfBoundsException e){
+                        e.printStackTrace();
+                    }
+
                 }
             }
         };
@@ -165,11 +171,13 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
 
         ArrayList<NotesModel> archiveNoteList = new ArrayList<>();
         for (NotesModel notesModel : modelList) {
-            if (notesModel.isArchieved()) {
+            if (notesModel.isArchived() && !notesModel.isDeleted()) {
                 archiveNoteList.add(notesModel);
             }
         }
-        archive_adapter = new RecyclerAdapter(getActivity(), archiveNoteList, this);
+        allNotes.clear();
+        allNotes.addAll(archiveNoteList);
+        archive_adapter = new RecyclerAdapter(getActivity(), archiveNoteList,this);
         archive_recyclerView.setAdapter(archive_adapter);
 
         if (archiveNoteList.size() != 0) {
@@ -202,16 +210,46 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
 
     void toggle(MenuItem item) {
         if (!isView) {
-            archive_recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
+            archive_recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1,
+                    StaggeredGridLayoutManager.VERTICAL));
             item.setIcon(R.drawable.ic_action_straggered);
             isView = true;
         } else {
-            archive_recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+            archive_recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,
+                    StaggeredGridLayoutManager.VERTICAL));
             item.setIcon(R.drawable.ic_action_list);
             isView = false;
         }
 
     }
 
+    @Override
+    public void implementFragment() {
 
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        newText = newText.toLowerCase();
+        if (!TextUtils.isEmpty(newText)) {
+            ArrayList<NotesModel> newList = new ArrayList<>();
+            for (NotesModel model : allNotes) {
+                String name = model.getTitle().toLowerCase();
+                if (name.contains(newText))
+                    newList.add(model);
+            }
+            filteredNotes.clear();
+            filteredNotes.addAll(newList);
+        } else {
+            filteredNotes.clear();
+            filteredNotes.addAll(allNotes);
+        }
+        archive_adapter.notifyDataSetChanged();
+        return true;
+    }
 }

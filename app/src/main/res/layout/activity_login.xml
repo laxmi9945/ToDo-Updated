@@ -11,12 +11,21 @@
     android:background="@drawable/login_gradient"
     >
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/login_frame"
+        android:visibility="gone"
+        android:background="@android:color/black"
+        />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="vertical"
         >
     <LinearLayout
+        android:id="@+id/linearMain"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -131,7 +140,7 @@
             android:layout_height="@dimen/google_btn_height"
             android:layout_marginTop="@dimen/google_btn_marigin_top"
             android:background="@drawable/google_button"
-            android:text="  G+                 Login with G+"
+            android:text="  G+         Login with G+"
             android:textSize="15dp"
             android:textColor="#fbfcfcfc"
             android:textAlignment="textStart"
@@ -141,5 +150,7 @@
     </LinearLayout>
     </LinearLayout>
     </LinearLayout>
+
     </ScrollView>
+
 </LinearLayout>

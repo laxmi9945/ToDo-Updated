@@ -1,9 +1,11 @@
 package com.app.todo.adapter;
 
-import android.app.Activity;
-import android.content.DialogInterface;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -13,16 +15,13 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.app.todo.R;
 import com.app.todo.model.NotesModel;
-import com.app.todo.todoMain.ui.activity.TodoMainActivity;
-import com.app.todo.todoMain.ui.fragment.ArchiveFragment;
+import com.app.todo.todoMain.ui.activity.NotesEditActivity;
 import com.app.todo.todoMain.ui.fragment.NotesFragment;
-import com.app.todo.todoMain.ui.fragment.NoteseditFragment;
-import com.app.todo.todoMain.ui.fragment.ReminderFragment;
-import com.app.todo.todoMain.ui.fragment.TrashFragment;
+import com.app.todo.todoMain.ui.fragment.viewFragment;
+import com.app.todo.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,55 +29,27 @@ import java.util.Random;
 
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskViewHolder> {
-    Activity context;
+    Context context;
     List<NotesModel> model;
+
+    Fragment notesFragment;
+
+    viewFragment viewFragment;
     private int lastPosition = -1;
-    ArchiveFragment archiveFragment;
-    Activity todoMainActivity;
-    ReminderFragment reminderFragment;
-    NotesFragment notesFragment;
-    TrashFragment trashFragment;
-    Integer[] colorList = {R.color.color1,R.color.color2,R.color.color3,R.color.color4,R.color.color5,R.color.color6
-            ,R.color.color7,R.color.color8,R.color.color9,R.color.color10,R.color.color11,R.color.color12,R.color.color13
-            ,R.color.color14,R.color.color15,R.color.color16,R.color.color17} ;
 
-    public RecyclerAdapter(Activity todoMainActivity, List<NotesModel> model, ArchiveFragment archiveFragment)  {
-      //  model=new ArrayList<>();
+
+    public RecyclerAdapter(Context context, List<NotesModel> model, viewFragment viewFragment) {
+
         this.model = model;
-        this.context = todoMainActivity;
-        this.archiveFragment=archiveFragment;
-        this.todoMainActivity=todoMainActivity;
+        this.context = context;
+        this.viewFragment = viewFragment;
     }
-
-    public RecyclerAdapter(Activity context, ArrayList<NotesModel> todoHomeDataModel, TodoMainActivity todoMainActivity) {
-        this.context=context;
-        this.model=todoHomeDataModel;
-        this.todoMainActivity=todoMainActivity;
-    }
-
-    public RecyclerAdapter(Activity context, ArrayList<NotesModel> reminderNoteList, ReminderFragment reminderFragment) {
-    this.model=reminderNoteList;
-        this.context=context;
-        this.reminderFragment=reminderFragment;
-    }
-
-    public RecyclerAdapter(Activity context, List<NotesModel> filteredNotes, NotesFragment notesFragment) {
-        this.context=context;
-        this.model=filteredNotes;
-        this.notesFragment=notesFragment;
-    }
-
-    public RecyclerAdapter(Activity context, List<NotesModel> filteredNotes, TrashFragment trashFragment) {
-        this.context=context;
-        this.model=filteredNotes;
-        this.trashFragment=trashFragment;
-    }
-
 
     @Override
-    public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType)   {
+    public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        View view = LayoutInflater.from(context).inflate(R.layout.activity_todonotes_cards, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.activity_todonotes_cards,
+                parent, false);
         TaskViewHolder myViewHolder = new TaskViewHolder(view);
         return myViewHolder;
     }
@@ -91,8 +62,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
         holder.timeTextView.setText(model.get(position).getTime());
         holder.contentTextView.setText(model.get(position).getContent());
 
-        holder.linearLayoutNoteItem.setBackgroundColor(ContextCompat.getColor(context,colorList[position%17]));
-
+        if (model.get(position).getColor() != null) {
+            holder.linearLayoutNoteItem.setBackgroundColor(Integer.parseInt(String.valueOf(model.
+                    get(position).getColor())));
+        }
         // Here you apply the animation when the view is bound
         setAnimation(holder.itemView, position);
     }
@@ -112,31 +85,63 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
     }
 
     public void deleteItem(int position) {
-        model.remove(position);
+        try {
+            model.remove(position);
+
+
+        } catch (Exception e) {
+            //notifyDataSetChanged();
+            notifyItemRemoved(position);
+            notifyItemRangeChanged(position, model.size());
+        }
+    }
+
+    public void archiveItem(int position) {
+
         notifyDataSetChanged();
-        notifyItemRemoved(position);
         notifyItemRangeChanged(position, model.size());
     }
-    public void archiveItem(int position){
 
-        notifyDataSetChanged();
-        notifyItemRangeChanged(position,model.size());
-    }
-
-    public void reminderItem(){
+    public void reminderItem() {
 
         notifyDataSetChanged();
     }
 
+    public void setFilter(ArrayList<NotesModel> newList) {
+
+        model = new ArrayList<>();
+        model.addAll(newList);
+        notifyDataSetChanged();
+
+    }
+
+    private void setAnimation(View viewToAnimate, int position) {
+
+        // If the bound view wasn't previously displayed on screen, it's animated
+        if (position > lastPosition) {
+            ScaleAnimation anim = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f,
+                    Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+            //to make duration random number between [0,501)
+            anim.setDuration(new Random().nextInt(501));
+            viewToAnimate.startAnimation(anim);
+            lastPosition = position;
+        }
+    }
+
+    public void setNoteList(ArrayList<NotesModel> notesmodel) {
+        this.model.clear();
+        notifyDataSetChanged();
+        this.model.addAll(notesmodel);
+        notifyDataSetChanged();
+    }
 
     public class TaskViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        AppCompatTextView titleTextView, dateTextView, contentTextView,timeTextView;
+        AppCompatTextView titleTextView, dateTextView, contentTextView, timeTextView;
         CardView cardView;
         LinearLayout linearLayoutNoteItem;
 
-        public TaskViewHolder(final View itemView)
-        {
+        public TaskViewHolder(final View itemView) {
             super(itemView);
             titleTextView = (AppCompatTextView) itemView.findViewById(R.id.title_TextView);
             dateTextView = (AppCompatTextView) itemView.findViewById(R.id.date_TextView);
@@ -144,14 +149,16 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
             contentTextView = (AppCompatTextView) itemView.findViewById(R.id.content_TextView);
             cardView = (CardView) itemView.findViewById(R.id.myCardView);
             linearLayoutNoteItem = (LinearLayout) itemView.findViewById(R.id.linearLayoutNoteItem);
+            //cardView.setOnLongClickListener(new MyClickListener());
             cardView.setOnClickListener(this);
-            if(archiveFragment!=null) {
+            /*if (archiveFragment != null) {
                 cardView.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
 
-                    /*final CharSequence[] options = {"Share note","Cancel"};
-                    android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
+                    *//**//*final CharSequence[] options = {"Share note","Cancel"};
+                    android.support.v7.app.AlertDialog.Builder builder = new
+                    android.support.v7.app.AlertDialog.Builder(context);
                     builder.setTitle("Select Option");
                     builder.setItems(options, new DialogInterface.OnClickListener() {
                         @Override
@@ -164,123 +171,92 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
                                 shareIntent.setType("text/plain");
                                 String title=note.getTitle();
                                 String content=note.getContent();
-                                shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, note.getTitle());
-                                shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Title: "+title+ "\n" +"Content: "+content);
-                                context.startActivity(Intent.createChooser(shareIntent, context.getResources().getString(R.string.share_using)));
+                                shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
+                                note.getTitle());
+                                shareIntent.putExtra(android.content.Intent.EXTRA_TEXT,
+                                "Title: "+title+ "\n" +"Content: "+content);
+                                context.startActivity(Intent.createChooser(shareIntent,
+                                 context.getResources().getString(R.string.share_using)));
                                 dialog.dismiss();
-                            } else if (options[item].equals("Cancel")) {
+                            } else if (options[item].equals("Cancel")){
                                 dialog.dismiss();
                             }
                         }
                     });
-                    builder.show();*/
-                        final CharSequence[] options = {"move to Notes", "move to Trash", "Cancel"};
-                        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
-                        builder.setTitle("Select Option");
-                        builder.setItems(options, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int item) {
+                    builder.show();*//**//*
 
-                                if (options[item].equals("move to Notes")) {
-                                /*DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-                                String uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                                NotesModel notesModel = new NotesModel();
-                                databaseReference.child(Constants.userdata).child(uId).child(notesModel.getDate()).child(String.valueOf(notesModel.getId())).setValue(notesModel);
-                                DataBaseUtility dataBaseUtility = new DataBaseUtility(context);
-                                dataBaseUtility.delete(notesModel);*/
-                                    Toast.makeText(context, "Moved to Notes", Toast.LENGTH_SHORT).show();
-                                    dialog.dismiss();
-                                } else if (options[item].equals("move to Trash")) {
-                                    Toast.makeText(context, "Moved to Trash", Toast.LENGTH_SHORT).show();
-                                    dialog.dismiss();
-                                } else if (options[item].equals("Cancel")) {
-                                    dialog.dismiss();
-                                }
-                            }
-                        });
-                        builder.show();
+
+
+
                         return true;
                     }
                 });
-            }
-           // cardView.setOnLongClickListener(new MyclickListener());
+            }*/
+            /*cardView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    viewFragment.implementFragment();
+                    //Toast.makeText(context, "hii", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            });*/
 
         }
 
         @Override
         public void onClick(View v) {
-            switch (v.getId()){
+            switch (v.getId()) {
                 case R.id.myCardView:
-                    if(archiveFragment!=null && trashFragment!=null && reminderFragment!=null || notesFragment!=null ) {
-                        NoteseditFragment fragment = new NoteseditFragment();
-                        (context).setTitle("Notes Update");
+
+                    /*NoteseditFragment fragment = new NoteseditFragment();
+                    Bundle args = new Bundle();
+                    NotesModel note = model.get(getAdapterPosition());
+                    args.putString("title", note.getTitle());
+                    args.putString("content", note.getContent());
+                    args.putString("date", note.getDate());
+                    args.putString("time", note.getTime());
+                    args.putInt("id", note.getId());
+                    args.putString("reminder", note.getReminderDate());
+                    args.putString("color", note.getColor());
+                    fragment.setArguments(args);
+                    ((AppCompatActivity) context).getFragmentManager()
+                            .beginTransaction().replace(R.id.frameLayout_container, fragment)
+                            //.addSharedElement(cardView,context
+                            .getString(R.string.custom_transition))
+                            .addToBackStack(null)
+                            .commit();*/
+                    //}
+
+                    //Activity to test transition
+
+                    notesFragment = ((AppCompatActivity) context).getSupportFragmentManager()
+                            .findFragmentByTag(NotesFragment.TAG);
+                    if (notesFragment.isVisible()) {
+                        Intent intent = new Intent(context, NotesEditActivity.class);
                         Bundle args = new Bundle();
                         NotesModel note = model.get(getAdapterPosition());
-                        args.putString("title", note.getTitle());
-                        args.putString("content", note.getContent());
-                        args.putString("date", note.getDate());
-                        args.putString("time", note.getTime());
-                        args.putInt("id", note.getId());
-                        args.putString("reminder", note.getReminderDate());
-
-                        fragment.setArguments(args);
-
-                        ( context).getFragmentManager()
-                                .beginTransaction().replace(R.id.frameLayout_container, fragment)
-                                .addToBackStack(null)
-                                .commit();
-                    }
-                    /*Intent intent = new Intent(context, DummyActivity.class);
-
-                        *//*Bundle args = new Bundle();
-                        NotesModel note = model.get(getAdapterPosition());
-                        args.putString("title", note.getTitle());
-                        args.putString("content", note.getContent());
-                        args.putString("date", note.getDate());
-                        args.putString("time", note.getTime());
-                        args.putInt("id", note.getId());
-                        args.putString("reminder", note.getReminderDate());*//*
-                        Bundle args = new Bundle();
-                        NotesModel note = model.get(getAdapterPosition());
-                        args.putString("title", note.getTitle());
-                        args.putString("content", note.getContent());
-                        args.putString("date", note.getDate());
-                        args.putString("time", note.getTime());
-                        args.putInt("id", note.getId());
-                        args.putString("reminder", note.getReminderDate());
+                        args.putString(Constants.notes_titile, note.getTitle());
+                        args.putString(Constants.notes_content, note.getContent());
+                        args.putString(Constants.notes_date, note.getDate());
+                        args.putString(Constants.notes_time, note.getTime());
+                        args.putInt(Constants.id, note.getId());
+                        args.putString(Constants.reminderDate, note.getReminderDate());
+                        args.putString(Constants.reminderTime,note.getReminderTime());
+                        args.putString(Constants.colorKey, note.getColor());
                         intent.putExtras(args);
-                        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(context,cardView, context.getString(R.string.custom_transition));
-                        context.startActivity(intent, options.toBundle());*/
+                        ActivityOptionsCompat options = ActivityOptionsCompat
+                                .makeSceneTransitionAnimation((AppCompatActivity) context,
+                                        cardView, context.getString(R.string.custom_transition));
+                        context.startActivity(intent, options.toBundle());
+                    } else {
+
+                    }
                     break;
 
             }
         }
-
     }
-
-    public void setFilter(ArrayList<NotesModel> newList){
-
-        model=new ArrayList<>();
-        model.addAll(newList );
-        notifyDataSetChanged();
-
-    }
-
-    private void setAnimation(View viewToAnimate, int position) {
-
-        // If the bound view wasn't previously displayed on screen, it's animated
-        if (position > lastPosition) {
-            ScaleAnimation anim = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-            anim.setDuration(new Random().nextInt(501));//to make duration random number between [0,501)
-            viewToAnimate.startAnimation(anim);
-            lastPosition = position;
-        }
-    }
-    public void setNoteList(ArrayList<NotesModel> notesmodel){
-        this.model.clear();
-        notifyDataSetChanged();
-        this.model.addAll(notesmodel);
-        notifyDataSetChanged();
-    }
-
 }
+
+
+

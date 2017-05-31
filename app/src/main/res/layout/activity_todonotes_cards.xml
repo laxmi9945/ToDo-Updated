@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:id="@+id/cardView_layout"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
@@ -44,14 +45,13 @@
             android:maxLines="10"
             android:ellipsize="end"
             android:textColor="#0e0e0e"
-            android:textSize="20dp"
+            android:textSize="20sp"
             android:alpha="0.45"
             android:layout_marginTop="@dimen/dimen_10dp"
             android:layout_marginLeft="@dimen/dimen_10dp"
             android:layout_marginStart="@dimen/dimen_10dp"
             />
-    <!--android:ellipsize="end"
-    android:maxLines="1"-->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -80,6 +80,7 @@
             android:paddingBottom="2dp"
             android:background="#d3d3d3"
             />
+
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/time_TextView"
         android:layout_width="wrap_content"
@@ -92,6 +93,7 @@
         android:textStyle="bold"
         android:visibility="gone"
         />
+
     </LinearLayout>
 </LinearLayout>
 
