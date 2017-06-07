@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import com.app.todo.R;
 import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.ui.activity.NotesEditActivity;
+import com.app.todo.todoMain.ui.fragment.ArchiveFragment;
 import com.app.todo.todoMain.ui.fragment.NotesFragment;
 import com.app.todo.todoMain.ui.fragment.viewFragment;
 import com.app.todo.utils.Constants;
@@ -27,16 +28,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import butterknife.OnItemClick;
+
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskViewHolder> {
     Context context;
     List<NotesModel> model;
 
-    Fragment notesFragment;
+    Fragment notesFragment,archiveFragment;
 
     viewFragment viewFragment;
     private int lastPosition = -1;
-
+    private OnItemClick itemClick;
 
     public RecyclerAdapter(Context context, List<NotesModel> model, viewFragment viewFragment) {
 
@@ -143,6 +146,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
 
         public TaskViewHolder(final View itemView) {
             super(itemView);
+            itemView.setClickable(true);
+            itemView.setOnClickListener(this);
             titleTextView = (AppCompatTextView) itemView.findViewById(R.id.title_TextView);
             dateTextView = (AppCompatTextView) itemView.findViewById(R.id.date_TextView);
             timeTextView = (AppCompatTextView) itemView.findViewById(R.id.time_TextView);
@@ -206,6 +211,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
+                
                 case R.id.myCardView:
 
                     /*NoteseditFragment fragment = new NoteseditFragment();
@@ -231,6 +237,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
 
                     notesFragment = ((AppCompatActivity) context).getSupportFragmentManager()
                             .findFragmentByTag(NotesFragment.TAG);
+                    archiveFragment=((AppCompatActivity)context).getSupportFragmentManager()
+                            .findFragmentByTag(ArchiveFragment.TAG);
                     if (notesFragment.isVisible()) {
                         Intent intent = new Intent(context, NotesEditActivity.class);
                         Bundle args = new Bundle();

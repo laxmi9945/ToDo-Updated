@@ -3,11 +3,13 @@ package com.app.todo.todoMain.ui.fragment;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -23,6 +25,8 @@ import com.app.todo.todoMain.presenter.ReminderFragmentPresenterInterface;
 import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,9 +47,13 @@ public class ReminderFragment extends Fragment implements ReminderFragmentInterf
     AppCompatTextView reminderTextView;
     AppCompatImageView reminderImageView;
     LinearLayout linearLayout;
+    NotesModel notesModel = new NotesModel();
     ArrayList<NotesModel> notesModelArrayList = new ArrayList<>();
     List<NotesModel> allNotes = new ArrayList<>();
     List<NotesModel> filteredNotes = new ArrayList<>();
+    DatabaseReference databaseReference;
+    String uId;
+    Snackbar snackbar;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -54,22 +62,59 @@ public class ReminderFragment extends Fragment implements ReminderFragmentInterf
         View view = inflater.inflate(R.layout.fragment_reminder, container, false);
         initView(view);
         getActivity().setTitle("Reminder");
-        String uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+       // uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         presenter.getReminderNotes(uId);
         return view;
     }
 
     private void initView(View view) {
+        databaseReference = FirebaseDatabase.getInstance().getReference().child(getString(R.string.userData));
+        firebaseAuth = FirebaseAuth.getInstance();
+        uId = firebaseAuth.getCurrentUser().getUid();
         linearLayout= (LinearLayout) view.findViewById(R.id.reminder_rootLayout);
         mrecyclerView = (RecyclerView) view.findViewById(R.id.reminder_recyclerView);
         reminderTextView= (AppCompatTextView) view.findViewById(R.id.reminder_textView);
         reminderImageView= (AppCompatImageView) view.findViewById(R.id.reminder_event_icon);
-        firebaseAuth = FirebaseAuth.getInstance();
         mrecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,
                 StaggeredGridLayoutManager.VERTICAL));
+        initSwipeView();
 
     }
+    void initSwipeView() {
 
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0,
+                ItemTouchHelper.LEFT) {
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                                  RecyclerView.ViewHolder target) {
+
+                return true;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                final int position = viewHolder.getAdapterPosition();
+                if (direction == ItemTouchHelper.LEFT) {
+                    try{
+                        notesModel = allNotes.get(position);
+                        databaseReference.child(uId).child(notesModel.getDate())
+                                .child(String.valueOf(notesModel.getId())).child("deleted")
+                                .setValue(true);
+                        snackbar = Snackbar
+                                .make(linearLayout, getString(R.string.item_moved_trash), Snackbar.LENGTH_LONG);
+                        snackbar.show();
+                    }catch (IndexOutOfBoundsException e){
+                        e.printStackTrace();
+                    }
+
+
+                }
+            }
+        };
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(mrecyclerView);
+    }
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -106,10 +151,12 @@ public class ReminderFragment extends Fragment implements ReminderFragmentInterf
         ArrayList<NotesModel> reminderNoteList=new ArrayList<>();
         for (NotesModel notesModel: notesModelList){
             if(notesModel.getReminderDate()!=null){
-            if (notesModel.getReminderDate().equals(currentDate) && !(notesModel.isArchived())){
+            if (notesModel.getReminderDate().equals(currentDate) && !(notesModel.isArchived()) && !(notesModel.isDeleted())){
                 reminderNoteList.add(notesModel);
             }
         }}
+        allNotes.clear();
+        allNotes.addAll(reminderNoteList);
         reminder_adapter= new RecyclerAdapter(todoMainActivity,reminderNoteList, this);
         mrecyclerView.setAdapter(reminder_adapter);
 

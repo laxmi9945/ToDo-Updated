@@ -55,7 +55,6 @@ import com.app.todo.todoMain.ui.fragment.ReminderFragment;
 import com.app.todo.todoMain.ui.fragment.TrashFragment;
 import com.app.todo.todoMain.ui.fragment.viewFragment;
 import com.app.todo.utils.Constants;
-import com.apsalar.sdk.Apsalar;
 import com.bumptech.glide.Glide;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.login.LoginManager;
@@ -65,14 +64,18 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -126,14 +129,14 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     ShareActionProvider shareActionProvider;
     PendingIntent pendingIntent;
     AlarmManager manager;
-
+    private StorageReference storageReference;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_drawerlayout);
         // Retrieve a PendingIntent that will perform a broadcast
-        Intent reminderIntent = new Intent(this, ReminderReceiver.class);
+        Intent reminderIntent = new Intent(this, ReminderNotifyActivity.class);
         pendingIntent = PendingIntent.getBroadcast(this, 0, reminderIntent, 0);
 
         getSupportFragmentManager()
@@ -157,9 +160,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         uId = firebaseAuth.getCurrentUser().getUid();
 
         initView();
-        Intent intent = getIntent();
-        Uri data = intent.getData();
-        Apsalar.startSession(this, "laxmi9945", "lLVQuEN2", data);
+
         //setActionBar(toolbar);
         if (sharedPreferences.getBoolean(Constants.key_fb_login, false)) {
             isFbLogin();
@@ -222,7 +223,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
 
     @Override
     public void initView() {
-
+        storageReference = FirebaseStorage.getInstance().getReference();
         View view = getLayoutInflater().inflate(R.layout.activity_todonotes_cards, null, false);
         textToSpeech = new TextToSpeech(this, this);
         floatingActionButton = (FloatingActionButton) findViewById(R.id.fabAddNotes);
@@ -376,6 +377,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
             CropIntent.putExtra("scaleUpIfNeeded", true);
             CropIntent.putExtra("return-data", true);
             startActivityForResult(CropIntent, CROP_IMAGE);
+            uploadImage();
 
         } catch (ActivityNotFoundException e) {
 
@@ -694,33 +696,29 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     public void implementFragment() {
 
     }
+    private void uploadImage() {
+        if (uri != null) {
+            StorageReference riversRef = storageReference.child("images/profile.jpg");
 
-    public void start() {
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        int interval = 8000;
+            riversRef.putFile(uri)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-        manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval,
-                pendingIntent);
-        Toast.makeText(this, "Alarm Set", Toast.LENGTH_SHORT).show();
+                            // Get a URL to the uploaded content
+                           // Uri downloadUrl = taskSnapshot.getDownloadUrl();
+
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+
+                        }
+                    });
+
+        } else {
+            //TODo display error Toast
+        }
     }
-
-    public void cancel() {
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        manager.cancel(pendingIntent);
-        Toast.makeText(this, "Alarm Canceled", Toast.LENGTH_SHORT).show();
-    }
-
-    public void startAt10() {
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        int interval = 1000 * 60 * 20;
-        /* Set the alarm to start at 10:30 AM */
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 11);
-        calendar.set(Calendar.MINUTE, 10);
-
-    }
-
-
-
 }

@@ -1,15 +1,10 @@
 package com.app.todo.todoMain.ui.fragment;
 
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
@@ -17,7 +12,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
@@ -39,7 +33,6 @@ import com.app.todo.database.DataBaseUtility;
 import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.presenter.NotesFragmentPresenter;
 import com.app.todo.todoMain.ui.activity.NotesAddActivity;
-import com.app.todo.todoMain.ui.activity.ReminderReceiver;
 import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 import com.app.todo.utils.Constants;
 import com.crashlytics.android.Crashlytics;
@@ -59,7 +52,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 
 
 public class NotesFragment extends Fragment implements NotesFragmentInterface, OnSearchTextChange,
-        View.OnClickListener,viewFragment{
+        View.OnClickListener, viewFragment {
 
     public static final String TAG = "NotesFragment";
     private static final int REQUEST_CODE = 2;
@@ -67,7 +60,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
     RecyclerView recyclerViewNotes;
     @BindView(R.id.fabAddNotes)
     FloatingActionButton fabAddNotes;
-    @BindView(R.id. list_empty_imageView)
+    @BindView(R.id.list_empty_imageView)
     AppCompatImageView empty_list_imageView;
     @BindView(R.id.list_empty_textView)
     AppCompatTextView empty_list_textView;
@@ -81,27 +74,28 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
     ProgressDialog progressDialog;
     DatabaseReference databaseReference;
     NotesModel notesModel = new NotesModel();
+    ArrayList<NotesModel> notesModel2 = new ArrayList<>();
     DataBaseUtility dataBaseUtility;
     Snackbar snackbar;
     View view;
     SharedPreferences sharedPreferences;
     boolean isGrid = false;
+    // This is a handle so that we can call methods on our service
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Fabric.with(getActivity(), new Crashlytics());
-
         View view = inflater.inflate(R.layout.fragment_notes, container, false);
+        // Create a new service client and bind our activity to this service
         dataBaseUtility = new DataBaseUtility(getActivity());
         presenter = new NotesFragmentPresenter(getContext(), this);
         //cardView= (CardView) view.findViewById(R.id.myCardView);
         databaseReference = FirebaseDatabase.getInstance().getReference().child(getString(R.string.userData));
         uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         presenter.getNoteList(uId);
-
         ButterKnife.bind(this, view);
         setHasOptionsMenu(true);
-
         fabAnimate();
         initSwipeView();
         sharedPreferences = getApplicationContext().getSharedPreferences(Constants.keys,
@@ -118,8 +112,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
                     StaggeredGridLayoutManager.VERTICAL));
         }
 
-
-        recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes,this);
+        recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes, this);
         recyclerViewNotes.setAdapter(recyclerAdapter);
 
         ((TodoMainActivity) getActivity()).setSearchTagListener(this);
@@ -130,7 +123,6 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
                 Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(getContext(),
                         android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
                 startActivityForResult(intent, 2, bundle);
-
             }
         });
         return view;
@@ -221,11 +213,10 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
         if (filteredNotes.size() != 0) {
             empty_list_textView.setVisibility(View.INVISIBLE);
             empty_list_imageView.setVisibility(View.INVISIBLE);
-            //coordinatorRootNotesFragment.setGravity(Gravity.START);
+
         } else {
             empty_list_textView.setVisibility(View.VISIBLE);
             empty_list_imageView.setVisibility(View.VISIBLE);
-            //coordinatorRootNotesFragment.setGravity(Gravity.CENTER);
         }
     }
 
@@ -233,6 +224,10 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
     public void getNotesListFailure(String message) {
 
         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+        dataBaseUtility.getDatafromDB();
+        recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes, this);
+        recyclerViewNotes.setAdapter(recyclerAdapter);
+
     }
 
     @Override
@@ -250,9 +245,12 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
                 String name = model.getTitle().toLowerCase();
                 if (name.contains(searchTag))
                     newList.add(model);
+                Log.i(TAG, "onSearchTagChange: " + newList);
+
             }
             filteredNotes.clear();
             filteredNotes.addAll(newList);
+
         } else {
             filteredNotes.clear();
             filteredNotes.addAll(allNotes);
@@ -264,14 +262,14 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
     void initSwipeView() {
 
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper
-                .SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT|ItemTouchHelper.UP
+                .SimpleCallback(ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT | ItemTouchHelper.UP
                 | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
                                   RecyclerView.ViewHolder target) {
-                    recyclerAdapter.notifyItemMoved(viewHolder.getAdapterPosition(),
-                            target.getAdapterPosition());
+                recyclerAdapter.notifyItemMoved(viewHolder.getAdapterPosition(),
+                        target.getAdapterPosition());
                 return true;
             }
 
@@ -329,13 +327,16 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     private List<NotesModel> getWithoutArchiveItems() {
         ArrayList<NotesModel> todoHomeDataModel = new ArrayList<>();
-        for (NotesModel note : allNotes ) {
+        for (NotesModel note : allNotes) {
             if (!note.isArchived()) {
                 todoHomeDataModel.add(note);
+
+                Log.i(TAG, "getWithoutArchiveItems: " + todoHomeDataModel);
             }
         }
         return todoHomeDataModel;
     }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -344,41 +345,34 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.changeview:
                 toggle(item);
                 break;
-            case R.id.notify:
-                notifyReminder();
-                break;
         }
-        /*int id = item.getItemId();
-        if (id == R.id.changeview) {
-            toggle(item);
-            return false;
-        }*/
+
         return super.onOptionsItemSelected(item);
     }
 
     void toggle(MenuItem item) {
 
         if (!isGrid) {
-            recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(1,
-                    StaggeredGridLayoutManager.VERTICAL));
-            item.setIcon(R.drawable.ic_action_straggered);
-            isGrid = true;
-            SharedPreferences.Editor edit = sharedPreferences.edit();
-            edit.putBoolean("isList", true);
-            edit.apply();
-
-        } else {
             recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(2,
                     StaggeredGridLayoutManager.VERTICAL));
             item.setIcon(R.drawable.ic_action_list);
             SharedPreferences.Editor edit = sharedPreferences.edit();
-            edit.putBoolean("isList", false);
+            edit.putBoolean("isList", true);
+            isGrid = true;
             edit.apply();
+
+        } else {
+            recyclerViewNotes.setLayoutManager(new StaggeredGridLayoutManager(1,
+                    StaggeredGridLayoutManager.VERTICAL));
+            item.setIcon(R.drawable.ic_action_straggered);
+            SharedPreferences.Editor edit = sharedPreferences.edit();
+            edit.putBoolean("isList", false);
             isGrid = false;
+            edit.apply();
         }
     }
 
@@ -403,44 +397,4 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     }
 
-
-
-    public void notifyReminder(){
-
-        NotificationManager nManager=
-                (NotificationManager)getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-
-        NotificationCompat.Builder builder=new
-                NotificationCompat.Builder(getActivity());
-
-        builder.setSmallIcon(R.drawable.alarm_bell);
-
-        builder.setContentTitle("Sample Notification");
-
-        builder.setContentText("Sample Notification for reminder...");
-
-        builder.setSubText("Sample Notification for reminder...");
-
-        Bitmap bmp= BitmapFactory.decodeResource(getResources(),
-                R.drawable.alarm_bell);
-
-        builder.setLargeIcon(bmp);
-
-        Intent i=new Intent();
-        Bundle bundle=new Bundle();
-        bundle.putString("name","value");
-        i.putExtras(bundle);
-
-        i.setComponent(new ComponentName(getApplicationContext(),
-                ReminderReceiver.class));
-
-
-        PendingIntent pIntent=PendingIntent.getActivity(getApplicationContext(),
-                0,i,0);
-
-        builder.setContentIntent(pIntent);
-
-        nManager.notify(1,builder.build());
-
-    }
 }

@@ -143,8 +143,17 @@ public class TrashFragment extends Fragment implements TrashFragmentInterface,
                     dataBaseUtility.delete(notesModel);
                     trash_recyclerView.setAdapter(recyclerAdapter);
                     snackbar = Snackbar
-                            .make(linearLayout, getString(R.string.item_deleted), Snackbar.LENGTH_LONG);
-                    snackbar.show();
+                            .make(linearLayout, getString(R.string.item_deleted), Snackbar.LENGTH_LONG)
+                    .setAction("Undo", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            databaseReference.child(uId).child(notesModel.getDate())
+                                    .child(String.valueOf(notesModel.getId())).setValue(notesModel);
+                        }
+                    });
+
+                            snackbar.show();
+
 
                 }
                 if (direction == ItemTouchHelper.RIGHT) {

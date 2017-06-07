@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -57,21 +58,13 @@
         <activity android:name=".todoMain.ui.activity.NotesEditActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
-
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="1e0275c993a7b60bb8eb5521e71b464821743311" />
-
-        <receiver
-            android:exported="true"
-            android:name="com.apsalar.sdk.ApsalarReceiver">
-            <intent-filter>
-                <action android:name="com.android.vending.INSTALL_REFERRER"/>
-            </intent-filter>
-        </receiver>
-       <!-- <receiver android:name=".todoMain.ui.activity.ReminderReceiver"></receiver>-->
-        <activity android:name=".todoMain.ui.activity.ReminderReceiver"/>
+        <activity android:name=".todoMain.ui.activity.ReminderNotifyActivity"/>
+        <service android:name=".todoMain.ui.alarmManager.NotifyService"/>
+        <service android:name=".todoMain.ui.alarmManager.ScheduleService"/>
     </application>
 
 </manifest>

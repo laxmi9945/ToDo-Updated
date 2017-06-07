@@ -1,6 +1,7 @@
 package com.app.todo.todoMain.ui.activity;
 
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -18,6 +19,8 @@ import com.app.todo.R;
 import com.app.todo.baseclass.BaseActivity;
 import com.app.todo.database.DataBaseUtility;
 import com.app.todo.model.NotesModel;
+import com.app.todo.todoMain.presenter.NotesEditActivityPresenter;
+import com.app.todo.todoMain.presenter.NotesEditActivityPresenterInterface;
 import com.app.todo.utils.Constants;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,7 +34,7 @@ import java.util.Calendar;
 
 import io.fabric.sdk.android.Fabric;
 
-public class NotesEditActivity extends BaseActivity implements View.OnClickListener,
+public class NotesEditActivity extends BaseActivity implements NotesEditActivityInterface,View.OnClickListener,
         ColorPickerDialogListener {
     private static final int DIALOG_ID = 0;
     AppCompatEditText titleEditText, contentEdtitext;
@@ -52,6 +55,8 @@ public class NotesEditActivity extends BaseActivity implements View.OnClickListe
     private DatePickerDialog.OnDateSetListener onDateSetListener;
     private Calendar myCalendar;
     TimePickerDialog timePickerDialog;
+    ProgressDialog progressDialog;
+    NotesEditActivityPresenterInterface presenter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,7 +124,8 @@ public class NotesEditActivity extends BaseActivity implements View.OnClickListe
 
     @Override
     public void initView() {
-
+        presenter = new NotesEditActivityPresenter(this, this);
+        progressDialog = new ProgressDialog(this);
         myCalendar = Calendar.getInstance();
         linearLayout = (LinearLayout) findViewById(R.id.root_layout);
         firebaseAuth = FirebaseAuth.getInstance();
@@ -193,7 +199,8 @@ public class NotesEditActivity extends BaseActivity implements View.OnClickListe
         notesModel.setId(id);
         notesModel.setReminderDate(reminderDatetextView.getText().toString());
         notesModel.setReminderTime(reminderTimetextView.getText().toString());
-        notesModel.setColor(color_pick);
+
+        notesModel.setColor(getColor);
         dataBaseUtility.updateNote(notesModel);
         try {
             databaseReference
@@ -209,7 +216,7 @@ public class NotesEditActivity extends BaseActivity implements View.OnClickListe
     public void onColorSelected(int dialogId, @ColorInt int color) {
         switch (dialogId) {
             case DIALOG_ID:
-                color_pick = String.valueOf(color);
+                getColor = String.valueOf(color);
                 linearLayout.setBackgroundColor(color);
                 break;
         }
@@ -228,5 +235,30 @@ public class NotesEditActivity extends BaseActivity implements View.OnClickListe
                 Toast.LENGTH_SHORT).show();
         commaSeparator.setVisibility(View.VISIBLE);
         }
+
+    @Override
+    public void showDialog(String message) {
+        if (!isFinishing()) {
+            progressDialog.setMessage(message);
+            progressDialog.show();
+        }
     }
+
+    @Override
+    public void hideDialog() {
+        if (!isFinishing() && progressDialog != null) {
+            progressDialog.dismiss();
+        }
+    }
+
+    @Override
+    public void noteEditSuccess(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void noteEditFailure(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+}
 

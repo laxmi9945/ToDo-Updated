@@ -27,7 +27,6 @@ public class NotesAddPresenter implements NotesAddPresenterInterface {
     public void addNoteToFirebase(Bundle bundle) {
 
         NotesModel model = new NotesModel();
-
         model.setArchived(false);
         model.setTime(bundle.getString(Constants.currentTimeKey));
         model.setDate(bundle.getString(Constants.currentDateKey));

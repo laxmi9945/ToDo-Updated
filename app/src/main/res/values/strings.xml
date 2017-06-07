@@ -116,12 +116,13 @@
     <string name="custom_transition">transitionView</string>
     <string name="title">Select color</string>
     <string name="notes_add">Notes add</string>
-    <string name="item_moved">item moved to Notes</string>
+    <string name="item_moved">item moved</string>
     <string name="item_moved_trash">item moved Trash</string>
     <string name="wait_logging_in">Wait u r logging into app</string>
     <string name="comma">,</string>
     <string name="reminder_time_set">Reminder time :</string>
     <string name="month_year_format">MMMM dd, yyyy</string>
+    <string name="reminder_message">Your notification time is upon us.</string>
 
 
     <integer name="swing_anim_time">750</integer>

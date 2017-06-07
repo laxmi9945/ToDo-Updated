@@ -64,6 +64,7 @@ public class DataBaseUtility extends SQLiteOpenHelper {
         database.close();
 
     }
+
     /*public void addUserInfo(NotesModel model ) {
         SQLiteDatabase database = this.getWritableDatabase();
         contentValues = new ContentValues();

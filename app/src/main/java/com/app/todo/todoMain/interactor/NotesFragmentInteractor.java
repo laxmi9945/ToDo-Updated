@@ -34,6 +34,7 @@ public class NotesFragmentInteractor implements NotesFragmentInteractorInterface
         this.presenter=presenter;
         firebaseAuth= FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference().child(context.getString(R.string.userData));
+
     }
 
     @Override
@@ -57,7 +58,7 @@ public class NotesFragmentInteractor implements NotesFragmentInteractorInterface
                         notesModel.addAll(notesModel_ArrayList);
                     }
 
-                    Log.i("aaa", "onDataChange:  "+notesModel.size());
+                    Log.i("check", "onDataChange:  "+notesModel.size());
 
                     presenter.getNoteListSuccess(notesModel);
                     presenter.hideDialog();
@@ -65,7 +66,6 @@ public class NotesFragmentInteractor implements NotesFragmentInteractorInterface
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
                     presenter.hideDialog();
 
                 }
@@ -73,6 +73,7 @@ public class NotesFragmentInteractor implements NotesFragmentInteractorInterface
 
         }else {
             presenter.getNoteListFailure(context.getString(R.string.no_internet));
+
             presenter.hideDialog();
         }
     }

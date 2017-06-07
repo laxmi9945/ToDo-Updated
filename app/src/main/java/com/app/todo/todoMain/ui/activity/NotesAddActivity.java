@@ -25,6 +25,7 @@ import com.app.todo.R;
 import com.app.todo.baseclass.BaseActivity;
 import com.app.todo.todoMain.presenter.NotesAddPresenter;
 import com.app.todo.todoMain.presenter.NotesAddPresenterInterface;
+import com.app.todo.todoMain.ui.alarmManager.ScheduleClient;
 import com.app.todo.utils.Constants;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
@@ -60,6 +61,7 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
     private Calendar myCalendar;
     private DatePickerDialog.OnDateSetListener onDateSetListener;
     LinearLayout timeLayout;
+    private ScheduleClient scheduleClient;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
@@ -74,7 +76,8 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
         date = new Date();
         CharSequence sequence = DateFormat.format(getString(R.string.date_time), date.getTime());
         CharSequence sequence2 = DateFormat.format(getString(R.string.time), date.getTime());
-
+        scheduleClient = new ScheduleClient(this);
+        scheduleClient.doBindService();
         dateTextView.setText(sequence);
         timeTextView.setText(sequence2);
         sharedPreferences = this.getSharedPreferences(Constants.keys, Context.MODE_PRIVATE);
@@ -88,7 +91,7 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
                 myCalendar.set(Calendar.MONTH, monthOfYear);
                 myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                 updateLabel();
-                setreminderTime();
+               // setreminderTime();
                 Log.i(TAG, "onDateSet: " + year + "    " + dayOfMonth);
 
             }
@@ -118,7 +121,7 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
 
     @Override
     public void initView() {
-
+        progressDialog = new ProgressDialog(this);
         presenter = new NotesAddPresenter(this, this);
         backIcon = (AppCompatImageView) findViewById(R.id.back_icon);
         saveIcon = (AppCompatImageView) findViewById(R.id.save_icon);
@@ -156,6 +159,8 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
         String myFormat = getString(R.string.month_year_format); //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat);
         reminderTextView.setText(sdf.format(myCalendar.getTime()));
+        // Ask our service to set an alarm for that date, this activity talks to the client that talks to the service
+        scheduleClient.setAlarmForNotification(myCalendar);
         Toast.makeText(this, getString(R.string.reminder_date_set) + reminderTextView.getText().toString(),
                 Toast.LENGTH_SHORT).show();
         commaSeparator.setVisibility(View.VISIBLE);
@@ -199,12 +204,11 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
         bundle.putString(Constants.reminderTime,reminderTimetextView.getText().toString());
         bundle.putString(Constants.colorKey, color_pick);
         presenter.addNoteToFirebase(bundle);
+
     }
 
     @Override
     public void showDialog(String message) {
-        progressDialog = new ProgressDialog(this);
-
         if (!isFinishing()) {
             progressDialog.setMessage(message);
             progressDialog.show();
@@ -240,6 +244,7 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
 
                 color_pick = String.valueOf(color);
                 linearLayout.setBackgroundColor(color);
+
                 // We got result from the dialog that is shown when clicking on the icon in the action bar.
                 Toast.makeText(this, "Selected Color: #" + Integer.toHexString(color),
                         Toast.LENGTH_SHORT).show();
@@ -257,5 +262,13 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
     public void onBackPressed() {
         saveNotes();
         super.onBackPressed();
+    }
+    @Override
+    protected void onStop() {
+        // When our activity is stopped ensure we also stop the connection to the service
+        // this stops us leaking our activity into the system *bad*
+        if(scheduleClient != null)
+            scheduleClient.doUnbindService();
+        super.onStop();
     }
 }
