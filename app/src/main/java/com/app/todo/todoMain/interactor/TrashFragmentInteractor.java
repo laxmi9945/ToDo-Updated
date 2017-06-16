@@ -16,6 +16,7 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class TrashFragmentInteractor implements TrashFragmentInteractorInterface {
     Context context;
@@ -36,7 +37,6 @@ public class TrashFragmentInteractor implements TrashFragmentInteractorInterface
         if (CommonChecker.isNetworkConnected(context)){
             
             databaseReference.child(uId).addValueEventListener(new ValueEventListener() {
-                //String uId = firebaseAuth.getCurrentUser().getUid();=
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     GenericTypeIndicator<ArrayList<NotesModel>> arrayListGenericTypeIndicator = new
@@ -51,6 +51,7 @@ public class TrashFragmentInteractor implements TrashFragmentInteractorInterface
                         notesModel.addAll(notesModel_ArrayList);
 
                     }
+                    notesModel.removeAll(Collections.singleton(null));
                     presenter.noteDeleteSuccess(notesModel);
                     presenter.hideDialog();
                 }

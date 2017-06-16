@@ -2,7 +2,6 @@ package com.app.todo.todoMain.ui.activity;
 
 
 import android.animation.LayoutTransition;
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
@@ -12,12 +11,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.speech.tts.TextToSpeech;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -31,19 +27,17 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
 import com.app.todo.R;
 import com.app.todo.adapter.RecyclerAdapter;
 import com.app.todo.baseclass.BaseActivity;
-import com.app.todo.database.DataBaseUtility;
+import com.app.todo.localdatabase.DataBaseUtility;
 import com.app.todo.login.ui.LoginActivity;
 import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.ui.fragment.AboutFragment;
@@ -52,8 +46,8 @@ import com.app.todo.todoMain.ui.fragment.NotesFragment;
 import com.app.todo.todoMain.ui.fragment.NoteseditFragmentInterface;
 import com.app.todo.todoMain.ui.fragment.OnSearchTextChange;
 import com.app.todo.todoMain.ui.fragment.ReminderFragment;
+import com.app.todo.todoMain.ui.fragment.ShareFragment;
 import com.app.todo.todoMain.ui.fragment.TrashFragment;
-import com.app.todo.todoMain.ui.fragment.viewFragment;
 import com.app.todo.utils.Constants;
 import com.bumptech.glide.Glide;
 import com.crashlytics.android.Crashlytics;
@@ -67,28 +61,30 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.fabric.sdk.android.Fabric;
 
-public class TodoMainActivity extends BaseActivity implements TodoMainActivityInterface, TextToSpeech.OnInitListener, SearchView.OnQueryTextListener, View.OnClickListener,
-        NavigationView.OnNavigationItemSelectedListener, NoteseditFragmentInterface, viewFragment {
+//import com.bumptech.glide.Glide;
+
+public class TodoMainActivity extends BaseActivity implements TodoMainActivityInterface, SearchView.OnQueryTextListener, View.OnClickListener,
+        NavigationView.OnNavigationItemSelectedListener, NoteseditFragmentInterface {
     static final String TAG = "NetworkStateReceiver";
-    private static final int DIALOG_ID = 0;
     private final int PICK_IMAGE_CAMERA = 100, PICK_IMAGE_GALLERY = 200, CROP_IMAGE = 1;
     RecyclerView recyclerView;
-    TextToSpeech textToSpeech;
     boolean isList = false;
     RecyclerAdapter recyclerAdapter;
     SharedPreferences sharedPreferences;
@@ -125,20 +121,22 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     Intent CamIntent, GalIntent, CropIntent;
     OnSearchTextChange searchTagListener;
     NotesFragment notesFragment;
-    String color_pick;
-    ShareActionProvider shareActionProvider;
     PendingIntent pendingIntent;
-    AlarmManager manager;
     private StorageReference storageReference;
+    Uri downloadUrl2;
+    FirebaseUser firebaseUser;
+    Bitmap bitmap;
+    ArchiveFragment archiveFragment;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_drawerlayout);
-        // Retrieve a PendingIntent that will perform a broadcast
-        Intent reminderIntent = new Intent(this, ReminderNotifyActivity.class);
-        pendingIntent = PendingIntent.getBroadcast(this, 0, reminderIntent, 0);
 
+        // Retrieve a PendingIntent that will perform a broadcast
+        /*Intent reminderIntent = new Intent(this, ReminderNotifyActivity.class);
+        pendingIntent = PendingIntent.getBroadcast(this, 0, reminderIntent, 0);*/
+        initView();
         getSupportFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(R.anim.anim_slide_in_from_left, R.anim.anim_slide_out_from_left)
@@ -154,12 +152,10 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
             isList = true;
         }
 
-        //Getting reference to Firebase Database
+        //Getting reference to Firebase DatabaseUtil
         databaseReference = FirebaseDatabase.getInstance().getReference().child(getString(R.string.userData));
         firebaseAuth = FirebaseAuth.getInstance();
         uId = firebaseAuth.getCurrentUser().getUid();
-
-        initView();
 
         //setActionBar(toolbar);
         if (sharedPreferences.getBoolean(Constants.key_fb_login, false)) {
@@ -168,18 +164,44 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
             isGoogleLogin();
 
         } else {
+
+            /*
             SharedPreferences shre = PreferenceManager.getDefaultSharedPreferences(this);
             String previouslyEncodedImage = shre.getString("image_data", "");
-
             if (!previouslyEncodedImage.equalsIgnoreCase("")) {
                 byte[] b = Base64.decode(previouslyEncodedImage, Base64.DEFAULT);
                 Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
                 circleImageView.setImageBitmap(bitmap);
-            }
-            String uName = firebaseAuth.getCurrentUser().getDisplayName();
-            String uEmail = firebaseAuth.getCurrentUser().getEmail();
-            nav_header_Name.setText(uName);
+            }*/
+
+            //String uName = firebaseUser.getDisplayName();
+            String uEmail = firebaseUser.getEmail();
+            String uName=uEmail.substring(0, uEmail.lastIndexOf("@"));
+            String uName2=uName.substring(0,1).toUpperCase() + uName.substring(1).toLowerCase();
+            nav_header_Name.setText(uName2);
             nav_header_Email.setText(uEmail);
+            //circleImageView.setImageURI(userPic);
+            //circleImageView.setImageURI(Uri.parse(uPic));
+            /*Glide.with(TodoMainActivity.this)
+                    .load(userPic)
+                    .into(circleImageView);*/
+          /*  Glide.with(TodoMainActivity.this)
+                    .load(String.valueOf(downloadUrl2))
+                    *//*.listener(new RequestListener<String, GlideDrawable>() {
+                        @Override
+                        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                            progressBar.setVisibility(View.GONE);
+                            return false;
+                        }
+                    })*//*
+                    .into(circleImageView)
+            ;*/
+            //downloadImage();
             circleImageView.setOnClickListener(this);
         }
         setTitle(getString(R.string.notes));
@@ -190,7 +212,6 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-
         floatingActionButton.setVisibility(View.VISIBLE);
 
     }
@@ -225,7 +246,6 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
     public void initView() {
         storageReference = FirebaseStorage.getInstance().getReference();
         View view = getLayoutInflater().inflate(R.layout.activity_todonotes_cards, null, false);
-        textToSpeech = new TextToSpeech(this, this);
         floatingActionButton = (FloatingActionButton) findViewById(R.id.fabAddNotes);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerViewNotes);
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -239,6 +259,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         nav_header_Name = (AppCompatTextView) header.findViewById(R.id.nav_header_appName);
         nav_header_Email = (AppCompatTextView) header.findViewById(R.id.nav_header_emailId);
         circleImageView = (CircleImageView) header.findViewById(R.id.profile_image);
+        firebaseUser=FirebaseAuth.getInstance().getCurrentUser();
         setSupportActionBar(toolbar);
 
         googleSignInOptions = new GoogleSignInOptions
@@ -255,7 +276,9 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
                 })
                 .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
                 .build();
+
         setClicklistener();
+        downloadImage();
 
     }
 
@@ -377,7 +400,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
             CropIntent.putExtra("scaleUpIfNeeded", true);
             CropIntent.putExtra("return-data", true);
             startActivityForResult(CropIntent, CROP_IMAGE);
-            uploadImage();
+
 
         } catch (ActivityNotFoundException e) {
 
@@ -403,23 +426,23 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
                 ImageCropFunction();
             } else if (requestCode == CROP_IMAGE) {
                 if (data != null) {
-
                     Bundle bundle = data.getExtras();
-                    Bitmap bitmap = bundle.getParcelable("data");
+                    Bitmap photo = bundle.getParcelable("data");
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                    byte[] b = baos.toByteArray();
+                    photo.compress(Bitmap.CompressFormat.JPEG, 100, baos);
 
+                   /* byte[] b = baos.toByteArray();
+                    String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);*/
+                    uploadImage();
+                    /*byte[] b = baos.toByteArray();
                     String encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
                     //  textEncode.setText(encodedImage);
-
                     SharedPreferences shre = PreferenceManager.getDefaultSharedPreferences(this);
                     SharedPreferences.Editor edit = shre.edit();
                     edit.putString("image_data", encodedImage);
                     edit.commit();
                     Log.i(TAG, "pic: " + bitmap);
-
-                    circleImageView.setImageBitmap(bitmap);
+                    circleImageView.setImageBitmap(bitmap);*/
                 } else {
                     Bundle bundle = data.getBundleExtra("bundle");
                     if (bundle != null) {
@@ -519,8 +542,18 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
                 drawer.closeDrawers();
                 break;
             case R.id.nav_share:
+                getSupportFragmentManager().beginTransaction()
+                        .setCustomAnimations(R.anim.anim_slide_in_from_left,
+                                R.anim.anim_slide_out_from_left)
+                        .replace(R.id.frameLayout_container, new ShareFragment(),
+                                ShareFragment.TAG)
+                        .addToBackStack(null)
+                        .commit();
+                setTitle(getString(R.string.share));
 
-                Toast.makeText(this, getString(R.string.logic), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, getString(R.string.about), Toast.LENGTH_SHORT).show();
+                drawer.closeDrawers();
+                //Toast.makeText(this, getString(R.string.logic), Toast.LENGTH_SHORT).show();
                 break;
 
         }
@@ -600,46 +633,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
 
         searchTagListener.onSearchTagChange(newText.trim());
 
-        return true;
-    }
-
-    @Override
-    public void onInit(int status) {
-        if (status == TextToSpeech.SUCCESS) {
-
-            int result = textToSpeech.setLanguage(Locale.US);
-
-
-            if (result == TextToSpeech.LANG_MISSING_DATA
-                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                Log.e("TextToSpeech", "This Language is not supported");
-            } else {
-
-                //speakOut();
-            }
-
-        } else {
-            Log.e("TextToSpeech", "Initilization Failed!");
-        }
-    }
-
-    private void speakOut() {
-
-        String userName = "Welcome back " + fb_first_name;
-        Toast.makeText(this, userName, Toast.LENGTH_SHORT).show();
-        textToSpeech.speak(userName, TextToSpeech.QUEUE_FLUSH, null);
-
-    }
-
-    @Override
-    public void onDestroy() {
-
-        //Stopping textToSpeech
-        if (textToSpeech != null) {
-            textToSpeech.stop();
-            textToSpeech.shutdown();
-        }
-        super.onDestroy();
+        return false;
     }
 
     @Override
@@ -672,7 +666,7 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
                 todoHomeDataModel.add(note);
             }
         }
-        recyclerAdapter = new RecyclerAdapter(TodoMainActivity.this, todoHomeDataModel, this);
+        recyclerAdapter = new RecyclerAdapter(TodoMainActivity.this, todoHomeDataModel);
         recyclerView.setAdapter(recyclerAdapter);
         recyclerAdapter.notifyDataSetChanged();
     }
@@ -692,21 +686,45 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         Toast.makeText(this, "Dialog dismissed", Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void implementFragment() {
+    public void uploadImage() {
 
-    }
-    private void uploadImage() {
         if (uri != null) {
-            StorageReference riversRef = storageReference.child("images/profile.jpg");
-
+            String uEmail = firebaseUser.getEmail();
+            String uName=uEmail.substring(0, uEmail.lastIndexOf("@"));
+            StorageReference riversRef = storageReference.child("images/"+uName+".jpg");
             riversRef.putFile(uri)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            @SuppressWarnings("VisibleForTests") Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                            Log.i(TAG, "onSuccess: "+downloadUrl);
+                            //downloadUrl2=downloadUrl;
+                            FirebaseDatabase.getInstance().getReference().child("userProfilePic").setValue(String.valueOf(downloadUrl));
+                            Glide.with(TodoMainActivity.this)
+                                    .load(downloadUrl)
+                                    .placeholder(R.drawable.mann)
+                                    .crossFade()
+                                    .into(circleImageView);
 
-                            // Get a URL to the uploaded content
-                           // Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                            // progressBar.setVisibility(View.VISIBLE);
+
+                            /*Glide.with(TodoMainActivity.this)
+                                    .load(String.valueOf(downloadUrl))
+                                 *//*.listener(new RequestListener<String, GlideDrawable>() {
+                                        @Override
+                                        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                                            return false;
+                                        }
+
+                                        @Override
+                                        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                            progressBar.setVisibility(View.GONE);
+                                            return false;
+                                        }
+                                    })*//*
+                                     .into(circleImageView)
+                            ;
+*/
 
                         }
                     })
@@ -720,5 +738,31 @@ public class TodoMainActivity extends BaseActivity implements TodoMainActivityIn
         } else {
             //TODo display error Toast
         }
+    }
+    private void downloadImage() {
+        File localFile = null;
+        String uEmail = firebaseUser.getEmail();
+        String uName=uEmail.substring(0, uEmail.lastIndexOf("@"));
+        try {
+            localFile = File.createTempFile("images", "jpg");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        final File finalLocalFile = localFile;
+        StorageReference mReference=storageReference.child("images/"+uName+".jpg");
+        mReference.getFile(localFile)
+                .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        Glide.with(TodoMainActivity.this).load(finalLocalFile).into(circleImageView);
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+
+            }
+        });
+
     }
 }

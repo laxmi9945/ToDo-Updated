@@ -27,7 +27,7 @@ import android.widget.Toast;
 
 import com.app.todo.R;
 import com.app.todo.adapter.RecyclerAdapter;
-import com.app.todo.database.DataBaseUtility;
+import com.app.todo.localdatabase.DataBaseUtility;
 import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.presenter.TrashFragmentPresenter;
 import com.app.todo.todoMain.presenter.TrashFragmentPresenterInterface;
@@ -114,7 +114,7 @@ public class TrashFragment extends Fragment implements TrashFragmentInterface,
         trash_imageView = (AppCompatImageView) view.findViewById(R.id.trash_icon);
         trash_recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,
                 StaggeredGridLayoutManager.VERTICAL));
-        recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes, this);
+        recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes);
         trash_recyclerView.setAdapter(recyclerAdapter);
 
         initSwipe();
@@ -200,13 +200,13 @@ public class TrashFragment extends Fragment implements TrashFragmentInterface,
     public void deleteSuccess(List<NotesModel> modelList) {
         deleteNoteList.clear();
         for (NotesModel notesModel : modelList) {
-            if (notesModel.isDeleted() && !notesModel.isArchived()) {
+            if (notesModel.isDeleted()) {
                 deleteNoteList.add(notesModel);
             }
         }
         allNotes.clear();
         allNotes.addAll(deleteNoteList);
-        trash_recyclerAdapter = new RecyclerAdapter(todoMainActivity, deleteNoteList, this);
+        trash_recyclerAdapter = new RecyclerAdapter(todoMainActivity, deleteNoteList);
         trash_recyclerView.setAdapter(trash_recyclerAdapter);
 
         if (deleteNoteList.size() != 0) {

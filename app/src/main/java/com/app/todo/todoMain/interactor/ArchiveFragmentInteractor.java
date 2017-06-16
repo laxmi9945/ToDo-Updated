@@ -17,6 +17,7 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class ArchiveFragmentInteractor implements ArchiveFragmentInteractorInterface {
     Context context;
@@ -56,6 +57,8 @@ public class ArchiveFragmentInteractor implements ArchiveFragmentInteractorInter
                         notesModel_ArrayList = post.getValue(arrayListGenericTypeIndicator);
                         notesModel.addAll(notesModel_ArrayList);
                     }
+                    notesModel.removeAll(Collections.singleton(null));
+
                     presenter.noteArchiveSuccess(notesModel);
                     presenter.hideDialog();
                 }

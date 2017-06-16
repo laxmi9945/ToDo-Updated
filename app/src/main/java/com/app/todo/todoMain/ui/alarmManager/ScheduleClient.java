@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 
 import java.util.Calendar;
@@ -48,9 +49,12 @@ public class ScheduleClient {
     /**
      * Tell our service to set an alarm for the given date
      * @param c a date to set the notification for
+     * @param bundle
      */
-    public void setAlarmForNotification(Calendar c){
-        mBoundService.setAlarm(c);
+    public void setAlarmForNotification(Calendar c, Bundle bundle){
+        mBoundService.setAlarm(c,bundle);
+
+
     }
 
     /**

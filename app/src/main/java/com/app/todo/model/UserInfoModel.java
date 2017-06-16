@@ -5,6 +5,8 @@ public class UserInfoModel {
     private String email;
     private String password;
     private String mobile;
+    private String profile_pic;
+
 
     public UserInfoModel() {
     }
@@ -44,6 +46,14 @@ public class UserInfoModel {
 
     public void setMobile(String mobile) {
         this.mobile = mobile;
+    }
+
+    public String getProfile_pic() {
+        return profile_pic;
+    }
+
+    public void setProfile_pic(String profile_pic) {
+        this.profile_pic = profile_pic;
     }
 
 }

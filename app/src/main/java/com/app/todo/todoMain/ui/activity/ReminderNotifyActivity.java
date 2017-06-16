@@ -6,6 +6,7 @@ import android.support.v7.widget.AppCompatTextView;
 
 import com.app.todo.R;
 import com.app.todo.model.NotesModel;
+import com.app.todo.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +25,8 @@ public class ReminderNotifyActivity extends Activity {
         Bundle extras = getIntent().getExtras();
 
         if(extras != null){
-            String title = extras.getString("title");
-            String content = extras.getString("content");
+            String title = extras.getString(Constants.titleKey);
+            String content = extras.getString(Constants.descriptionKey);
             System.out.println("data : " +title );
             System.out.println("data : " +content );
             titleTextView.setText(title);

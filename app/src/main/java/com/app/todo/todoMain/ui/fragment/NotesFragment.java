@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
@@ -29,7 +30,7 @@ import android.widget.Toast;
 
 import com.app.todo.R;
 import com.app.todo.adapter.RecyclerAdapter;
-import com.app.todo.database.DataBaseUtility;
+import com.app.todo.localdatabase.DataBaseUtility;
 import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.presenter.NotesFragmentPresenter;
 import com.app.todo.todoMain.ui.activity.NotesAddActivity;
@@ -52,8 +53,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 
 
 public class NotesFragment extends Fragment implements NotesFragmentInterface, OnSearchTextChange,
-        View.OnClickListener, viewFragment {
-
+        View.OnClickListener {
     public static final String TAG = "NotesFragment";
     private static final int REQUEST_CODE = 2;
     @BindView(R.id.recyclerViewNotes)
@@ -74,12 +74,13 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
     ProgressDialog progressDialog;
     DatabaseReference databaseReference;
     NotesModel notesModel = new NotesModel();
-    ArrayList<NotesModel> notesModel2 = new ArrayList<>();
+    List<NotesModel> notesModel2 = new ArrayList<>();
     DataBaseUtility dataBaseUtility;
     Snackbar snackbar;
     View view;
     SharedPreferences sharedPreferences;
     boolean isGrid = false;
+    CoordinatorLayout coordinatorLayout;
     // This is a handle so that we can call methods on our service
 
     @Override
@@ -87,11 +88,14 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
                              Bundle savedInstanceState) {
         Fabric.with(getActivity(), new Crashlytics());
         View view = inflater.inflate(R.layout.fragment_notes, container, false);
+        coordinatorLayout= (CoordinatorLayout) view.findViewById(R.id.coordinatorRootNotesFragment);
         // Create a new service client and bind our activity to this service
         dataBaseUtility = new DataBaseUtility(getActivity());
+        notesModel2= dataBaseUtility.getDatafromDB();
         presenter = new NotesFragmentPresenter(getContext(), this);
         //cardView= (CardView) view.findViewById(R.id.myCardView);
         databaseReference = FirebaseDatabase.getInstance().getReference().child(getString(R.string.userData));
+        databaseReference.keepSynced(true);
         uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         presenter.getNoteList(uId);
         ButterKnife.bind(this, view);
@@ -112,7 +116,7 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
                     StaggeredGridLayoutManager.VERTICAL));
         }
 
-        recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes, this);
+        recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes);
         recyclerViewNotes.setAdapter(recyclerAdapter);
 
         ((TodoMainActivity) getActivity()).setSearchTagListener(this);
@@ -222,11 +226,28 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
 
     @Override
     public void getNotesListFailure(String message) {
+        snackbar = Snackbar
+                .make(coordinatorLayout,getString(R.string.no_internet), Snackbar.LENGTH_LONG)
+                .setAction(getString(R.string.retry), new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
 
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                        snackbar.dismiss();
+
+                    }
+                });
+        // Changing message text color
+        snackbar.setActionTextColor(Color.RED);
+        // Changing action button text color
+        View sbView = snackbar.getView();
+        AppCompatTextView textView = (AppCompatTextView) sbView.
+                findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(Color.YELLOW);
+        snackbar.show();
+        //Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
         dataBaseUtility.getDatafromDB();
-        recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes, this);
-        recyclerViewNotes.setAdapter(recyclerAdapter);
+        recyclerAdapter = new RecyclerAdapter(getActivity(), filteredNotes);
+        //recyclerViewNotes.setAdapter(recyclerAdapter);
 
     }
 
@@ -390,11 +411,5 @@ public class NotesFragment extends Fragment implements NotesFragmentInterface, O
         }
     }
 
-    @Override
-    public void implementFragment() {
-
-        Toast.makeText(getActivity(), "clicked...", Toast.LENGTH_SHORT).show();
-
-    }
 
 }

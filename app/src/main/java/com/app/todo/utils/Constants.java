@@ -17,6 +17,7 @@ public class Constants {
     public static String content_data="Content_data";
     public static String date_data="date_data";
     public static int SplashScreen_TimeOut=3000;
+    public static int Click_TimeOut=2000;
     public static int Splash_textView_animation_time=2000;
     public static String Mobile_Pattern = "\\\\d{3}-\\\\d{7}";
     public static String EMAIL_PATTERN = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";

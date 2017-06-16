@@ -123,6 +123,7 @@
     <string name="reminder_time_set">Reminder time :</string>
     <string name="month_year_format">MMMM dd, yyyy</string>
     <string name="reminder_message">Your notification time is upon us.</string>
+    <string name="share">Share Notes</string>
 
 
     <integer name="swing_anim_time">750</integer>

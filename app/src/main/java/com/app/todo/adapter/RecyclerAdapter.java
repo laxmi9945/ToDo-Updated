@@ -1,6 +1,7 @@
 package com.app.todo.adapter;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -21,6 +22,8 @@ import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.ui.activity.NotesEditActivity;
 import com.app.todo.todoMain.ui.fragment.ArchiveFragment;
 import com.app.todo.todoMain.ui.fragment.NotesFragment;
+import com.app.todo.todoMain.ui.fragment.ShareFragment;
+import com.app.todo.todoMain.ui.fragment.TrashFragment;
 import com.app.todo.todoMain.ui.fragment.viewFragment;
 import com.app.todo.utils.Constants;
 
@@ -34,18 +37,26 @@ import butterknife.OnItemClick;
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskViewHolder> {
     Context context;
     List<NotesModel> model;
-
     Fragment notesFragment,archiveFragment;
-
+    boolean click=true;
+    boolean longClick=true;
     viewFragment viewFragment;
     private int lastPosition = -1;
     private OnItemClick itemClick;
+    ShareFragment shareFragment;
 
-    public RecyclerAdapter(Context context, List<NotesModel> model, viewFragment viewFragment) {
+    TrashFragment trashFragment;
+
+    public RecyclerAdapter(Context context, List<NotesModel> model) {
 
         this.model = model;
         this.context = context;
-        this.viewFragment = viewFragment;
+    }
+
+    public RecyclerAdapter(Context context,List<NotesModel> model, ShareFragment shareFragment) {
+        this.context=context;
+        this.model=model;
+        this.shareFragment=shareFragment;
     }
 
     @Override
@@ -58,7 +69,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
     }
 
     @Override
-    public void onBindViewHolder(RecyclerAdapter.TaskViewHolder holder, final int position) {
+    public void onBindViewHolder(final RecyclerAdapter.TaskViewHolder holder, final int position) {
 
         holder.titleTextView.setText(model.get(position).getTitle());
         holder.dateTextView.setText(model.get(position).getDate());
@@ -71,6 +82,46 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
         }
         // Here you apply the animation when the view is bound
         setAnimation(holder.itemView, position);
+
+        if(shareFragment!=null){
+            holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    final CharSequence[] options = {"Share note", "Cancel"};
+                    android.support.v7.app.AlertDialog.Builder builder = new
+                            android.support.v7.app.AlertDialog.Builder(context);
+                    builder.setTitle("Select Option");
+                    builder.setItems(options, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int item) {
+
+                            if (options[item].equals("Share note")) {
+                                NotesModel note = model.get(holder.getAdapterPosition());
+                                //Toast.makeText(context, "Yes...", Toast.LENGTH_SHORT).show();
+                                Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
+                                shareIntent.setType("text/plain");
+                                String title = note.getTitle();
+                                String content = note.getContent();
+                                shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
+                                        note.getTitle());
+                                shareIntent.putExtra(android.content.Intent.EXTRA_TEXT,
+                                        "Title: " + title + "\n" + "Content: " + content);
+                                context.startActivity(Intent.createChooser(shareIntent,
+                                        context.getResources().getString(R.string.share_using)));
+                                dialog.dismiss();
+                            } else if (options[item].equals("Cancel")) {
+                                dialog.dismiss();
+                            }
+                        }
+                    });
+                    builder.show();
+                    return false;
+                }
+            });
+        }else
+        {
+
+        }
     }
 
 
@@ -155,65 +206,19 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
             cardView = (CardView) itemView.findViewById(R.id.myCardView);
             linearLayoutNoteItem = (LinearLayout) itemView.findViewById(R.id.linearLayoutNoteItem);
             //cardView.setOnLongClickListener(new MyClickListener());
-            cardView.setOnClickListener(this);
-            /*if (archiveFragment != null) {
-                cardView.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
+                cardView.setOnClickListener(this);
 
-                    *//**//*final CharSequence[] options = {"Share note","Cancel"};
-                    android.support.v7.app.AlertDialog.Builder builder = new
-                    android.support.v7.app.AlertDialog.Builder(context);
-                    builder.setTitle("Select Option");
-                    builder.setItems(options, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int item) {
-
-                            if (options[item].equals("Share note")) {
-                                NotesModel note=model.get(getAdapterPosition());
-                                //Toast.makeText(context, "Yes...", Toast.LENGTH_SHORT).show();
-                                Intent shareIntent=new Intent(android.content.Intent.ACTION_SEND);
-                                shareIntent.setType("text/plain");
-                                String title=note.getTitle();
-                                String content=note.getContent();
-                                shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
-                                note.getTitle());
-                                shareIntent.putExtra(android.content.Intent.EXTRA_TEXT,
-                                "Title: "+title+ "\n" +"Content: "+content);
-                                context.startActivity(Intent.createChooser(shareIntent,
-                                 context.getResources().getString(R.string.share_using)));
-                                dialog.dismiss();
-                            } else if (options[item].equals("Cancel")){
-                                dialog.dismiss();
-                            }
-                        }
-                    });
-                    builder.show();*//**//*
-
-
-
-
-                        return true;
-                    }
-                });
-            }*/
-            /*cardView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    viewFragment.implementFragment();
-                    //Toast.makeText(context, "hii", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-            });*/
 
         }
 
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                
-                case R.id.myCardView:
 
+                case R.id.myCardView:
+                    if(shareFragment!=null){
+
+                    }else {
                     /*NoteseditFragment fragment = new NoteseditFragment();
                     Bundle args = new Bundle();
                     NotesModel note = model.get(getAdapterPosition());
@@ -231,15 +236,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
                             .getString(R.string.custom_transition))
                             .addToBackStack(null)
                             .commit();*/
-                    //}
+                        //}
 
-                    //Activity to test transition
+                        //Activity to test transition
 
-                    notesFragment = ((AppCompatActivity) context).getSupportFragmentManager()
-                            .findFragmentByTag(NotesFragment.TAG);
-                    archiveFragment=((AppCompatActivity)context).getSupportFragmentManager()
-                            .findFragmentByTag(ArchiveFragment.TAG);
-                    if (notesFragment.isVisible()) {
+                        notesFragment = ((AppCompatActivity) context).getSupportFragmentManager()
+                                .findFragmentByTag(NotesFragment.TAG);
+                        archiveFragment = ((AppCompatActivity) context).getSupportFragmentManager()
+                                .findFragmentByTag(ArchiveFragment.TAG);
+                   /* if (notesFragment.isVisible()) {*/
                         Intent intent = new Intent(context, NotesEditActivity.class);
                         Bundle args = new Bundle();
                         NotesModel note = model.get(getAdapterPosition());
@@ -249,20 +254,27 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TaskVi
                         args.putString(Constants.notes_time, note.getTime());
                         args.putInt(Constants.id, note.getId());
                         args.putString(Constants.reminderDate, note.getReminderDate());
-                        args.putString(Constants.reminderTime,note.getReminderTime());
+                        args.putString(Constants.reminderTime, note.getReminderTime());
                         args.putString(Constants.colorKey, note.getColor());
                         intent.putExtras(args);
                         ActivityOptionsCompat options = ActivityOptionsCompat
                                 .makeSceneTransitionAnimation((AppCompatActivity) context,
                                         cardView, context.getString(R.string.custom_transition));
                         context.startActivity(intent, options.toBundle());
-                    } else {
-
                     }
                     break;
+                    } /*else {
 
-            }
+                    }*/
+
+
+            //}
         }
+    }
+    public void setFilter(List<NotesModel> notesModelList) {
+        notesModelList = new ArrayList<>();
+        notesModelList.addAll(notesModelList);
+        notifyDataSetChanged();
     }
 }
 

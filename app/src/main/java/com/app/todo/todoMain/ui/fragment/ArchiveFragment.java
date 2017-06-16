@@ -7,6 +7,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -21,7 +22,7 @@ import android.widget.LinearLayout;
 
 import com.app.todo.R;
 import com.app.todo.adapter.RecyclerAdapter;
-import com.app.todo.database.DataBaseUtility;
+import com.app.todo.localdatabase.DataBaseUtility;
 import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.presenter.ArchiveFragmentPresenter;
 import com.app.todo.todoMain.presenter.ArchiveFragmentPresenterInterface;
@@ -37,7 +38,7 @@ import java.util.List;
 import io.fabric.sdk.android.Fabric;
 
 
-public class ArchiveFragment extends Fragment implements ArchiveFragmentInterface,viewFragment,
+public class ArchiveFragment extends Fragment implements ArchiveFragmentInterface,
         SearchView.OnQueryTextListener {
     public static final String TAG = "ArchiveFragment";
     ArchiveFragmentPresenterInterface presenter;
@@ -58,7 +59,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
     boolean isView = false;
     DataBaseUtility dataBaseUtility;
     Snackbar snackbar;
-
+    CardView cardView;
     public ArchiveFragment(TodoMainActivity todoMainActivity) {
         this.todoMainActivity = todoMainActivity;
         presenter = new ArchiveFragmentPresenter(todoMainActivity, this);
@@ -177,7 +178,7 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
         }
         allNotes.clear();
         allNotes.addAll(archiveNoteList);
-        archive_adapter = new RecyclerAdapter(getActivity(), archiveNoteList,this);
+        archive_adapter = new RecyclerAdapter(getActivity(), archiveNoteList);
         archive_recyclerView.setAdapter(archive_adapter);
 
         if (archiveNoteList.size() != 0) {
@@ -220,11 +221,6 @@ public class ArchiveFragment extends Fragment implements ArchiveFragmentInterfac
             item.setIcon(R.drawable.ic_action_list);
             isView = false;
         }
-
-    }
-
-    @Override
-    public void implementFragment() {
 
     }
 

@@ -15,6 +15,7 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatTextView;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -347,7 +348,7 @@ public class LoginActivity extends BaseActivity implements LoginActivityInterfac
             Bundle bundle = new Bundle();
 
             String id = object.getString("id");
-
+            Log.i("fb", "getFacebookData: "+id.toString());
             try {
 
                 URL profile_pic = new URL("http://graph.facebook.com/" + id + "/picture?type=square");

@@ -1,4 +1,4 @@
-package com.app.todo.database;
+package com.app.todo.localdatabase;
 
 import android.content.ContentValues;
 import android.content.Context;

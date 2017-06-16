@@ -13,6 +13,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -54,14 +55,17 @@ public class ReminderFragment extends Fragment implements ReminderFragmentInterf
     DatabaseReference databaseReference;
     String uId;
     Snackbar snackbar;
+    boolean isView = false;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         Fabric.with(getActivity(), new Crashlytics());
         View view = inflater.inflate(R.layout.fragment_reminder, container, false);
+        setHasOptionsMenu(true);
         initView(view);
         getActivity().setTitle("Reminder");
+        ((TodoMainActivity)getActivity()).setSearchTagListener(this);
        // uId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         presenter.getReminderNotes(uId);
         return view;
@@ -149,15 +153,17 @@ public class ReminderFragment extends Fragment implements ReminderFragmentInterf
         SimpleDateFormat format = new SimpleDateFormat(getString(R.string.date_time));
         String currentDate = format.format(date.getTime());
         ArrayList<NotesModel> reminderNoteList=new ArrayList<>();
-        for (NotesModel notesModel: notesModelList){
-            if(notesModel.getReminderDate()!=null){
+        for (NotesModel notesModel: notesModelList)
+        {
+            if(notesModel.getReminderDate()!=null)
+            {
             if (notesModel.getReminderDate().equals(currentDate) && !(notesModel.isArchived()) && !(notesModel.isDeleted())){
                 reminderNoteList.add(notesModel);
             }
         }}
         allNotes.clear();
         allNotes.addAll(reminderNoteList);
-        reminder_adapter= new RecyclerAdapter(todoMainActivity,reminderNoteList, this);
+        reminder_adapter= new RecyclerAdapter(todoMainActivity,reminderNoteList);
         mrecyclerView.setAdapter(reminder_adapter);
 
         if(reminderNoteList.size()!=0){
@@ -200,6 +206,30 @@ public class ReminderFragment extends Fragment implements ReminderFragmentInterf
             filteredNotes.addAll(allNotes);
         }
         reminder_adapter.notifyDataSetChanged();
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.changeview) {
+            toggle(item);
+            return false;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    void toggle(MenuItem item) {
+        if (!isView) {
+            mrecyclerView.setLayoutManager(new StaggeredGridLayoutManager(1,
+                    StaggeredGridLayoutManager.VERTICAL));
+            item.setIcon(R.drawable.ic_action_straggered);
+            isView = true;
+        } else {
+            mrecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,
+                    StaggeredGridLayoutManager.VERTICAL));
+            item.setIcon(R.drawable.ic_action_list);
+            isView = false;
+        }
+
     }
 }
 

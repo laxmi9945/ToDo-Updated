@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 import com.app.todo.R;
 import com.app.todo.baseclass.BaseActivity;
-import com.app.todo.database.DataBaseUtility;
+import com.app.todo.localdatabase.DataBaseUtility;
 import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.presenter.NotesEditActivityPresenter;
 import com.app.todo.todoMain.presenter.NotesEditActivityPresenterInterface;
@@ -64,7 +64,6 @@ public class NotesEditActivity extends BaseActivity implements NotesEditActivity
         setContentView(R.layout.activity_notesadd);
 
         initView();
-        //reminderDatetextView = (AppCompatTextView) findViewById(R.id.reminderEdit_textView);
         onDateSetListener = new DatePickerDialog.OnDateSetListener() {
 
             @Override
@@ -132,6 +131,7 @@ public class NotesEditActivity extends BaseActivity implements NotesEditActivity
         uId = firebaseAuth.getCurrentUser().getUid();
         firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference().child(Constants.userdata);
+        //FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         titleEditText = (AppCompatEditText) findViewById(R.id.title_editText);
         contentEdtitext = (AppCompatEditText) findViewById(R.id.content_editText);
         reminderDatetextView = (AppCompatTextView) findViewById(R.id.reminder_textView);

@@ -32,6 +32,7 @@ public class NotesAddInteractor implements NotesAddInteractorInterface {
 
         firebaseAuth = FirebaseAuth.getInstance();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        //FirebaseDatabase.getInstance().setPersistenceEnabled(true);
     }
 
     @Override

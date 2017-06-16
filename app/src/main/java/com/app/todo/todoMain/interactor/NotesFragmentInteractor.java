@@ -16,6 +16,7 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by bridgeit on 13/5/17.
@@ -26,7 +27,6 @@ public class NotesFragmentInteractor implements NotesFragmentInteractorInterface
     Context context;
     NotesFragmentPresenter presenter;
     DatabaseReference databaseReference;
-
     FirebaseAuth firebaseAuth;
 
     public NotesFragmentInteractor(Context context, NotesFragmentPresenter presenter) {
@@ -34,6 +34,7 @@ public class NotesFragmentInteractor implements NotesFragmentInteractorInterface
         this.presenter=presenter;
         firebaseAuth= FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference().child(context.getString(R.string.userData));
+
 
     }
 
@@ -46,6 +47,8 @@ public class NotesFragmentInteractor implements NotesFragmentInteractorInterface
 
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
+                   /* Map<String, Object> objectMap = (HashMap<String, Object>)
+                            dataSnapshot.getValue();*/
                     GenericTypeIndicator<ArrayList<NotesModel>> arrayListGenericTypeIndicator = new
                             GenericTypeIndicator<ArrayList<NotesModel>>() {
                     };
@@ -57,7 +60,7 @@ public class NotesFragmentInteractor implements NotesFragmentInteractorInterface
                         notesModel_ArrayList = post.getValue(arrayListGenericTypeIndicator);
                         notesModel.addAll(notesModel_ArrayList);
                     }
-
+                    notesModel.removeAll(Collections.singleton(null));
                     Log.i("check", "onDataChange:  "+notesModel.size());
 
                     presenter.getNoteListSuccess(notesModel);
@@ -73,7 +76,6 @@ public class NotesFragmentInteractor implements NotesFragmentInteractorInterface
 
         }else {
             presenter.getNoteListFailure(context.getString(R.string.no_internet));
-
             presenter.hideDialog();
         }
     }

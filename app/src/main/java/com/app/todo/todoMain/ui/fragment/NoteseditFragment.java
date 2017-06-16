@@ -25,7 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.app.todo.R;
-import com.app.todo.database.DataBaseUtility;
+import com.app.todo.localdatabase.DataBaseUtility;
 import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.ui.activity.TodoMainActivity;
 import com.app.todo.utils.Constants;
