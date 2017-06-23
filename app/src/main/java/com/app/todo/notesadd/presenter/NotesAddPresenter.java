@@ -3,6 +3,7 @@ package com.app.todo.todoMain.presenter;
 import android.content.Context;
 import android.os.Bundle;
 
+import com.app.todo.localdatabase.DataBaseUtility;
 import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.interactor.NotesAddInteractor;
 import com.app.todo.todoMain.interactor.NotesAddInteractorInterface;
@@ -27,6 +28,7 @@ public class NotesAddPresenter implements NotesAddPresenterInterface {
     public void addNoteToFirebase(Bundle bundle) {
 
         NotesModel model = new NotesModel();
+        DataBaseUtility dataBaseUtility=new DataBaseUtility(context);
         model.setArchived(false);
         model.setTime(bundle.getString(Constants.currentTimeKey));
         model.setDate(bundle.getString(Constants.currentDateKey));
@@ -35,6 +37,7 @@ public class NotesAddPresenter implements NotesAddPresenterInterface {
         model.setReminderDate(bundle.getString(Constants.reminderDate));
         model.setReminderTime(bundle.getString(Constants.reminderTime));
         model.setColor(bundle.getString(Constants.colorKey));
+        dataBaseUtility.addNotes(model);
         interactor.addNoteToFirebase(model);
     }
 

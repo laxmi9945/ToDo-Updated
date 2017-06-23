@@ -23,13 +23,12 @@ import android.widget.Toast;
 
 import com.app.todo.R;
 import com.app.todo.baseclass.BaseActivity;
-import com.app.todo.localdatabase.DataBaseUtility;
-import com.app.todo.model.NotesModel;
 import com.app.todo.todoMain.presenter.NotesAddPresenter;
 import com.app.todo.todoMain.presenter.NotesAddPresenterInterface;
 import com.app.todo.todoMain.ui.alarmManager.ScheduleClient;
 import com.app.todo.utils.Constants;
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -73,6 +72,9 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
         setContentView(R.layout.activity_notesadd);
         //setTitle(getString(R.string.notes_add));
         firebaseAuth = FirebaseAuth.getInstance();
+        if(!FirebaseApp.getApps(this).isEmpty()) {
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        }
 
         initView();
 
@@ -96,7 +98,7 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
                 day=dayOfMonth;
                 years=year;
                 month=monthOfYear;
-                updateLabel();
+                setDateforReminder();
                 setreminderTime();
                 Log.i(TAG, "onDateSet: " + year + "    " + dayOfMonth);
 
@@ -109,25 +111,7 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
         datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
     }
 
-    private void setreminderTime() {
 
-        Calendar mcurrentTime = Calendar.getInstance();
-         hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-         minute = mcurrentTime.get(Calendar.MINUTE);
-        timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                hour=selectedHour;
-                minute=selectedMinute;
-                reminderTimetextView.setText( selectedHour + ":" + selectedMinute);
-
-                Toast.makeText(NotesAddActivity.this, getString(R.string.reminder_time_set) +reminderTimetextView.getText().toString(), Toast.LENGTH_SHORT).show();
-                lastComma.setVisibility(View.VISIBLE);
-            }
-        }, hour, minute, true);//24hr time
-       // scheduleClient.setAlarmForNotification(myCalendar);
-        timePickerDialog.show();
-    }
 
     @Override
     public void initView() {
@@ -166,15 +150,37 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
 
     }
 
-    private void updateLabel() {
+    private void setDateforReminder() {
+
         String myFormat = getString(R.string.month_year_format); //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat);
         reminderTextView.setText(sdf.format(myCalendar.getTime()));
+
         // Ask our service to set an alarm for that date, this activity talks to the client that talks to the service
         Toast.makeText(this, getString(R.string.reminder_date_set) + reminderTextView.getText().toString(),
                 Toast.LENGTH_SHORT).show();
+
         //scheduleClient.setAlarmForNotification(myCalendar);
         commaSeparator.setVisibility(View.VISIBLE);
+    }
+    private void setreminderTime() {
+
+        Calendar mcurrentTime = Calendar.getInstance();
+        hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+        minute = mcurrentTime.get(Calendar.MINUTE);
+        timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                hour=selectedHour;
+                minute=selectedMinute;
+                reminderTimetextView.setText( selectedHour + ":" + selectedMinute);
+
+                Toast.makeText(NotesAddActivity.this, getString(R.string.reminder_time_set) +reminderTimetextView.getText().toString(), Toast.LENGTH_SHORT).show();
+                lastComma.setVisibility(View.VISIBLE);
+            }
+        }, hour, minute, true);//24hr time
+        // scheduleClient.setAlarmForNotification(myCalendar);
+        timePickerDialog.show();
     }
 
     @Override
@@ -207,8 +213,6 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
 
     private void saveNotes() {
 
-        NotesModel notesModel=new NotesModel();
-        DataBaseUtility dataBaseUtility=new DataBaseUtility(this);
         Bundle bundle = new Bundle();
         bundle.putString(Constants.currentTimeKey, timeTextView.getText().toString());
         bundle.putString(Constants.titleKey, titleEdittext.getText().toString());
@@ -218,9 +222,11 @@ public class NotesAddActivity extends BaseActivity implements NotesAddActivityIn
         bundle.putString(Constants.reminderTime,reminderTimetextView.getText().toString());
         bundle.putString(Constants.colorKey, color_pick);
         presenter.addNoteToFirebase(bundle);
-        dataBaseUtility.addNotes(notesModel);
+
+       // dataBaseUtility.addNotes(notesModel);
         Calendar calendar=Calendar.getInstance();
         calendar.set(years,month,day,hour,minute);
+
             scheduleClient.setAlarmForNotification(calendar,bundle);
        // scheduleClient.setAlarmForNotification(calendar,bundle);
     }
